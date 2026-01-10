@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+namespace App\Modules\Identity\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
     ];
 
     /**
@@ -47,10 +46,30 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'string',
         ];
     }
 
-    protected static function newFactory(): UserFactory
+    /**
+     * Relasi polymorphic dengan anggota (bisa berbagai tipe: Student, Teacher, dll)
+     */
+    public function anggota()
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Check if user is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'Aktif';
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
     {
         return UserFactory::new();
     }
