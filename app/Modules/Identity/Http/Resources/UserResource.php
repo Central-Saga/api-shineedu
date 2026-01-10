@@ -39,9 +39,6 @@ class UserResource extends JsonResource
                     return $roleData;
                 })->values();
             }),
-            'anggota' => $this->whenLoaded('anggota', function () {
-                return $this->anggota;
-            }),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
