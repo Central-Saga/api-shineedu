@@ -2,6 +2,7 @@
 
 namespace App\Modules\Identity\Http\Controllers\Api\V2;
 
+use App\Modules\Identity\Domain\Enums\UserStatus;
 use App\Modules\Identity\Http\Requests\LoginRequest;
 use App\Modules\Identity\Http\Resources\UserResource;
 use App\Shared\Http\Responses\ApiResponse;
@@ -25,7 +26,7 @@ class AuthController
         $user = Auth::user();
 
         // Check if user is active
-        if ($user->status !== 'Aktif') {
+        if ($user->status !== UserStatus::AKTIF) {
             Auth::logout();
             return ApiResponse::forbidden('Akun Anda tidak aktif. Silakan hubungi administrator.');
         }
