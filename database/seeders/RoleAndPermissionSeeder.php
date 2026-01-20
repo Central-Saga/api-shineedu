@@ -42,6 +42,7 @@ class RoleAndPermissionSeeder extends Seeder
             'settings',
 
             // HR
+            'employees',      // karyawan
             'vacancies',      // lowongan
             'applications',   // lamaran
         ];

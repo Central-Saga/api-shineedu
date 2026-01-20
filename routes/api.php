@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\HR\Http\Controllers\Api\V2\EmployeeController;
 use App\Modules\Identity\Http\Controllers\Api\V2\AuthController;
 use App\Modules\Identity\Http\Controllers\Api\V2\PermissionController;
 use App\Modules\Identity\Http\Controllers\Api\V2\RoleController;
@@ -41,5 +42,13 @@ Route::prefix('v2')->group(function () {
         Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
         Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->middleware('permission:users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
+
+        // Employees
+        Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employees.view');
+        Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employees.create');
+        Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->middleware('permission:employees.view');
+        Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');
+        Route::patch('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');
+        Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('permission:employees.delete');
     });
 });
