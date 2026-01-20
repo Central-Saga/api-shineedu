@@ -2,6 +2,7 @@
 
 namespace App\Modules\Identity\Http\Controllers\Api\V2;
 
+use App\Modules\Identity\Http\Requests\RoleIndexRequest;
 use App\Modules\Identity\Http\Requests\RoleStoreRequest;
 use App\Modules\Identity\Http\Requests\RoleSyncPermissionsRequest;
 use App\Modules\Identity\Http\Requests\RoleUpdateRequest;
@@ -17,14 +18,25 @@ class RoleController
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(RoleIndexRequest $request): JsonResponse
     {
-        $roles = Role::with('permissions')
-            ->orderBy('name')
-            ->get();
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 100);
+        $allowedSort = ['name', 'created_at', 'updated_at'];
+        $sortBy = in_array($request->get('sort_by'), $allowedSort) ? $request->get('sort_by') : 'name';
+        $sortDir = in_array(strtolower((string) $request->get('sort_dir')), ['asc', 'desc']) ? strtolower((string) $request->get('sort_dir')) : 'asc';
 
-        return ApiResponse::ok(
+        $query = Role::query()->with('permissions');
+
+        if ($keyword = $request->get('q')) {
+            $query->where('name', 'like', "%{$keyword}%");
+        }
+
+        $query->orderBy($sortBy, $sortDir);
+        $roles = $query->paginate($perPage)->withQueryString();
+
+        return ApiResponse::paginated(
             RoleResource::collection($roles),
+            $roles,
             'Data role berhasil diambil'
         );
     }

@@ -22,14 +22,24 @@ Route::prefix('v2')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 
         // Permissions
-        Route::get('/permissions', [PermissionController::class, 'index']);
+        Route::get('/permissions', [PermissionController::class, 'index'])->middleware('permission:permissions.view');
 
         // Roles
-        Route::apiResource('roles', RoleController::class);
-        Route::put('/roles/{role}/permissions', [RoleController::class, 'syncPermissions']);
+        Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
+        Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
+        Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('permission:roles.view');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.update');
+        Route::patch('/roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.update');
+        Route::put('/roles/{role}/permissions', [RoleController::class, 'syncPermissions'])->middleware('permission:roles.manage');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
 
         // Users
-        Route::apiResource('users', UserController::class);
-        Route::put('/users/{user}/role', [UserController::class, 'updateRole']);
+        Route::get('/users', [UserController::class, 'index'])->middleware('permission:users.view');
+        Route::post('/users', [UserController::class, 'store'])->middleware('permission:users.create');
+        Route::get('/users/{user}', [UserController::class, 'show'])->middleware('permission:users.view');
+        Route::put('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
+        Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
+        Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->middleware('permission:users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
     });
 });

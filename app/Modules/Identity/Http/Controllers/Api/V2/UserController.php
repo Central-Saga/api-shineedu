@@ -2,6 +2,7 @@
 
 namespace App\Modules\Identity\Http\Controllers\Api\V2;
 
+use App\Modules\Identity\Http\Requests\UserIndexRequest;
 use App\Modules\Identity\Http\Requests\UserStoreRequest;
 use App\Modules\Identity\Http\Requests\UserUpdateRequest;
 use App\Modules\Identity\Http\Requests\UserUpdateRoleRequest;
@@ -17,11 +18,30 @@ class UserController
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(UserIndexRequest $request): JsonResponse
     {
-        $users = User::with('roles.permissions')
-            ->orderBy('name')
-            ->paginate(15);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 100);
+        $allowedSort = ['name', 'email', 'status', 'created_at', 'updated_at'];
+        $sortBy = in_array($request->get('sort_by'), $allowedSort) ? $request->get('sort_by') : 'created_at';
+        $sortDir = in_array(strtolower((string) $request->get('sort_dir')), ['asc', 'desc']) ? strtolower((string) $request->get('sort_dir')) : 'desc';
+
+        $query = User::query()->with('roles.permissions');
+
+        if ($keyword = $request->get('q')) {
+            $query->where(function ($sub) use ($keyword) {
+                $sub->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%");
+            });
+        }
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+        if ($role = $request->get('role')) {
+            $query->whereHas('roles', fn ($r) => $r->where('name', $role));
+        }
+
+        $query->orderBy($sortBy, $sortDir);
+        $users = $query->paginate($perPage)->withQueryString();
 
         return ApiResponse::paginated(
             UserResource::collection($users),
