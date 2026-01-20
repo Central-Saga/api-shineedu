@@ -1,0 +1,972 @@
+openapi: 3.0.3
+info:
+  title: 'Laravel API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'https://api.shineeducationbali.test'
+tags:
+  -
+    name: Endpoints
+    description: ''
+paths:
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/auth/login:
+    post:
+      summary: 'Login user and return token'
+      operationId: loginUserAndReturnToken
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: validation.email.
+                  example: gbailey@example.net
+                password:
+                  type: string
+                  description: validation.min.
+                  example: '+-0pBNvYgxwmi/#iw'
+              required:
+                - email
+                - password
+      security: []
+  /api/v2/auth/me:
+    get:
+      summary: 'Get current authenticated user'
+      operationId: getCurrentAuthenticatedUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/auth/logout:
+    post:
+      summary: 'Logout current user (revoke current token)'
+      operationId: logoutCurrentUserrevokeCurrentToken
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/permissions:
+    get:
+      summary: 'Display a listing of all permissions.'
+      operationId: displayAListingOfAllPermissions
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/roles:
+    get:
+      summary: 'Display a listing of the resource.'
+      operationId: displayAListingOfTheResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                  nullable: true
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+                  nullable: true
+                q:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                sort_by:
+                  type: string
+                  description: ''
+                  example: created_at
+                  enum:
+                    - name
+                    - created_at
+                    - updated_at
+                  nullable: true
+                sort_dir:
+                  type: string
+                  description: ''
+                  example: desc
+                  enum:
+                    - asc
+                    - desc
+                  nullable: true
+      security: []
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                permissions:
+                  type: array
+                  description: 'The <code>name</code> of an existing record in the permissions table.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - name
+                - permissions
+      security: []
+  '/api/v2/roles/{role_id}':
+    get:
+      summary: 'Display the specified resource.'
+      operationId: displayTheSpecifiedResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                permissions:
+                  type: array
+                  description: 'The <code>name</code> of an existing record in the permissions table.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - name
+                - permissions
+      security: []
+    patch:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                permissions:
+                  type: array
+                  description: 'The <code>name</code> of an existing record in the permissions table.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - name
+                - permissions
+      security: []
+    delete:
+      summary: 'Remove the specified resource from storage.'
+      operationId: removeTheSpecifiedResourceFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: role_id
+        description: 'The ID of the role.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v2/roles/{role_id}/permissions':
+    put:
+      summary: 'Sync permissions to role.'
+      operationId: syncPermissionsToRole
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  description: 'The <code>name</code> of an existing record in the permissions table.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - permissions
+      security: []
+    parameters:
+      -
+        in: path
+        name: role_id
+        description: 'The ID of the role.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/users:
+    get:
+      summary: 'Display a listing of the resource.'
+      operationId: displayAListingOfTheResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                  nullable: true
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+                  nullable: true
+                q:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                  nullable: true
+                role:
+                  type: string
+                  description: 'The <code>name</code> of an existing record in the roles table.'
+                  example: architecto
+                  nullable: true
+                sort_by:
+                  type: string
+                  description: ''
+                  example: created_at
+                  enum:
+                    - name
+                    - email
+                    - status
+                    - created_at
+                    - updated_at
+                  nullable: true
+                sort_dir:
+                  type: string
+                  description: ''
+                  example: asc
+                  enum:
+                    - asc
+                    - desc
+                  nullable: true
+      security: []
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                email:
+                  type: string
+                  description: validation.email.
+                  example: zbailey@example.net
+                password:
+                  type: string
+                  description: validation.min.
+                  example: '-0pBNvYgxw'
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                role:
+                  type: string
+                  description: 'The <code>name</code> of an existing record in the roles table.'
+                  example: architecto
+              required:
+                - name
+                - email
+                - password
+                - status
+                - role
+      security: []
+  '/api/v2/users/{user_id}':
+    get:
+      summary: 'Display the specified resource.'
+      operationId: displayTheSpecifiedResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                email:
+                  type: string
+                  description: validation.email.
+                  example: zbailey@example.net
+                password:
+                  type: string
+                  description: validation.min.
+                  example: '-0pBNvYgxw'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+      security: []
+    patch:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                email:
+                  type: string
+                  description: validation.email.
+                  example: zbailey@example.net
+                password:
+                  type: string
+                  description: validation.min.
+                  example: '-0pBNvYgxw'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+      security: []
+    delete:
+      summary: 'Remove the specified resource from storage.'
+      operationId: removeTheSpecifiedResourceFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: user_id
+        description: 'The ID of the user.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v2/users/{user_id}/role':
+    put:
+      summary: 'Update user role.'
+      operationId: updateUserRole
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: 'The <code>name</code> of an existing record in the roles table.'
+                  example: architecto
+              required:
+                - role
+      security: []
+    parameters:
+      -
+        in: path
+        name: user_id
+        description: 'The ID of the user.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/employees:
+    get:
+      summary: 'Display a listing of the resource.'
+      operationId: displayAListingOfTheResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                  nullable: true
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+                  nullable: true
+                q:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: nonaktif
+                  enum:
+                    - aktif
+                    - nonaktif
+                  nullable: true
+                kategori_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: z
+                  nullable: true
+                subtipe_kontrak:
+                  type: string
+                  description: validation.max.
+                  example: m
+                  nullable: true
+                tipe_gaji:
+                  type: string
+                  description: validation.max.
+                  example: i
+                  nullable: true
+                sort_by:
+                  type: string
+                  description: ''
+                  example: status
+                  enum:
+                    - kode_karyawan
+                    - status
+                    - gaji_pokok
+                    - created_at
+                    - updated_at
+                  nullable: true
+                sort_dir:
+                  type: string
+                  description: ''
+                  example: asc
+                  enum:
+                    - asc
+                    - desc
+                  nullable: true
+      security: []
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: b
+                user_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: architecto
+                kategori_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                subtipe_kontrak:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                tipe_gaji:
+                  type: string
+                  description: validation.max.
+                  example: z
+                  nullable: true
+                gaji_pokok:
+                  type: number
+                  description: validation.min.
+                  example: 77
+                  nullable: true
+                bank_nama:
+                  type: string
+                  description: validation.max.
+                  example: i
+                  nullable: true
+                bank_no_rekening:
+                  type: string
+                  description: validation.max.
+                  example: 'y'
+                  nullable: true
+                nomor_hp:
+                  type: string
+                  description: validation.max.
+                  example: v
+                  nullable: true
+                alamat:
+                  type: string
+                  description: validation.max.
+                  example: d
+                  nullable: true
+                tanggal_lahir:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-20T03:47:41'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: nonaktif
+                  enum:
+                    - aktif
+                    - nonaktif
+              required:
+                - kode_karyawan
+                - user_id
+                - kategori_karyawan
+                - status
+      security: []
+  '/api/v2/employees/{employee_id}':
+    get:
+      summary: 'Display the specified resource.'
+      operationId: displayTheSpecifiedResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+                user_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                kategori_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                subtipe_kontrak:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                tipe_gaji:
+                  type: string
+                  description: validation.max.
+                  example: z
+                  nullable: true
+                gaji_pokok:
+                  type: number
+                  description: validation.min.
+                  example: 77
+                  nullable: true
+                bank_nama:
+                  type: string
+                  description: validation.max.
+                  example: i
+                  nullable: true
+                bank_no_rekening:
+                  type: string
+                  description: validation.max.
+                  example: 'y'
+                  nullable: true
+                nomor_hp:
+                  type: string
+                  description: validation.max.
+                  example: v
+                  nullable: true
+                alamat:
+                  type: string
+                  description: validation.max.
+                  example: d
+                  nullable: true
+                tanggal_lahir:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-20T03:47:41'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: aktif
+                  enum:
+                    - aktif
+                    - nonaktif
+                  nullable: true
+      security: []
+    patch:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+                user_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                kategori_karyawan:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                subtipe_kontrak:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                tipe_gaji:
+                  type: string
+                  description: validation.max.
+                  example: z
+                  nullable: true
+                gaji_pokok:
+                  type: number
+                  description: validation.min.
+                  example: 77
+                  nullable: true
+                bank_nama:
+                  type: string
+                  description: validation.max.
+                  example: i
+                  nullable: true
+                bank_no_rekening:
+                  type: string
+                  description: validation.max.
+                  example: 'y'
+                  nullable: true
+                nomor_hp:
+                  type: string
+                  description: validation.max.
+                  example: v
+                  nullable: true
+                alamat:
+                  type: string
+                  description: validation.max.
+                  example: d
+                  nullable: true
+                tanggal_lahir:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-20T03:47:41'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: aktif
+                  enum:
+                    - aktif
+                    - nonaktif
+                  nullable: true
+      security: []
+    delete:
+      summary: 'Remove the specified resource from storage.'
+      operationId: removeTheSpecifiedResourceFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: employee_id
+        description: 'The ID of the employee.'
+        example: 16
+        required: true
+        schema:
+          type: integer
