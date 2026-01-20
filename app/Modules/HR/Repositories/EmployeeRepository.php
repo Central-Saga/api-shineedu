@@ -11,6 +11,8 @@ class EmployeeRepository implements EmployeeRepositoryInterface
     protected const SORT_WHITELIST = [
         'kode_karyawan',
         'status',
+        'kategori_karyawan',
+        'tipe_gaji',
         'gaji_pokok',
         'created_at',
         'updated_at',
