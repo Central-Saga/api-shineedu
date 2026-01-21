@@ -27,6 +27,7 @@ Route::prefix('v2')->group(function () {
 
         // Roles
         Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
+        Route::get('/roles/export', [RoleController::class, 'export'])->middleware('permission:roles.view'); // Falls back to view permission
         Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
         Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('permission:roles.view');
         Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.update');
@@ -36,6 +37,8 @@ Route::prefix('v2')->group(function () {
 
         // Users
         Route::get('/users', [UserController::class, 'index'])->middleware('permission:users.view');
+        Route::get('/users/export', [UserController::class, 'export'])->middleware('permission:users.view'); // Falls back to view
+        Route::post('/users/import', [UserController::class, 'import'])->middleware('permission:users.create'); // Requires create permission
         Route::post('/users', [UserController::class, 'store'])->middleware('permission:users.create');
         Route::get('/users/{user}', [UserController::class, 'show'])->middleware('permission:users.view');
         Route::put('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
@@ -45,6 +48,8 @@ Route::prefix('v2')->group(function () {
 
         // Employees
         Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employees.view');
+        Route::get('/employees/export', [EmployeeController::class, 'export'])->middleware('permission:employees.view');
+        Route::post('/employees/import', [EmployeeController::class, 'import'])->middleware('permission:employees.create');
         Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employees.create');
         Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->middleware('permission:employees.view');
         Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');

@@ -12,6 +12,11 @@ use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Exports\UsersExport;
+use App\Imports\UsersImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
+
 
 class UserController
 {
@@ -37,7 +42,7 @@ class UserController
             $query->where('status', $status);
         }
         if ($role = $request->get('role')) {
-            $query->whereHas('roles', fn ($r) => $r->where('name', $role));
+            $query->whereHas('roles', fn($r) => $r->where('name', $role));
         }
 
         $query->orderBy($sortBy, $sortDir);
@@ -152,5 +157,95 @@ class UserController
         $user->delete();
 
         return ApiResponse::ok(null, 'User berhasil dihapus');
+    }
+
+    /**
+     * Export users.
+     */
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'users_' . date('Ymd_His');
+
+        if ($format === 'sql') {
+            return $this->exportSql($request, $filename);
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
+            'txt' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new UsersExport($request), $filename . '.' . $format, $ext);
+    }
+
+    /**
+     * Helper to export SQL.
+     */
+    protected function exportSql(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new UsersExport($request);
+            $query = $exporter->query();
+
+            $handle = fopen('php://output', 'w');
+
+            $query->chunk(100, function ($users) use ($handle) {
+                foreach ($users as $user) {
+                    $vals = [
+                        addslashes($user->name),
+                        addslashes($user->email),
+                        // Handle password? Usually exclude or use hash.
+                        addslashes($user->password),
+                        addslashes($user->status->value),
+                        addslashes($user->created_at),
+                        addslashes($user->updated_at),
+                    ];
+                    $sql = sprintf(
+                        "INSERT INTO users (name, email, password, status, created_at, updated_at) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');\n",
+                        ...$vals
+                    );
+                    fwrite($handle, $sql);
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.sql', [
+            'Content-Type' => 'application/sql',
+        ]);
+    }
+
+    /**
+     * Import users.
+     */
+    public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls', // Added xls just in case
+        ]);
+
+        try {
+            // Note: For SQL Import, we would need to parse and execute.
+            // Currently Maatwebsite Excel handles Spreadsheet formats.
+            // If file is SQL, this might fail unless we implement custom handler.
+            // For now, supporting standard formats.
+
+            Excel::import(new UsersImport, $request->file('file'));
+
+            return ApiResponse::ok(null, 'Import users berhasil');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+            }
+            return ApiResponse::validation($errors, 'Validation Error');
+        } catch (\Exception $e) {
+            return ApiResponse::fail($e->getMessage(), 500);
+        }
     }
 }

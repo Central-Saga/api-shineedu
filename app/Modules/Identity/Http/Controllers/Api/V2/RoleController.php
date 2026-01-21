@@ -11,7 +11,12 @@ use App\Modules\Identity\Models\User;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Permission;
+
 use Spatie\Permission\Models\Role;
+use App\Exports\RolesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
+
 
 class RoleController
 {
@@ -141,5 +146,62 @@ class RoleController
             new RoleResource($role),
             'Permissions berhasil disinkronkan'
         );
+    }
+
+    /**
+     * Export roles.
+     */
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'roles_' . date('Ymd_His');
+
+        if ($format === 'sql') {
+            return $this->exportSql($request, $filename);
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
+            'txt' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new RolesExport($request), $filename . '.' . $format, $ext);
+    }
+
+    /**
+     * Helper to export SQL.
+     */
+    protected function exportSql(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new RolesExport($request);
+            $query = $exporter->query();
+
+            $handle = fopen('php://output', 'w');
+
+            $query->chunk(100, function ($roles) use ($handle) {
+                foreach ($roles as $role) {
+                    $vals = [
+                        addslashes($role->name),
+                        addslashes($role->guard_name),
+                        addslashes($role->created_at),
+                        addslashes($role->updated_at),
+                    ];
+                    $sql = sprintf(
+                        "INSERT INTO roles (name, guard_name, created_at, updated_at) VALUES ('%s', '%s', '%s', '%s');\n",
+                        ...$vals
+                    );
+                    fwrite($handle, $sql);
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.sql', [
+            'Content-Type' => 'application/sql',
+        ]);
     }
 }
