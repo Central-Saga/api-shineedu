@@ -1,13 +1,26 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\HR\Models;
 
 use App\Modules\Identity\Models\User;
+use Database\Factories\EmployeeFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Employee extends Model
 {
+    use HasFactory;
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory<static>
+     */
+    protected static function newFactory()
+    {
+        return EmployeeFactory::new();
+    }
     /**
      * The table associated with the model.
      *

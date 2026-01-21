@@ -2,7 +2,7 @@
 
 namespace App\Modules\HR\Services;
 
-use App\Models\Employee;
+use App\Modules\HR\Models\Employee;
 
 class EmployeeService
 {

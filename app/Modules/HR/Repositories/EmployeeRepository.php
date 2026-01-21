@@ -2,7 +2,7 @@
 
 namespace App\Modules\HR\Repositories;
 
-use App\Models\Employee;
+use App\Modules\HR\Models\Employee;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 

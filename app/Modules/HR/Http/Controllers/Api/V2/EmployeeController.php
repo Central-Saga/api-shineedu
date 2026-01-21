@@ -2,7 +2,7 @@
 
 namespace App\Modules\HR\Http\Controllers\Api\V2;
 
-use App\Models\Employee;
+use App\Modules\HR\Models\Employee;
 use App\Modules\HR\Http\Requests\EmployeeIndexRequest;
 use App\Modules\HR\Http\Requests\StoreEmployeeRequest;
 use App\Modules\HR\Http\Requests\UpdateEmployeeRequest;
