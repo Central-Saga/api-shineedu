@@ -12,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \App\Modules\HR\Repositories\EmployeeRepositoryInterface::class,
+            \App\Modules\HR\Repositories\EmployeeRepository::class
+        );
     }
 
     /**
