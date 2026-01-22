@@ -38,6 +38,11 @@ class EmployeeSeeder extends Seeder
 
         // 2) Create some dummy employees with their users
         // Use factory for random ones
-        Employee::factory()->count(10)->create();
+        Employee::factory()->count(10)->create()->each(function ($employee) {
+            $user = $employee->user;
+            if ($user && !$user->hasAnyRole(\Spatie\Permission\Models\Role::all())) {
+                $user->assignRole('Teacher');
+            }
+        });
     }
 }

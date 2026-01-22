@@ -241,10 +241,12 @@ class UserController
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls',
+            'update' => 'nullable|boolean',
         ]);
 
         $file = $request->file('file');
         $extension = $file->getClientOriginalExtension();
+        $updateExisting = $request->boolean('update', false);
 
         if ($extension === 'sql') {
             try {
@@ -260,15 +262,12 @@ class UserController
         }
 
         try {
-            Excel::import(new UsersImport, $file);
-            return ApiResponse::ok(null, 'Import users berhasil');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $failures = $e->failures();
-            $errors = [];
-            foreach ($failures as $failure) {
-                $errors[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
-            }
-            return ApiResponse::validation($errors, 'Validation Error');
+            $importer = new UsersImport($updateExisting);
+            Excel::import($importer, $file);
+
+            $report = $importer->getReport();
+
+            return ApiResponse::ok($report, 'Import users berhasil');
         } catch (\Exception $e) {
             return ApiResponse::fail($e->getMessage(), 500);
         }

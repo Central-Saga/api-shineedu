@@ -26,5 +26,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user?->hasRole('Superadmin') ? true : null;
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \App\Modules\Identity\Infrastructure\Console\Commands\ImportUsersCommand::class,
+            ]);
+        }
     }
 }

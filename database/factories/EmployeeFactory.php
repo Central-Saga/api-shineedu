@@ -40,4 +40,17 @@ class EmployeeFactory extends Factory
             'status' => 'aktif',
         ];
     }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Employee $employee) {
+            $user = $employee->user;
+            if ($user && !$user->hasAnyRole(\Spatie\Permission\Models\Role::all())) {
+                $user->assignRole('Teacher');
+            }
+        });
+    }
 }

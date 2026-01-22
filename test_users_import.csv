@@ -1,0 +1,6 @@
+name,email,password,status,role
+Test User 1,testuser1@example.com,password123,Aktif,Student
+Test User 2,testuser2@example.com,password123,Non Aktif,Teacher
+Existing User,admin@shineedu.test,newpassword,Aktif,Admin
+Invalid Email,invalid-email,password123,Aktif,Student
+Super Admin User,super@example.com,password123,Aktif,Super Admin
