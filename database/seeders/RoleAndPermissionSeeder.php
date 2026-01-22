@@ -45,6 +45,9 @@ class RoleAndPermissionSeeder extends Seeder
             'employees',      // karyawan
             'vacancies',      // lowongan
             'applications',   // lamaran
+            'cuti',           // cuti/izin/sakit
+            'absensi',        // kehadiran manual/mesin
+            'pengaturan_cuti', // setting kuota cuti
         ];
 
         // Pola CRUD umum per modul
