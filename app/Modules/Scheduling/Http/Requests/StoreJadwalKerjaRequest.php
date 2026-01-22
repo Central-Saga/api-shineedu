@@ -23,7 +23,7 @@ class StoreJadwalKerjaRequest extends FormRequest
             'tarif' => 'required|numeric|min:0',
             'status' => 'required|string|in:Aktif,Non Aktif',
             'ruangan_kelas' => 'nullable|string|max:255',
-            'guru_pengajar_id' => 'required|exists:users,id',
+            'guru_pengajar_id' => 'required|exists:karyawan,id',
         ];
     }
 }

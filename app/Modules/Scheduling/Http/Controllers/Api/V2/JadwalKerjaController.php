@@ -14,14 +14,14 @@ class JadwalKerjaController
 {
     public function index(Request $request): JsonResponse
     {
-        $query = JadwalKerja::query()->with('guru');
+        $query = JadwalKerja::query()->with('guru.user');
 
         // Search
         if ($keyword = $request->get('q')) {
             $query->where(function ($q) use ($keyword) {
                 $q->where('mata_pelajaran', 'like', "%{$keyword}%")
                     ->orWhere('kategori', 'like', "%{$keyword}%")
-                    ->orWhereHas('guru', function ($uq) use ($keyword) {
+                    ->orWhereHas('guru.user', function ($uq) use ($keyword) {
                         $uq->where('name', 'like', "%{$keyword}%");
                     });
             });
@@ -64,7 +64,7 @@ class JadwalKerjaController
     public function store(StoreJadwalKerjaRequest $request): JsonResponse
     {
         $jadwal = JadwalKerja::create($request->validated());
-        $jadwal->load('guru');
+        $jadwal->load('guru.user');
 
         return ApiResponse::created(
             new JadwalKerjaResource($jadwal),
@@ -74,7 +74,7 @@ class JadwalKerjaController
 
     public function show(JadwalKerja $jadwalKerja): JsonResponse
     {
-        $jadwalKerja->load('guru');
+        $jadwalKerja->load('guru.user');
 
         return ApiResponse::ok(
             new JadwalKerjaResource($jadwalKerja),
@@ -85,7 +85,7 @@ class JadwalKerjaController
     public function update(UpdateJadwalKerjaRequest $request, JadwalKerja $jadwalKerja): JsonResponse
     {
         $jadwalKerja->update($request->validated());
-        $jadwalKerja->load('guru');
+        $jadwalKerja->load('guru.user');
 
         return ApiResponse::ok(
             new JadwalKerjaResource($jadwalKerja),

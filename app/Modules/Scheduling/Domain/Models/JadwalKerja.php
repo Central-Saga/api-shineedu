@@ -2,7 +2,7 @@
 
 namespace App\Modules\Scheduling\Domain\Models;
 
-use App\Modules\Identity\Domain\Models\User;
+use App\Modules\HR\Domain\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,7 +32,7 @@ class JadwalKerja extends Model
 
     public function guru()
     {
-        return $this->belongsTo(User::class, 'guru_pengajar_id');
+        return $this->belongsTo(Employee::class, 'guru_pengajar_id');
     }
 
     public function realisasi()

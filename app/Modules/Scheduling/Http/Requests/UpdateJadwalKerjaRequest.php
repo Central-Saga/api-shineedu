@@ -23,7 +23,7 @@ class UpdateJadwalKerjaRequest extends FormRequest
             'tarif' => 'sometimes|required|numeric|min:0',
             'status' => 'sometimes|required|string|in:Aktif,Non Aktif',
             'ruangan_kelas' => 'nullable|string|max:255',
-            'guru_pengajar_id' => 'sometimes|required|exists:users,id',
+            'guru_pengajar_id' => 'sometimes|required|exists:karyawan,id',
         ];
     }
 }
