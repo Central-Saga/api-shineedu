@@ -16,13 +16,15 @@ use App\Exports\EmployeesExport;
 use App\Imports\EmployeesImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use App\Modules\HR\Application\Services\UnifiedEmployeeImportService;
 
 
 class EmployeeController
 {
     public function __construct(
         protected EmployeeRepositoryInterface $repository,
-        protected EmployeeService $service
+        protected EmployeeService $service,
+        protected UnifiedEmployeeImportService $importService
     ) {}
 
     /**
@@ -229,15 +231,18 @@ class EmployeeController
         }
 
         try {
-            Excel::import(new EmployeesImport, $file);
-            return ApiResponse::ok(null, 'Import karyawan berhasil');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $failures = $e->failures();
-            $errors = [];
-            foreach ($failures as $failure) {
-                $errors[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+            // Optional: configure dynamically if needed
+            // $this->importService->setConfig(['user_mode' => 'update']);
+
+            $report = $this->importService->import($file);
+
+            if (!empty($report['errors']) && $report['employees_inserted'] === 0 && $report['employees_updated'] === 0) {
+                // If everything failed validation or DB, return as validation error
+                $errorMessages = array_map(fn($e) => is_array($e) ? $e['message'] : $e, $report['errors']);
+                return ApiResponse::validation($errorMessages, 'Import failed/Validation Error');
             }
-            return ApiResponse::validation($errors, 'Validation Error');
+
+            return ApiResponse::ok($report, 'Proses import selesai');
         } catch (\Exception $e) {
             return ApiResponse::fail($e->getMessage(), 500);
         }

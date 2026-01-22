@@ -1,0 +1,4 @@
+kode_karyawan,nama,email,password,role,kategori_karyawan,subtipe_kontrak,tipe_gaji,gaji_pokok,bank_nama,bank_no_rekening,nomor_hp,alamat,tanggal_lahir,status
+EMP001,John Doe,john.doe@example.com,secret123,Superadmin,Tetap,Full-time,Bulanan,5000000,BCA,12345678,0812345678,Jl. Merdeka No. 1,1990-01-01,aktif
+EMP002,Jane Smith,jane.smith@example.com,,Staff,Kontrak,Part-time,Harian,200000,BNI,87654321,0819876543,Jl. Sudirman No. 2,1995-05-15,aktif
+EMP003,Bad Data,bad.email,pass,InvalidRole,Tetap,,,,,,,,nonaktif
