@@ -57,9 +57,11 @@ class UsersExport implements FromQuery, WithHeadings, WithMapping
         return [
             'Name',
             'Email',
+            'Password',
             'Status',
             'Role',
             'Created At',
+            'Updated At',
         ];
     }
 
@@ -75,9 +77,11 @@ class UsersExport implements FromQuery, WithHeadings, WithMapping
         return [
             $user->name,
             $user->email,
+            $user->password,
             $status,
             $user->roles->pluck('name')->join(', '),
             $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '-',
+            $user->updated_at ? $user->updated_at->format('Y-m-d H:i:s') : '-',
         ];
     }
 }

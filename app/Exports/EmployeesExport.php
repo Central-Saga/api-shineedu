@@ -18,12 +18,13 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
 
     public function query()
     {
-        $query = Employee::query()->with('user');
+        $query = Employee::query()->with(['user.roles']);
 
         if ($keyword = $this->request->get('q')) {
             $query->where('kode_karyawan', 'like', "%{$keyword}%")
                 ->orWhereHas('user', function ($q) use ($keyword) {
-                    $q->where('name', 'like', "%{$keyword}%");
+                    $q->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%");
                 });
         }
 
@@ -60,13 +61,22 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
     {
         return [
             'Kode Karyawan',
-            'Nama User',
-            'Kategori',
+            'Nama',
+            'Email',
+            'Password',
+            'Role',
+            'Kategori Karyawan',
             'Subtipe Kontrak',
             'Tipe Gaji',
             'Gaji Pokok',
+            'Bank Nama',
+            'Bank No Rekening',
+            'Nomor HP',
+            'Alamat',
+            'Tanggal Lahir',
             'Status',
             'Created At',
+            'Updated At',
         ];
     }
 
@@ -74,13 +84,22 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
     {
         return [
             $employee->kode_karyawan,
-            $employee->user ? $employee->user->name : '-',
+            $employee->user?->name ?? '-',
+            $employee->user?->email ?? '-',
+            $employee->user?->password ?? '-',
+            $employee->user ? $employee->user->roles->pluck('name')->implode(', ') : '-',
             $employee->kategori_karyawan,
             $employee->subtipe_kontrak,
             $employee->tipe_gaji,
             $employee->gaji_pokok,
+            $employee->bank_nama,
+            $employee->bank_no_rekening,
+            $employee->nomor_hp,
+            $employee->alamat,
+            $employee->tanggal_lahir ? $employee->tanggal_lahir->format('Y-m-d') : '-',
             $employee->status,
             $employee->created_at ? $employee->created_at->format('Y-m-d H:i:s') : '-',
+            $employee->updated_at ? $employee->updated_at->format('Y-m-d H:i:s') : '-',
         ];
     }
 }

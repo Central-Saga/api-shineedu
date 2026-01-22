@@ -128,12 +128,49 @@ class EmployeeController
     {
         return response()->streamDownload(function () use ($request) {
             $exporter = new EmployeesExport($request);
-            $query = $exporter->query();
+            $query = $exporter->query(); // This already includes with(['user.roles'])
 
             $handle = fopen('php://output', 'w');
 
+            // Header info
+            fwrite($handle, "-- Shine Education Bali - Employee & User Data Export\n");
+            fwrite($handle, "-- Generated at " . date('Y-m-d H:i:s') . "\n\n");
+            fwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
             $query->chunk(100, function ($employees) use ($handle) {
                 foreach ($employees as $employee) {
+                    $user = $employee->user;
+
+                    // 1. Export User if exists
+                    if ($user) {
+                        $userStatus = $user->status instanceof \BackedEnum ? $user->status->value : $user->status;
+                        $userVals = [
+                            $user->id,
+                            addslashes($user->name),
+                            addslashes($user->email),
+                            addslashes($user->password),
+                            addslashes((string)$userStatus),
+                            addslashes((string)$user->created_at),
+                            addslashes((string)$user->updated_at),
+                        ];
+                        $userSql = sprintf(
+                            "INSERT INTO users (id, name, email, password, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s') ON DUPLICATE KEY UPDATE name=VALUES(name), status=VALUES(status);\n",
+                            ...$userVals
+                        );
+                        fwrite($handle, $userSql);
+
+                        // 2. Export Roles (model_has_roles)
+                        foreach ($user->roles as $role) {
+                            $roleSql = sprintf(
+                                "INSERT INTO model_has_roles (role_id, model_type, model_id) SELECT id, 'App\\\\Modules\\\\Identity\\\\Models\\\\User', %d FROM roles WHERE name='%s' ON DUPLICATE KEY UPDATE role_id=role_id;\n",
+                                $user->id,
+                                addslashes($role->name)
+                            );
+                            fwrite($handle, $roleSql);
+                        }
+                    }
+
+                    // 3. Export Karyawan
                     $vals = [
                         addslashes($employee->kode_karyawan),
                         $employee->user_id ?? 'NULL',
@@ -147,17 +184,19 @@ class EmployeeController
                         $employee->alamat ? "'" . addslashes($employee->alamat) . "'" : 'NULL',
                         $employee->tanggal_lahir ? "'" . $employee->tanggal_lahir->format('Y-m-d') . "'" : 'NULL',
                         addslashes($employee->status),
-                        addslashes($employee->created_at),
-                        addslashes($employee->updated_at),
+                        addslashes((string)$employee->created_at),
+                        addslashes((string)$employee->updated_at),
                     ];
                     $sql = sprintf(
-                        "INSERT INTO karyawan (kode_karyawan, user_id, kategori_karyawan, subtipe_kontrak, tipe_gaji, gaji_pokok, bank_nama, bank_no_rekening, nomor_hp, alamat, tanggal_lahir, status, created_at, updated_at) VALUES ('%s', %s, '%s', %s, '%s', %s, %s, %s, %s, %s, %s, '%s', '%s', '%s');\n",
+                        "INSERT INTO karyawan (kode_karyawan, user_id, kategori_karyawan, subtipe_kontrak, tipe_gaji, gaji_pokok, bank_nama, bank_no_rekening, nomor_hp, alamat, tanggal_lahir, status, created_at, updated_at) VALUES ('%s', %s, '%s', %s, '%s', %s, %s, %s, %s, %s, %s, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE status=VALUES(status), kategori_karyawan=VALUES(kategori_karyawan);\n",
                         ...$vals
                     );
                     fwrite($handle, $sql);
+                    fwrite($handle, "\n");
                 }
             });
 
+            fwrite($handle, "SET FOREIGN_KEY_CHECKS=1;\n");
             fclose($handle);
         }, $filename . '.sql', [
             'Content-Type' => 'application/sql',
