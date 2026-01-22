@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Identity\Models;
+namespace App\Modules\Identity\Domain\Models;
 
 use App\Modules\Identity\Domain\Enums\UserStatus;
 use Database\Factories\UserFactory;

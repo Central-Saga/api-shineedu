@@ -7,7 +7,7 @@ use App\Modules\Identity\Http\Requests\UserStoreRequest;
 use App\Modules\Identity\Http\Requests\UserUpdateRequest;
 use App\Modules\Identity\Http\Requests\UserUpdateRoleRequest;
 use App\Modules\Identity\Http\Resources\UserResource;
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;

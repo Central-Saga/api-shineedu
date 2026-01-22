@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Modules\HR\Models;
+namespace App\Modules\HR\Domain\Models;
 
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use Database\Factories\EmployeeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -58,6 +58,7 @@ class Employee extends Model
         return [
             'tanggal_lahir' => 'date',
             'gaji_pokok' => 'decimal:2',
+            'status' => \App\Modules\HR\Domain\Enums\EmployeeStatus::class,
         ];
     }
 

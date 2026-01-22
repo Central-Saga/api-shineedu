@@ -2,8 +2,8 @@
 
 namespace App\Modules\HR\Application\Services;
 
-use App\Modules\HR\Models\Employee;
-use App\Modules\Identity\Models\User;
+use App\Modules\HR\Domain\Models\Employee;
+use App\Modules\Identity\Domain\Models\User;
 use App\Modules\Identity\Domain\Enums\UserStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
