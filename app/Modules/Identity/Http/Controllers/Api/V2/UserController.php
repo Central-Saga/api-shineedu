@@ -171,11 +171,20 @@ class UserController
             return $this->exportSql($request, $filename);
         }
 
+        if ($format === 'pdf') {
+            $exporter = new UsersExport($request);
+            $users = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.users', compact('users'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
         $ext = match ($format) {
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
             'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };

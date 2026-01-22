@@ -65,12 +65,19 @@ class UsersExport implements FromQuery, WithHeadings, WithMapping
 
     public function map($user): array
     {
+        $status = $user->status;
+        if ($status instanceof \BackedEnum) {
+            $status = $status->value;
+        } elseif ($status instanceof \UnitEnum) {
+            $status = $status->name;
+        }
+
         return [
             $user->name,
             $user->email,
-            $user->status,
+            $status,
             $user->roles->pluck('name')->join(', '),
-            $user->created_at->format('Y-m-d H:i:s'),
+            $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '-',
         ];
     }
 }

@@ -100,11 +100,20 @@ class EmployeeController
             return $this->exportSql($request, $filename);
         }
 
+        if ($format === 'pdf') {
+            $exporter = new EmployeesExport($request);
+            $employees = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.employees', compact('employees'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
         $ext = match ($format) {
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
             'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };

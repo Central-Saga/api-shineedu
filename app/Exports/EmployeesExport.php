@@ -80,7 +80,7 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
             $employee->tipe_gaji,
             $employee->gaji_pokok,
             $employee->status,
-            $employee->created_at->format('Y-m-d H:i:s'),
+            $employee->created_at ? $employee->created_at->format('Y-m-d H:i:s') : '-',
         ];
     }
 }

@@ -160,16 +160,25 @@ class RoleController
             return $this->exportSql($request, $filename);
         }
 
+        if ($format === 'pdf') {
+            $exporter = new \App\Exports\RolesExport($request);
+            $roles = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.roles', compact('roles'))
+                ->setPaper('a4', 'portrait');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
         $ext = match ($format) {
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
             'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };
 
-        return Excel::download(new RolesExport($request), $filename . '.' . $format, $ext);
+        return Excel::download(new \App\Exports\RolesExport($request), $filename . '.' . $format, $ext);
     }
 
     /**

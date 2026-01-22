@@ -48,7 +48,7 @@ class RolesExport implements FromQuery, WithHeadings, WithMapping
         return [
             $role->name,
             $role->permissions->pluck('name')->join(', '),
-            $role->created_at->format('Y-m-d H:i:s'),
+            $role->created_at ? $role->created_at->format('Y-m-d H:i:s') : '-',
         ];
     }
 }
