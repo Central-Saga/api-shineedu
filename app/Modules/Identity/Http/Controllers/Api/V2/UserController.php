@@ -205,12 +205,18 @@ class UserController
 
             $query->chunk(100, function ($users) use ($handle) {
                 foreach ($users as $user) {
+                    $status = $user->status;
+                    if ($status instanceof \BackedEnum) {
+                        $status = $status->value;
+                    } elseif ($status instanceof \UnitEnum) {
+                        $status = $status->name;
+                    }
+
                     $vals = [
                         addslashes($user->name),
                         addslashes($user->email),
-                        // Handle password? Usually exclude or use hash.
                         addslashes($user->password),
-                        addslashes($user->status->value),
+                        addslashes($status),
                         addslashes($user->created_at),
                         addslashes($user->updated_at),
                     ];
@@ -234,17 +240,27 @@ class UserController
     public function import(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls', // Added xls just in case
+            'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls',
         ]);
 
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+
+        if ($extension === 'sql') {
+            try {
+                $sql = file_get_contents($file->getRealPath());
+                if (empty($sql)) {
+                    return ApiResponse::fail('File SQL kosong', 422);
+                }
+                \Illuminate\Support\Facades\DB::unprepared($sql);
+                return ApiResponse::ok(null, 'Import users dari SQL berhasil');
+            } catch (\Exception $e) {
+                return ApiResponse::fail('Gagal melakukan import SQL: ' . $e->getMessage(), 500);
+            }
+        }
+
         try {
-            // Note: For SQL Import, we would need to parse and execute.
-            // Currently Maatwebsite Excel handles Spreadsheet formats.
-            // If file is SQL, this might fail unless we implement custom handler.
-            // For now, supporting standard formats.
-
-            Excel::import(new UsersImport, $request->file('file'));
-
+            Excel::import(new UsersImport, $file);
             return ApiResponse::ok(null, 'Import users berhasil');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();

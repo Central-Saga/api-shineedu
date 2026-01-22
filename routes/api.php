@@ -28,6 +28,7 @@ Route::prefix('v2')->group(function () {
         // Roles
         Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
         Route::get('/roles/export', [RoleController::class, 'export'])->middleware('permission:roles.view'); // Falls back to view permission
+        Route::post('/roles/import', [RoleController::class, 'import'])->middleware('permission:roles.create');
         Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
         Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('permission:roles.view');
         Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.update');

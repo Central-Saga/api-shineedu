@@ -213,4 +213,32 @@ class RoleController
             'Content-Type' => 'application/sql',
         ]);
     }
+    /**
+     * Import roles.
+     */
+    public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls',
+        ]);
+
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+
+        if ($extension === 'sql') {
+            try {
+                $sql = file_get_contents($file->getRealPath());
+                if (empty($sql)) {
+                    return ApiResponse::fail('File SQL kosong', 422);
+                }
+                \Illuminate\Support\Facades\DB::unprepared($sql);
+                return ApiResponse::ok(null, 'Import roles dari SQL berhasil');
+            } catch (\Exception $e) {
+                return ApiResponse::fail('Gagal melakukan import SQL: ' . $e->getMessage(), 500);
+            }
+        }
+
+        // Spreadsheet import for roles could be added here if needed.
+        return ApiResponse::fail('Import spreadsheet untuk role belum didukung.', 400);
+    }
 }

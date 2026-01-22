@@ -138,12 +138,20 @@ class EmployeeController
                         addslashes($employee->kode_karyawan),
                         $employee->user_id ?? 'NULL',
                         addslashes($employee->kategori_karyawan),
+                        $employee->subtipe_kontrak ? "'" . addslashes($employee->subtipe_kontrak) . "'" : 'NULL',
+                        addslashes($employee->tipe_gaji),
+                        $employee->gaji_pokok ?? 0,
+                        $employee->bank_nama ? "'" . addslashes($employee->bank_nama) . "'" : 'NULL',
+                        $employee->bank_no_rekening ? "'" . addslashes($employee->bank_no_rekening) . "'" : 'NULL',
+                        $employee->nomor_hp ? "'" . addslashes($employee->nomor_hp) . "'" : 'NULL',
+                        $employee->alamat ? "'" . addslashes($employee->alamat) . "'" : 'NULL',
+                        $employee->tanggal_lahir ? "'" . $employee->tanggal_lahir->format('Y-m-d') . "'" : 'NULL',
+                        addslashes($employee->status),
                         addslashes($employee->created_at),
                         addslashes($employee->updated_at),
                     ];
-                    // Simplify for example, should include all columns
                     $sql = sprintf(
-                        "INSERT INTO karyawan (kode_karyawan, user_id, kategori_karyawan, created_at, updated_at) VALUES ('%s', %s, '%s', '%s', '%s');\n",
+                        "INSERT INTO karyawan (kode_karyawan, user_id, kategori_karyawan, subtipe_kontrak, tipe_gaji, gaji_pokok, bank_nama, bank_no_rekening, nomor_hp, alamat, tanggal_lahir, status, created_at, updated_at) VALUES ('%s', %s, '%s', %s, '%s', %s, %s, %s, %s, %s, %s, '%s', '%s', '%s');\n",
                         ...$vals
                     );
                     fwrite($handle, $sql);
@@ -165,9 +173,24 @@ class EmployeeController
             'file' => 'required|file|mimes:xlsx,csv,txt,sql,xls',
         ]);
 
-        try {
-            Excel::import(new EmployeesImport, $request->file('file'));
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
 
+        if ($extension === 'sql') {
+            try {
+                $sql = file_get_contents($file->getRealPath());
+                if (empty($sql)) {
+                    return ApiResponse::fail('File SQL kosong', 422);
+                }
+                \Illuminate\Support\Facades\DB::unprepared($sql);
+                return ApiResponse::ok(null, 'Import karyawan dari SQL berhasil');
+            } catch (\Exception $e) {
+                return ApiResponse::fail('Gagal melakukan import SQL: ' . $e->getMessage(), 500);
+            }
+        }
+
+        try {
+            Excel::import(new EmployeesImport, $file);
             return ApiResponse::ok(null, 'Import karyawan berhasil');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
