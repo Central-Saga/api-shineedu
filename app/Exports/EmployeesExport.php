@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Modules\HR\Models\Employee;
+use App\Modules\HR\Domain\Models\Employee;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;

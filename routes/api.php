@@ -56,5 +56,18 @@ Route::prefix('v2')->group(function () {
         Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');
         Route::patch('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');
         Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('permission:employees.delete');
+
+        // Scheduling (Jadwal Kerja & Realisasi)
+        Route::get('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'index'])->middleware('permission:scheduling.view');
+        Route::post('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'store'])->middleware('permission:scheduling.create');
+        Route::get('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'show'])->middleware('permission:scheduling.view');
+        Route::put('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'update'])->middleware('permission:scheduling.update');
+        Route::delete('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'destroy'])->middleware('permission:scheduling.delete');
+
+        Route::get('/realisasi-jadwal', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'index'])->middleware('permission:scheduling.view');
+        Route::post('/realisasi-jadwal', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'store'])->middleware('permission:scheduling.create');
+        Route::get('/realisasi-jadwal/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'show'])->middleware('permission:scheduling.view');
+        Route::put('/realisasi-jadwal/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'update'])->middleware('permission:scheduling.update');
+        Route::delete('/realisasi-jadwal/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'destroy'])->middleware('permission:scheduling.delete');
     });
 });

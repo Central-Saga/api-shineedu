@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Modules\HR\Models\Employee;
-use App\Modules\Identity\Models\User;
+use App\Modules\HR\Domain\Models\Employee;
+use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Seeder;
 
 class EmployeeSeeder extends Seeder

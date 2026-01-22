@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;

@@ -7,7 +7,7 @@ use App\Modules\Identity\Http\Requests\RoleStoreRequest;
 use App\Modules\Identity\Http\Requests\RoleSyncPermissionsRequest;
 use App\Modules\Identity\Http\Requests\RoleUpdateRequest;
 use App\Modules\Identity\Http\Resources\RoleResource;
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Permission;

@@ -3,7 +3,7 @@
 namespace App\Modules\Identity\Application\Services;
 
 use App\Modules\Identity\Domain\Enums\UserStatus;
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;

@@ -2,13 +2,12 @@
 
 namespace App\Modules\HR\Http\Controllers\Api\V2;
 
-use App\Modules\HR\Models\Employee;
+use App\Modules\HR\Domain\Models\Employee;
 use App\Modules\HR\Http\Requests\EmployeeIndexRequest;
 use App\Modules\HR\Http\Requests\StoreEmployeeRequest;
 use App\Modules\HR\Http\Requests\UpdateEmployeeRequest;
 use App\Modules\HR\Http\Resources\EmployeeResource;
-use App\Modules\HR\Repositories\EmployeeRepositoryInterface;
-use App\Modules\HR\Services\EmployeeService;
+
 
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -22,8 +21,6 @@ use App\Modules\HR\Application\Services\UnifiedEmployeeImportService;
 class EmployeeController
 {
     public function __construct(
-        protected EmployeeRepositoryInterface $repository,
-        protected EmployeeService $service,
         protected UnifiedEmployeeImportService $importService
     ) {}
 
@@ -32,7 +29,59 @@ class EmployeeController
      */
     public function index(EmployeeIndexRequest $request): JsonResponse
     {
-        $employees = $this->repository->paginate($request->validated());
+        $params = $request->validated();
+        $query = Employee::query()->with('user');
+
+        // Search: kode_karyawan OR user name/email
+        if (! empty($params['q'] ?? null)) {
+            $keyword = (string) $params['q'];
+            $query->where(function ($q) use ($keyword) {
+                $q->where('kode_karyawan', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', function ($uq) use ($keyword) {
+                        $uq->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('email', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        // Filters
+        if (! empty($params['status'] ?? null)) {
+            $query->where('status', $params['status']);
+        }
+        if (! empty($params['kategori_karyawan'] ?? null)) {
+            $query->where('kategori_karyawan', $params['kategori_karyawan']);
+        }
+        if (! empty($params['subtipe_kontrak'] ?? null)) {
+            $query->where('subtipe_kontrak', $params['subtipe_kontrak']);
+        }
+        if (! empty($params['tipe_gaji'] ?? null)) {
+            $query->where('tipe_gaji', $params['tipe_gaji']);
+        }
+
+        // Sort
+        $sortWhitelist = [
+            'kode_karyawan',
+            'status',
+            'kategori_karyawan',
+            'tipe_gaji',
+            'gaji_pokok',
+            'created_at',
+            'updated_at',
+        ];
+
+        $sortBy = in_array($params['sort_by'] ?? null, $sortWhitelist, true)
+            ? $params['sort_by']
+            : 'created_at';
+        $sortDir = in_array(strtolower((string) ($params['sort_dir'] ?? '')), ['asc', 'desc'], true)
+            ? strtolower((string) $params['sort_dir'])
+            : 'desc';
+        $query->orderBy($sortBy, $sortDir);
+
+        // Pagination
+        $perPage = (int) ($params['per_page'] ?? 15);
+        $perPage = min(max($perPage, 1), 100);
+
+        $employees = $query->paginate($perPage)->withQueryString();
 
         return ApiResponse::paginated(
             EmployeeResource::collection($employees),
@@ -46,7 +95,7 @@ class EmployeeController
      */
     public function store(StoreEmployeeRequest $request): JsonResponse
     {
-        $employee = $this->service->create($request->validated());
+        $employee = Employee::create($request->validated());
 
         return ApiResponse::created(
             new EmployeeResource($employee->load('user')),
@@ -72,7 +121,7 @@ class EmployeeController
      */
     public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
     {
-        $this->service->update($employee, $request->validated());
+        $employee->update($request->validated());
 
         return ApiResponse::ok(
             new EmployeeResource($employee->fresh()->load('user')),
@@ -164,7 +213,7 @@ class EmployeeController
                         // 2. Export Roles (model_has_roles)
                         foreach ($user->roles as $role) {
                             $roleSql = sprintf(
-                                "INSERT INTO model_has_roles (role_id, model_type, model_id) SELECT id, 'App\\\\Modules\\\\Identity\\\\Models\\\\User', %d FROM roles WHERE name='%s' ON DUPLICATE KEY UPDATE role_id=role_id;\n",
+                                "INSERT INTO model_has_roles (role_id, model_type, model_id) SELECT id, 'App\\\\Modules\\\\Identity\\\\Domain\\\\Models\\\\User', %d FROM roles WHERE name='%s' ON DUPLICATE KEY UPDATE role_id=role_id;\n",
                                 $user->id,
                                 addslashes($role->name)
                             );
