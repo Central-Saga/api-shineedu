@@ -2,6 +2,7 @@
 
 namespace App\Modules\Scheduling\Domain\Models;
 
+use App\Modules\HR\Domain\Models\Employee;
 use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,11 +42,11 @@ class RealisasiJadwalKerja extends Model
 
     public function guruPengajar()
     {
-        return $this->belongsTo(User::class, 'guru_pengajar_id');
+        return $this->belongsTo(Employee::class, 'guru_pengajar_id');
     }
 
     public function guruPengganti()
     {
-        return $this->belongsTo(User::class, 'guru_pengganti_id');
+        return $this->belongsTo(Employee::class, 'guru_pengganti_id');
     }
 }

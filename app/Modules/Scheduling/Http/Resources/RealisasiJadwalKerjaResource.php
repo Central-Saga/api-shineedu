@@ -26,12 +26,28 @@ class RealisasiJadwalKerjaResource extends JsonResource
             'guru_pengajar_id' => $this->guru_pengajar_id,
             'guru_pengajar' => $this->whenLoaded('guruPengajar', fn() => [
                 'id' => $this->guruPengajar->id,
-                'name' => $this->guruPengajar->name,
+                'kode_karyawan' => $this->guruPengajar->kode_karyawan,
+                'user' => [
+                    'id' => $this->guruPengajar->user->id,
+                    'name' => $this->guruPengajar->user->name,
+                    'email' => $this->guruPengajar->user->email,
+                ],
+                'kontak' => [
+                    'nomor_hp' => $this->guruPengajar->nomor_hp,
+                ],
             ]),
             'guru_pengganti_id' => $this->guru_pengganti_id,
             'guru_pengganti' => $this->whenLoaded('guruPengganti', fn() => [
                 'id' => $this->guruPengganti->id,
-                'name' => $this->guruPengganti->name,
+                'kode_karyawan' => $this->guruPengganti->kode_karyawan,
+                'user' => [
+                    'id' => $this->guruPengganti->user->id,
+                    'name' => $this->guruPengganti->user->name,
+                    'email' => $this->guruPengganti->user->email,
+                ],
+                'kontak' => [
+                    'nomor_hp' => $this->guruPengganti->nomor_hp,
+                ],
             ]),
             'created_at' => (string) $this->created_at,
             'updated_at' => (string) $this->updated_at,
