@@ -16,6 +16,18 @@ class AbsensiService
     {
         $query = Absensi::query()->with('karyawan.user');
 
+        // Privacy filter: regular users only see their own attendance
+        $user = request()->user();
+        if ($user && ! $user->hasRole('Admin') && ! $user->hasPermissionTo('absensi.manage')) {
+            $employee = $user->employee;
+            if ($employee) {
+                $query->where('karyawan_id', $employee->id);
+            } else {
+                // If user is not an employee and not an admin, they see nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         // Search
         if (! empty($params['q'] ?? null)) {
             $keyword = (string) $params['q'];

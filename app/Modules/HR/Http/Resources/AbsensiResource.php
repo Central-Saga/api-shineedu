@@ -22,13 +22,14 @@ class AbsensiResource extends JsonResource
             'jam_masuk' => $this->jam_masuk ? $this->jam_masuk->format('H:i') : null,
             'jam_pulang' => $this->jam_pulang ? $this->jam_pulang->format('H:i') : null,
             'durasi' => $this->durasi,
+            'durasi_menit' => $this->durasi,
             'durasi_jam' => $this->durasi ? round($this->durasi / 60, 2) : 0,
             'tanggal' => $this->tanggal->format('Y-m-d'),
             'sumber_absen' => $this->sumber_absen,
             'catatan' => $this->catatan,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            // 'karyawan' => new EmployeeResource($this->whenLoaded('karyawan')),
+            'karyawan' => new EmployeeResource($this->whenLoaded('karyawan')),
         ];
     }
 }

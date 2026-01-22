@@ -14,6 +14,7 @@ class PengaturanCutiRules extends Model
     protected $fillable = [
         'kategori_karyawan',
         'subtipe_kontrak',
+        'kategori_mapel',
         'jenis',
         'periode',
         'maksimal_pengajuan',

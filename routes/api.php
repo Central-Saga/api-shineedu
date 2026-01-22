@@ -90,8 +90,10 @@ Route::prefix('v2')->group(function () {
         // Route::post('/cuti/{cuti}/approve', ...)->middleware('permission:cuti.approve');
 
         // Absensi
+        Route::post('/absensi/check-in', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkIn'])->middleware('permission:absensi.create');
+        Route::post('/absensi/check-out', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkOut'])->middleware('permission:absensi.create');
         Route::get('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'index'])->middleware('permission:absensi.view');
-        Route::post('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'store'])->middleware('permission:absensi.create');
+        Route::post('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'store'])->middleware('permission:absensi.manage');
         Route::get('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'show'])->middleware('permission:absensi.view');
         Route::put('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
         Route::patch('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');

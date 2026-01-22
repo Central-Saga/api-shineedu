@@ -18,6 +18,7 @@ class PengaturanCutiResource extends JsonResource
             'id' => $this->id,
             'kategori_karyawan' => $this->kategori_karyawan,
             'subtipe_kontrak' => $this->subtipe_kontrak,
+            'kategori_mapel' => $this->kategori_mapel,
             'jenis' => $this->jenis,
             'periode' => $this->periode,
             'maksimal_pengajuan' => $this->maksimal_pengajuan,
