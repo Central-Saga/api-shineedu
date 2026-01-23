@@ -17,6 +17,7 @@ class EmployeeResource extends JsonResource
         return [
             'id' => $this->id,
             'kode_karyawan' => $this->kode_karyawan,
+            'divisi' => $this->divisi,
             'status' => $this->status,
             'kategori_karyawan' => $this->kategori_karyawan,
             'subtipe_kontrak' => $this->subtipe_kontrak,

@@ -23,11 +23,18 @@ class EmployeeSeeder extends Seeder
             $ddmmyy = $dateObj->format('dmy');
             $random = str_pad($user->id, 4, '0', STR_PAD_LEFT);
 
+            $divisi = 'Operasional';
+            if ($user->hasRole('Teacher')) {
+                // Randomly assign Coding or Non-Coding to teachers
+                $divisi = $user->id % 2 === 0 ? 'Coding' : 'Non-Coding';
+            }
+
             Employee::firstOrCreate(
                 ['user_id' => $user->id],
                 [
                     'kode_karyawan' => "{$ddmmyy}{$random}",
                     'kategori_karyawan' => 'tetap',
+                    'divisi' => $divisi,
                     'status' => 'aktif',
                     'nomor_hp' => '08123456789',
                     'alamat' => 'Denpasar, Bali',

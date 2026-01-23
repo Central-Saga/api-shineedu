@@ -90,7 +90,7 @@ class PengaturanCutiService
      * Find active rule for specific criteria
      * Used by CutiService
      */
-    public function findRule(string $kategori, ?string $subtipe, string $jenis): ?PengaturanCutiRules
+    public function findRule(string $kategori, ?string $subtipe, ?string $divisi, string $jenis): ?PengaturanCutiRules
     {
         $query = PengaturanCutiRules::query()
             ->where('aktif', true)
@@ -100,12 +100,16 @@ class PengaturanCutiService
         if ($subtipe) {
             $query->where('subtipe_kontrak', $subtipe);
         } else {
-            // If subtipe not provided or null, maybe we should match null?
-            // Or if rule has null subtipe it applies to all?
-            // Domain rule: Contrak has subtipe. Others don't.
-            // If kategori != Kontrak, subtipe should be ignored or null in DB.
-            // If parameter passed is null, we look for rule with null subtipe.
             $query->whereNull('subtipe_kontrak');
+        }
+
+        if ($divisi) {
+            $query->where(function ($q) use ($divisi) {
+                $q->where('divisi', $divisi)
+                    ->orWhere('divisi', 'all');
+            });
+        } else {
+            $query->where('divisi', 'all');
         }
 
         return $query->first();

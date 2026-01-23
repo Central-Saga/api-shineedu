@@ -36,6 +36,7 @@ class UpdateEmployeeRequest extends FormRequest
             'nomor_hp' => ['nullable', 'string', 'max:30'],
             'alamat' => ['nullable', 'string', 'max:500'],
             'tanggal_lahir' => ['nullable', 'date'],
+            'divisi' => ['nullable', 'string', 'in:Coding,Non-Coding,Operasional'],
             'status' => ['nullable', 'string', 'in:aktif,nonaktif'],
         ];
     }

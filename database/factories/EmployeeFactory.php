@@ -37,6 +37,7 @@ class EmployeeFactory extends Factory
             'nomor_hp' => fake()->phoneNumber(),
             'alamat' => fake()->address(),
             'tanggal_lahir' => $birthDate,
+            'divisi' => fake()->randomElement(['Coding', 'Non-Coding', 'Operasional']),
             'status' => 'aktif',
         ];
     }

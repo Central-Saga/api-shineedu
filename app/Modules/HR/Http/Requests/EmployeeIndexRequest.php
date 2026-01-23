@@ -30,9 +30,10 @@ class EmployeeIndexRequest extends FormRequest
             'q' => ['nullable', 'string', 'max:255'],
             'status' => ['nullable', 'string', 'in:aktif,nonaktif'],
             'kategori_karyawan' => ['nullable', 'string', 'max:255'],
+            'divisi' => ['nullable', 'string', 'max:255'],
             'subtipe_kontrak' => ['nullable', 'string', 'max:255'],
             'tipe_gaji' => ['nullable', 'string', 'max:255'],
-            'sort_by' => ['nullable', 'string', 'in:kode_karyawan,status,kategori_karyawan,tipe_gaji,gaji_pokok,created_at,updated_at'],
+            'sort_by' => ['nullable', 'string', 'in:kode_karyawan,status,kategori_karyawan,divisi,tipe_gaji,gaji_pokok,created_at,updated_at'],
             'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
         ];
     }

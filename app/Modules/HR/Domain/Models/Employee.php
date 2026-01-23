@@ -37,6 +37,7 @@ class Employee extends Model
         'kode_karyawan',
         'user_id',
         'kategori_karyawan',
+        'divisi',
         'subtipe_kontrak',
         'tipe_gaji',
         'gaji_pokok',

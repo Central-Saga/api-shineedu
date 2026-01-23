@@ -16,6 +16,7 @@ class UpdatePengaturanCutiRequest extends FormRequest
         return [
             'kategori_karyawan' => 'sometimes|string',
             'subtipe_kontrak' => 'nullable|string',
+            'divisi' => 'sometimes|string|in:Coding,Non-Coding,Operasional,all,coding,non_coding',
             'jenis' => 'sometimes|string|in:cuti,izin,sakit',
             'periode' => 'sometimes|string|in:bulanan,tahunan',
             'maksimal_pengajuan' => 'nullable|integer|min:0',

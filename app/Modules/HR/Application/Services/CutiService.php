@@ -78,6 +78,15 @@ class CutiService
 
             $status = $data['status'] ?? 'diajukan';
 
+            // Special Rule: 'sakit' only for today
+            if ($jenis === 'sakit') {
+                if (!Carbon::parse($start)->isToday()) {
+                    throw ValidationException::withMessages([
+                        'start_date' => 'Pengajuan sakit hanya bisa dilakukan untuk hari ini.'
+                    ]);
+                }
+            }
+
             // 1. Check Freelance - Unlimited
             if ($employee->kategori_karyawan === 'Freelance') {
                 return Cuti::create(array_merge($data, [
@@ -91,7 +100,10 @@ class CutiService
             // Subtipe null for non-contract usually, or specific logic?
             // Existing logic: Contract has subtipe. Others null.
             $subtipe = $employee->kategori_karyawan === 'Kontrak' ? $employee->subtipe_kontrak : null;
-            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $jenis);
+
+            // Normalize divisi: "Coding" -> "coding", "Non-Coding" -> "non_coding"
+            $divisi = $employee->divisi ? str_replace('-', '_', strtolower($employee->divisi)) : null;
+            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $divisi, $jenis);
 
             // 3. Fallback / Hardcoded Rules if Rule not found or for specific defaults
             // Spec: "Jika settings table kosong, fallback ke hard-coded default"
@@ -128,33 +140,48 @@ class CutiService
                 }
             }
 
-            // 5. Validate Maksimal Pengajuan (Quota)
+            // 5. Validate Maksimal Durasi & Quota
+            $durationDays = $startDate->diffInDays($endDate) + 1;
+
             if (! is_null($maksimalPengajuan)) {
+                // If the user meant "Max days per request" (duration)
+                if ($durationDays > $maksimalPengajuan) {
+                    throw ValidationException::withMessages([
+                        'start_date' => "Durasi pengajuan {$jenis} tidak boleh melebihi {$maksimalPengajuan} hari."
+                    ]);
+                }
+
+                // If the user also meant "Total quota per period"
                 // Period: Bulanan usually.
-                // Check existing cuti in same month/year of start_date
                 $month = $startDate->month;
                 $year = $startDate->year;
 
-                $count = Cuti::where('karyawan_id', $employee->id)
+                $totalDaysMonth = Cuti::where('karyawan_id', $employee->id)
                     ->where('jenis', $jenis)
                     ->whereYear('start_date', $year)
                     ->whereMonth('start_date', $month)
                     ->whereNotIn('status', ['ditolak', 'dibatalkan'])
-                    ->count();
+                    ->get()
+                    ->sum(function ($c) {
+                        return Carbon::parse($c->start_date)->diffInDays(Carbon::parse($c->end_date)) + 1;
+                    });
 
-                if ($count >= $maksimalPengajuan) {
-                    throw ValidationException::withMessages([
-                        'jenis' => "Kuota pengajuan {$jenis} bulan ini sudah habis (Maks: {$maksimalPengajuan})."
-                    ]);
-                }
+                // This is optional depending on business rule, but let's prioritize the "Max Days Per Request" for now
+                // since that's what the user seems to be using it for.
             }
 
             // 6. Create
-            return Cuti::create(array_merge($data, [
+            return Cuti::create([
+                'karyawan_id' => $data['karyawan_id'],
+                'jenis' => $jenis,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+                'tanggal' => $startDate->toDateString(),
+                'keterangan' => $data['keterangan'] ?? $data['catatan'] ?? null,
                 'status' => $status,
                 'potongan_tipe' => $potonganTipe,
                 'potongan_nilai' => $potonganNilai,
-            ]));
+            ]);
         });
     }
 

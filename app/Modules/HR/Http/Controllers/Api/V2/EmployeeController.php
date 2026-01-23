@@ -57,12 +57,16 @@ class EmployeeController
         if (! empty($params['tipe_gaji'] ?? null)) {
             $query->where('tipe_gaji', $params['tipe_gaji']);
         }
+        if (! empty($params['divisi'] ?? null)) {
+            $query->where('divisi', $params['divisi']);
+        }
 
         // Sort
         $sortWhitelist = [
             'kode_karyawan',
             'status',
             'kategori_karyawan',
+            'divisi',
             'tipe_gaji',
             'gaji_pokok',
             'created_at',
