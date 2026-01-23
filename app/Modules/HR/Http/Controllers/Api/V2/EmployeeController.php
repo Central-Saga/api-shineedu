@@ -32,6 +32,12 @@ class EmployeeController
         $params = $request->validated();
         $query = Employee::query()->with('user');
 
+        // Apply permission-based filtering
+        $user = $request->user();
+        if (!$user->can('employees.view')) {
+            $query->where('user_id', $user->id);
+        }
+
         // Search: kode_karyawan OR user name/email
         if (! empty($params['q'] ?? null)) {
             $keyword = (string) $params['q'];

@@ -23,6 +23,15 @@ class CutiService
     {
         $query = Cuti::query()->with(['karyawan.user', 'approver']);
 
+        // Apply permission-based filtering
+        $user = auth()->user();
+        if ($user && !$user->can('cuti.view')) {
+            // If they can't view all, they can only see their own
+            $query->whereHas('karyawan', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
         // Search
         if (! empty($params['q'] ?? null)) {
             $keyword = (string) $params['q'];

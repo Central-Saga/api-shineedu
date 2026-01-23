@@ -26,22 +26,15 @@
             width: 100%;
         }
 
-        .logo-placeholder {
+        .logo-container {
             display: table-cell;
             vertical-align: middle;
-            width: 60px;
+            width: 80px;
         }
 
-        .logo-box {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #D4A017 0%, #B8860B 100%);
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            line-height: 50px;
-            font-weight: bold;
-            font-size: 18pt;
+        .logo-img {
+            width: 70px;
+            height: auto;
         }
 
         .info-section {
@@ -133,14 +126,11 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="logo-placeholder">
-                <div class="logo-box">S</div>
-            </div>
             <div class="info-section">
                 <h1 class="company-name">Shine Education Bali</h1>
-                <p class="company-tagline">Empowering Minds, Shaping Futures in Bali</p>
+                <p class="company-tagline">Smart Learning, Bright Future</p>
                 <p style="font-size: 8pt; color: #666; margin: 5px 0 0 0;">
-                    Jalan Pendidikan No. 123, Denpasar, Bali &bull; info@shineedu.com &bull; +62 812-3456-7890
+                    Munggu, Kec. Mengwi, Kabupaten Badung, Bali &bull; info@shineedu.com &bull; +62 812-3456-7890
                 </p>
             </div>
         </div>

@@ -9,6 +9,8 @@ use App\Modules\Scheduling\Http\Resources\JadwalKerjaResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Exports\JadwalKerjaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JadwalKerjaController
 {
@@ -98,5 +100,31 @@ class JadwalKerjaController
         $jadwalKerja->delete();
 
         return ApiResponse::ok(null, 'Jadwal kerja berhasil dihapus');
+    }
+
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'jadwal_kerja_' . date('Ymd_His');
+
+        if ($format === 'pdf') {
+            $exporter = new JadwalKerjaExport($request);
+            $items = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.jadwal_kerja', compact('items'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            'txt' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new JadwalKerjaExport($request), $filename . '.' . $format, $ext);
     }
 }
