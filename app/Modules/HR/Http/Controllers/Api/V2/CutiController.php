@@ -106,4 +106,24 @@ class CutiController
 
         return Excel::download(new CutiExport($request), $filename . '.' . $format, $ext);
     }
+
+    public function approve(Cuti $cuti): JsonResponse
+    {
+        $updated = $this->service->approve($cuti, auth()->id());
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti berhasil disetujui'
+        );
+    }
+
+    public function reject(Cuti $cuti): JsonResponse
+    {
+        $updated = $this->service->reject($cuti, auth()->id());
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti ditolak'
+        );
+    }
 }

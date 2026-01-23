@@ -204,4 +204,24 @@ class CutiService
     {
         $cuti->delete();
     }
+
+    public function approve(Cuti $cuti, ?int $approverId): Cuti
+    {
+        $cuti->update([
+            'status' => 'disetujui',
+            'disetujui_oleh' => $approverId,
+        ]);
+
+        return $cuti->fresh(['karyawan.user', 'approver']);
+    }
+
+    public function reject(Cuti $cuti, ?int $approverId): Cuti
+    {
+        $cuti->update([
+            'status' => 'ditolak',
+            'disetujui_oleh' => $approverId,
+        ]);
+
+        return $cuti->fresh(['karyawan.user', 'approver']);
+    }
 }
