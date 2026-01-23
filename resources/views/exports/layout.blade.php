@@ -126,11 +126,6 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="logo-container">
-                <div
-                    style="width: 50px; height: 50px; background: #C8102E; border-radius: 8px; color: white; text-align: center; line-height: 50px; font-weight: bold; font-size: 20pt;">
-                    S</div>
-            </div>
             <div class="info-section">
                 <h1 class="company-name">Shine Education Bali</h1>
                 <p class="company-tagline">Smart Learning, Bright Future</p>
