@@ -70,5 +70,33 @@ Route::prefix('v2')->group(function () {
         Route::get('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'show'])->middleware('permission:scheduling.view');
         Route::put('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'update'])->middleware('permission:scheduling.update');
         Route::delete('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'destroy'])->middleware('permission:scheduling.delete');
+
+        // Pengaturan Cuti
+        Route::get('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'index'])->middleware('permission:pengaturan_cuti.view');
+        Route::post('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'store'])->middleware('permission:pengaturan_cuti.create');
+        Route::get('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'show'])->middleware('permission:pengaturan_cuti.view');
+        Route::put('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'update'])->middleware('permission:pengaturan_cuti.update');
+        Route::patch('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'update'])->middleware('permission:pengaturan_cuti.update');
+        Route::delete('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'destroy'])->middleware('permission:pengaturan_cuti.delete');
+
+        // Cuti
+        Route::get('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'index'])->middleware('permission:cuti.view');
+        Route::post('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'store'])->middleware('permission:cuti.create');
+        Route::get('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'show'])->middleware('permission:cuti.view');
+        Route::put('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'update'])->middleware('permission:cuti.update');
+        Route::patch('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'update'])->middleware('permission:cuti.update');
+        Route::delete('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'destroy'])->middleware('permission:cuti.delete');
+        // Optional custom approval routes if separate from update
+        // Route::post('/cuti/{cuti}/approve', ...)->middleware('permission:cuti.approve');
+
+        // Absensi
+        Route::post('/absensi/check-in', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkIn'])->middleware('permission:absensi.create');
+        Route::post('/absensi/check-out', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkOut'])->middleware('permission:absensi.create');
+        Route::get('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'index'])->middleware('permission:absensi.view');
+        Route::post('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'store'])->middleware('permission:absensi.manage');
+        Route::get('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'show'])->middleware('permission:absensi.view');
+        Route::put('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
+        Route::patch('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
+        Route::delete('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'destroy'])->middleware('permission:absensi.delete');
     });
 });

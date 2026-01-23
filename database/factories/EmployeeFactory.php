@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Modules\HR\Models\Employee;
+use App\Modules\HR\Domain\Models\Employee;
 use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Modules\HR\Models\Employee>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Modules\HR\Domain\Models\Employee>
  */
 class EmployeeFactory extends Factory
 {

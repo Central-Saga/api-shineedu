@@ -61,6 +61,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi dengan data karyawan
+     */
+    public function employee()
+    {
+        return $this->hasOne(\App\Modules\HR\Domain\Models\Employee::class, 'user_id');
+    }
+
+    /**
      * Check if user is active
      */
     public function isActive(): bool

@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Modules\HR\Application\Services;
+
+use App\Modules\HR\Domain\Models\PengaturanCutiRules;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class PengaturanCutiService
+{
+    /**
+     * Get list with filters and pagination
+     */
+    public function getList(array $params): LengthAwarePaginator
+    {
+        $query = PengaturanCutiRules::query();
+
+        // Search? Usually not relevant for config, but generic search could search enum values
+        if (! empty($params['q'] ?? null)) {
+            $keyword = (string) $params['q'];
+            $query->where(function ($q) use ($keyword) {
+                $q->where('kategori_karyawan', 'like', "%{$keyword}%")
+                    ->orWhere('jenis', 'like', "%{$keyword}%");
+            });
+        }
+
+        // Filters
+        if (! empty($params['kategori_karyawan'] ?? null)) {
+            $query->where('kategori_karyawan', $params['kategori_karyawan']);
+        }
+        if (! empty($params['subtipe_kontrak'] ?? null)) {
+            $query->where('subtipe_kontrak', $params['subtipe_kontrak']);
+        }
+        if (! empty($params['jenis'] ?? null)) {
+            $query->where('jenis', $params['jenis']);
+        }
+        if (isset($params['aktif'])) {
+            $query->where('aktif', filter_var($params['aktif'], FILTER_VALIDATE_BOOLEAN));
+        }
+
+        // Sort
+        $sortWhitelist = [
+            'id',
+            'kategori_karyawan',
+            'jenis',
+            'created_at',
+            'updated_at'
+        ];
+        $sortBy = in_array($params['sort_by'] ?? null, $sortWhitelist, true)
+            ? $params['sort_by']
+            : 'created_at';
+        $sortDir = in_array(strtolower((string) ($params['sort_dir'] ?? '')), ['asc', 'desc'], true)
+            ? strtolower((string) $params['sort_dir'])
+            : 'desc';
+
+        $query->orderBy($sortBy, $sortDir);
+
+        $perPage = (int) ($params['per_page'] ?? 15);
+        $perPage = min(max($perPage, 1), 100);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Store new rule
+     */
+    public function store(array $data): PengaturanCutiRules
+    {
+        return PengaturanCutiRules::create($data);
+    }
+
+    /**
+     * Update existing rule
+     */
+    public function update(PengaturanCutiRules $rule, array $data): PengaturanCutiRules
+    {
+        $rule->update($data);
+        return $rule->fresh();
+    }
+
+    /**
+     * Delete rule
+     */
+    public function delete(PengaturanCutiRules $rule): void
+    {
+        $rule->delete();
+    }
+
+    /**
+     * Find active rule for specific criteria
+     * Used by CutiService
+     */
+    public function findRule(string $kategori, ?string $subtipe, string $jenis): ?PengaturanCutiRules
+    {
+        $query = PengaturanCutiRules::query()
+            ->where('aktif', true)
+            ->where('kategori_karyawan', $kategori)
+            ->where('jenis', $jenis);
+
+        if ($subtipe) {
+            $query->where('subtipe_kontrak', $subtipe);
+        } else {
+            // If subtipe not provided or null, maybe we should match null?
+            // Or if rule has null subtipe it applies to all?
+            // Domain rule: Contrak has subtipe. Others don't.
+            // If kategori != Kontrak, subtipe should be ignored or null in DB.
+            // If parameter passed is null, we look for rule with null subtipe.
+            $query->whereNull('subtipe_kontrak');
+        }
+
+        return $query->first();
+    }
+}
