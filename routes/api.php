@@ -48,7 +48,7 @@ Route::prefix('v2')->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
 
         // Employees
-        Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employees.view');
+        Route::get('/employees', [EmployeeController::class, 'index']);
         Route::get('/employees/export', [EmployeeController::class, 'export'])->middleware('permission:employees.view');
         Route::post('/employees/import', [EmployeeController::class, 'import'])->middleware('permission:employees.create');
         Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employees.create');
@@ -74,7 +74,7 @@ Route::prefix('v2')->group(function () {
         Route::delete('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'destroy'])->middleware('permission:realisasi_jadwal_kerja.delete');
 
         // Pengaturan Cuti
-        Route::get('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'index'])->middleware('permission:pengaturan_cuti.view');
+        Route::get('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'index']);
         Route::post('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'store'])->middleware('permission:pengaturan_cuti.create');
         Route::get('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'show'])->middleware('permission:pengaturan_cuti.view');
         Route::put('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'update'])->middleware('permission:pengaturan_cuti.update');
@@ -82,7 +82,7 @@ Route::prefix('v2')->group(function () {
         Route::delete('/pengaturan-cuti/{rule}', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'destroy'])->middleware('permission:pengaturan_cuti.delete');
 
         // Cuti
-        Route::get('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'index'])->middleware('permission:cuti.view');
+        Route::get('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'index']);
         Route::get('/cuti/export', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'export'])->middleware('permission:cuti.view');
         Route::post('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'store'])->middleware('permission:cuti.create');
         Route::get('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'show'])->middleware('permission:cuti.view');
