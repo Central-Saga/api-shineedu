@@ -127,20 +127,9 @@
     <div class="header">
         <div class="header-content">
             <div class="logo-container">
-                @php
-                $logoPath = public_path('images/shine-logo.png');
-                $logoData = "";
-                if (file_exists($logoPath)) {
-                $logoData = base64_encode(file_get_contents($logoPath));
-                }
-                @endphp
-                @if($logoData)
-                <img src="data:image/png;base64,{{ $logoData }}" class="logo-img">
-                @else
                 <div
-                    style="width: 50px; height: 50px; background: #C8102E; border-radius: 8px; color: white; text-align: center; line-height: 50px; font-weight: bold;">
+                    style="width: 50px; height: 50px; background: #C8102E; border-radius: 8px; color: white; text-align: center; line-height: 50px; font-weight: bold; font-size: 20pt;">
                     S</div>
-                @endif
             </div>
             <div class="info-section">
                 <h1 class="company-name">Shine Education Bali</h1>
