@@ -41,4 +41,14 @@ class Absensi extends Model implements HasMedia
     {
         return $this->belongsTo(Employee::class, 'karyawan_id');
     }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attendance_photos')
+            ->useDisk('public')
+            ->singleFile();
+        $this->addMediaCollection('attendance_photos_out')
+            ->useDisk('public')
+            ->singleFile();
+    }
 }

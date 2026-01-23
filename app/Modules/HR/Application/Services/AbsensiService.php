@@ -14,7 +14,7 @@ class AbsensiService
      */
     public function getList(array $params): LengthAwarePaginator
     {
-        $query = Absensi::query()->with('karyawan.user');
+        $query = Absensi::query()->with(['karyawan.user', 'media']);
 
         // Privacy filter: regular users only see their own attendance
         $user = request()->user();

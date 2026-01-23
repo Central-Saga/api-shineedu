@@ -90,6 +90,7 @@ Route::prefix('v2')->group(function () {
         // Route::post('/cuti/{cuti}/approve', ...)->middleware('permission:cuti.approve');
 
         // Absensi
+        Route::get('/absensi/today', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'todayStatus'])->middleware('permission:absensi.create');
         Route::post('/absensi/check-in', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkIn'])->middleware('permission:absensi.create');
         Route::post('/absensi/check-out', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkOut'])->middleware('permission:absensi.create');
         Route::get('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'index'])->middleware('permission:absensi.view');

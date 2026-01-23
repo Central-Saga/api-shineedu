@@ -19,7 +19,10 @@ class StoreCutiRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'keterangan' => 'nullable|string',
-            'tanggal' => 'nullable|date', // Optional override
+            'catatan' => 'nullable|string', // Alias for keterangan
+            'tanggal' => 'nullable|date',
+            'status' => 'nullable|string|in:diajukan,disetujui,ditolak,dibatalkan',
+            'bukti_pendukung' => 'nullable|file|max:5120', // Max 5MB
         ];
     }
 }

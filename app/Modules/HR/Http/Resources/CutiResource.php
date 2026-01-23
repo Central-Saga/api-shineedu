@@ -28,6 +28,7 @@ class CutiResource extends JsonResource
             'approver_name' => $this->approver->name ?? null,
             'potongan_tipe' => $this->potongan_tipe,
             'potongan_nilai' => $this->potongan_nilai,
+            'bukti_pendukung_url' => $this->getFirstMediaUrl('bukti_cuti'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // Include employee details for context if needed in list

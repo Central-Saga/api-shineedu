@@ -64,14 +64,24 @@ class CutiService
     {
         return DB::transaction(function () use ($data) {
             $employee = Employee::findOrFail($data['karyawan_id']);
-            $startDate = Carbon::parse($data['start_date']);
-            $endDate = Carbon::parse($data['end_date']);
+
+            $start = $data['start_date'] ?? $data['tanggal'] ?? null;
+            $end = $data['end_date'] ?? $data['tanggal'] ?? null;
+
+            if (!$start || !$end) {
+                throw ValidationException::withMessages(['start_date' => 'Tanggal pengajuan wajib diisi']);
+            }
+
+            $startDate = Carbon::parse($start);
+            $endDate = Carbon::parse($end);
             $jenis = $data['jenis'];
+
+            $status = $data['status'] ?? 'diajukan';
 
             // 1. Check Freelance - Unlimited
             if ($employee->kategori_karyawan === 'Freelance') {
                 return Cuti::create(array_merge($data, [
-                    'status' => 'diajukan',
+                    'status' => $status,
                     'potongan_tipe' => 'none',
                     'potongan_nilai' => 0
                 ]));
@@ -141,7 +151,7 @@ class CutiService
 
             // 6. Create
             return Cuti::create(array_merge($data, [
-                'status' => 'diajukan',
+                'status' => $status,
                 'potongan_tipe' => $potonganTipe,
                 'potongan_nilai' => $potonganNilai,
             ]));

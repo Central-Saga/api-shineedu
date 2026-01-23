@@ -32,7 +32,16 @@ class CutiController
     public function store(StoreCutiRequest $request): JsonResponse
     {
         try {
-            $cuti = $this->service->createCuti($request->validated());
+            $data = $request->validated();
+            if (empty($data['keterangan']) && !empty($data['catatan'])) {
+                $data['keterangan'] = $data['catatan'];
+            }
+
+            $cuti = $this->service->createCuti($data);
+
+            if ($request->hasFile('bukti_pendukung')) {
+                $cuti->addMediaFromRequest('bukti_pendukung')->toMediaCollection('bukti_cuti');
+            }
 
             return ApiResponse::created(
                 new CutiResource($cuti->load('karyawan.user')),

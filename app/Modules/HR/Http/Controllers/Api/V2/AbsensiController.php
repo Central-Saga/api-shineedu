@@ -13,9 +13,29 @@ use Illuminate\Http\Request;
 
 class AbsensiController
 {
+    private const SHINE_LAT = -8.5207986;
+    private const SHINE_LNG = 115.137969;
+    private const MAX_RADIUS_METERS = 100;
+
     public function __construct(
         protected AbsensiService $service
     ) {}
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2): float
+    {
+        $earthRadius = 6371000; // in meters
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
 
     public function index(Request $request): JsonResponse
     {
@@ -28,19 +48,38 @@ class AbsensiController
         );
     }
 
+    public function todayStatus(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $employee = $user->employee;
+
+        if (!$employee) {
+            return ApiResponse::fail('User is not linked to an employee record', 400);
+        }
+
+        $absensi = Absensi::where('karyawan_id', $employee->id)
+            ->where('tanggal', now()->format('Y-m-d'))
+            ->first();
+
+        return ApiResponse::ok(
+            $absensi ? new AbsensiResource($absensi) : null,
+            'Status absensi berhasil diambil'
+        );
+    }
+
     public function store(StoreAbsensiRequest $request): JsonResponse
     {
         $absensi = $this->service->create($request->validated());
 
         return ApiResponse::created(
-            new AbsensiResource($absensi->load('karyawan.user')),
+            new AbsensiResource($absensi->load(['karyawan.user', 'media'])),
             'Absensi berhasil dicatat'
         );
     }
 
     public function show(Absensi $absensi): JsonResponse
     {
-        $absensi->load('karyawan.user');
+        $absensi->load(['karyawan.user', 'media']);
 
         return ApiResponse::ok(
             new AbsensiResource($absensi),
@@ -53,7 +92,7 @@ class AbsensiController
         $updated = $this->service->update($absensi, $request->validated());
 
         return ApiResponse::ok(
-            new AbsensiResource($updated->load('karyawan.user')),
+            new AbsensiResource($updated->load(['karyawan.user', 'media'])),
             'Data absensi berhasil diperbarui'
         );
     }
@@ -66,6 +105,17 @@ class AbsensiController
             'longitude' => 'required|numeric',
             'qr_data' => 'nullable|string',
         ]);
+
+        $distance = $this->calculateDistance(
+            self::SHINE_LAT,
+            self::SHINE_LNG,
+            $request->latitude,
+            $request->longitude
+        );
+
+        if ($distance > self::MAX_RADIUS_METERS) {
+            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $distance, self::MAX_RADIUS_METERS), 400);
+        }
 
         $user = $request->user();
         $employee = $user->employee; // Assuming relationship exists User -> Employee
@@ -95,11 +145,12 @@ class AbsensiController
         $absensi->save();
 
         if ($request->hasFile('photo')) {
-            $absensi->addMediaFromRequest('photo')->toMediaCollection('attendance_photos');
+            $absensi->addMediaFromRequest('photo')
+                ->toMediaCollection('attendance_photos');
         }
 
         return ApiResponse::created(
-            new AbsensiResource($absensi),
+            new AbsensiResource($absensi->load('media')),
             'Check-in berhasil'
         );
     }
@@ -111,6 +162,17 @@ class AbsensiController
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ]);
+
+        $distance = $this->calculateDistance(
+            self::SHINE_LAT,
+            self::SHINE_LNG,
+            $request->latitude,
+            $request->longitude
+        );
+
+        if ($distance > self::MAX_RADIUS_METERS) {
+            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $distance, self::MAX_RADIUS_METERS), 400);
+        }
 
         $user = $request->user();
         $employee = $user->employee;
@@ -142,11 +204,12 @@ class AbsensiController
         $absensi->save();
 
         if ($request->hasFile('photo')) {
-            $absensi->addMediaFromRequest('photo')->toMediaCollection('attendance_photos_out');
+            $absensi->addMediaFromRequest('photo')
+                ->toMediaCollection('attendance_photos_out');
         }
 
         return ApiResponse::ok(
-            new AbsensiResource($absensi),
+            new AbsensiResource($absensi->load('media')),
             'Check-out berhasil'
         );
     }
