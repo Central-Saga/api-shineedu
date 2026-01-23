@@ -58,18 +58,20 @@ Route::prefix('v2')->group(function () {
         Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('permission:employees.delete');
 
         // Scheduling (Jadwal Kerja & Realisasi)
-        Route::get('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'index'])->middleware('permission:scheduling.view');
-        Route::post('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'store'])->middleware('permission:scheduling.create');
-        Route::get('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'show'])->middleware('permission:scheduling.view');
-        Route::put('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'update'])->middleware('permission:scheduling.update');
-        Route::delete('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'destroy'])->middleware('permission:scheduling.delete');
+        Route::get('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'index'])->middleware('permission:jadwal_kerja.view');
+        Route::get('/jadwal-kerja/export', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'export'])->middleware('permission:jadwal_kerja.view');
+        Route::post('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'store'])->middleware('permission:jadwal_kerja.create');
+        Route::get('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'show'])->middleware('permission:jadwal_kerja.view');
+        Route::put('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'update'])->middleware('permission:jadwal_kerja.update');
+        Route::delete('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'destroy'])->middleware('permission:jadwal_kerja.delete');
 
-        Route::get('/realisasi-jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'index'])->middleware('permission:scheduling.view');
-        Route::post('/realisasi-jadwal-kerja/sync', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'sync'])->middleware('permission:scheduling.create');
-        Route::post('/realisasi-jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'store'])->middleware('permission:scheduling.create');
-        Route::get('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'show'])->middleware('permission:scheduling.view');
-        Route::put('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'update'])->middleware('permission:scheduling.update');
-        Route::delete('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'destroy'])->middleware('permission:scheduling.delete');
+        Route::get('/realisasi-jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'index'])->middleware('permission:realisasi_jadwal_kerja.view');
+        Route::get('/realisasi-jadwal-kerja/export', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'export'])->middleware('permission:realisasi_jadwal_kerja.view');
+        Route::post('/realisasi-jadwal-kerja/sync', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'sync'])->middleware('permission:realisasi_jadwal_kerja.create');
+        Route::post('/realisasi-jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'store'])->middleware('permission:realisasi_jadwal_kerja.create');
+        Route::get('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'show'])->middleware('permission:realisasi_jadwal_kerja.view');
+        Route::put('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'update'])->middleware('permission:realisasi_jadwal_kerja.update');
+        Route::delete('/realisasi-jadwal-kerja/{realisasiJadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\RealisasiJadwalKerjaController::class, 'destroy'])->middleware('permission:realisasi_jadwal_kerja.delete');
 
         // Pengaturan Cuti
         Route::get('/pengaturan-cuti', [\App\Modules\HR\Http\Controllers\Api\V2\PengaturanCutiController::class, 'index'])->middleware('permission:pengaturan_cuti.view');
@@ -81,6 +83,7 @@ Route::prefix('v2')->group(function () {
 
         // Cuti
         Route::get('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'index'])->middleware('permission:cuti.view');
+        Route::get('/cuti/export', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'export'])->middleware('permission:cuti.view');
         Route::post('/cuti', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'store'])->middleware('permission:cuti.create');
         Route::get('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'show'])->middleware('permission:cuti.view');
         Route::put('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'update'])->middleware('permission:cuti.update');
@@ -91,6 +94,7 @@ Route::prefix('v2')->group(function () {
 
         // Absensi
         Route::get('/absensi/today', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'todayStatus'])->middleware('permission:absensi.create');
+        Route::get('/absensi/export', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'export'])->middleware('permission:absensi.view');
         Route::post('/absensi/check-in', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkIn'])->middleware('permission:absensi.create');
         Route::post('/absensi/check-out', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'checkOut'])->middleware('permission:absensi.create');
         Route::get('/absensi', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'index'])->middleware('permission:absensi.view');

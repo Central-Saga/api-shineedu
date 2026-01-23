@@ -35,6 +35,8 @@ class EmployeeSeeder extends Seeder
                     'kode_karyawan' => "{$ddmmyy}{$random}",
                     'kategori_karyawan' => 'tetap',
                     'divisi' => $divisi,
+                    'tipe_gaji' => 'bulanan',
+                    'gaji_pokok' => 5000000,
                     'status' => 'aktif',
                     'nomor_hp' => '08123456789',
                     'alamat' => 'Denpasar, Bali',

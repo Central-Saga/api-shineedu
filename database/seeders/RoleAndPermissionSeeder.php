@@ -48,6 +48,8 @@ class RoleAndPermissionSeeder extends Seeder
             'cuti',           // cuti/izin/sakit
             'absensi',        // kehadiran manual/mesin
             'pengaturan_cuti', // setting kuota cuti
+            'jadwal_kerja',
+            'realisasi_jadwal_kerja',
         ];
 
         // Pola CRUD umum per modul
@@ -96,6 +98,12 @@ class RoleAndPermissionSeeder extends Seeder
             'enrollment.view',
             'catalog.view',
             'users.view', // kalau guru boleh lihat profil murid tertentu, nanti bisa refine policy
+            'cuti.view',
+            'cuti.create',
+            'absensi.view',
+            'jadwal_kerja.view',
+            'realisasi_jadwal_kerja.view',
+            'realisasi_jadwal_kerja.manage',
         ]);
 
         // Student: mostly view

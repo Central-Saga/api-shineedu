@@ -11,6 +11,8 @@ use App\Shared\Http\Responses\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Exports\RealisasiJadwalKerjaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RealisasiJadwalKerjaController
 {
@@ -144,5 +146,31 @@ class RealisasiJadwalKerjaController
         $realisasiJadwalKerja->delete();
 
         return ApiResponse::ok(null, 'Realisasi jadwal berhasil dihapus');
+    }
+
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'realisasi_jadwal_kerja_' . date('Ymd_His');
+
+        if ($format === 'pdf') {
+            $exporter = new RealisasiJadwalKerjaExport($request);
+            $items = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.realisasi_jadwal_kerja', compact('items'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            'txt' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new RealisasiJadwalKerjaExport($request), $filename . '.' . $format, $ext);
     }
 }
