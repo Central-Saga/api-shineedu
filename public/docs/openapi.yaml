@@ -161,7 +161,7 @@ paths:
                 sort_by:
                   type: string
                   description: ''
-                  example: created_at
+                  example: name
                   enum:
                     - name
                     - created_at
@@ -205,6 +205,51 @@ paths:
               required:
                 - name
                 - permissions
+      security: []
+  /api/v2/roles/export:
+    get:
+      summary: 'Export roles.'
+      operationId: exportRoles
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/roles/import:
+    post:
+      summary: 'Import roles.'
+      operationId: importRoles
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file.'
+              required:
+                - file
       security: []
   '/api/v2/roles/{role_id}':
     get:
@@ -400,7 +445,7 @@ paths:
                 sort_by:
                   type: string
                   description: ''
-                  example: created_at
+                  example: name
                   enum:
                     - name
                     - email
@@ -461,6 +506,56 @@ paths:
                 - password
                 - status
                 - role
+      security: []
+  /api/v2/users/export:
+    get:
+      summary: 'Export users.'
+      operationId: exportUsers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/users/import:
+    post:
+      summary: 'Import users.'
+      operationId: importUsers
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file.'
+                update:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: true
+              required:
+                - file
       security: []
   '/api/v2/users/{user_id}':
     get:
@@ -551,7 +646,7 @@ paths:
                 status:
                   type: string
                   description: ''
-                  example: 'Non Aktif'
+                  example: Aktif
                   enum:
                     - Aktif
                     - 'Non Aktif'
@@ -652,7 +747,7 @@ paths:
                 status:
                   type: string
                   description: ''
-                  example: nonaktif
+                  example: aktif
                   enum:
                     - aktif
                     - nonaktif
@@ -662,23 +757,31 @@ paths:
                   description: validation.max.
                   example: z
                   nullable: true
-                subtipe_kontrak:
+                divisi:
                   type: string
                   description: validation.max.
                   example: m
                   nullable: true
-                tipe_gaji:
+                subtipe_kontrak:
                   type: string
                   description: validation.max.
                   example: i
                   nullable: true
+                tipe_gaji:
+                  type: string
+                  description: validation.max.
+                  example: 'y'
+                  nullable: true
                 sort_by:
                   type: string
                   description: ''
-                  example: status
+                  example: updated_at
                   enum:
                     - kode_karyawan
                     - status
+                    - kategori_karyawan
+                    - divisi
+                    - tipe_gaji
                     - gaji_pokok
                     - created_at
                     - updated_at
@@ -757,7 +860,16 @@ paths:
                 tanggal_lahir:
                   type: string
                   description: validation.date.
-                  example: '2026-01-20T03:47:41'
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: Operasional
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
                   nullable: true
                 status:
                   type: string
@@ -771,6 +883,51 @@ paths:
                 - user_id
                 - kategori_karyawan
                 - status
+      security: []
+  /api/v2/employees/export:
+    get:
+      summary: 'Export employees.'
+      operationId: exportEmployees
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/employees/import:
+    post:
+      summary: 'Import employees.'
+      operationId: importEmployees
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file.'
+              required:
+                - file
       security: []
   '/api/v2/employees/{employee_id}':
     get:
@@ -862,7 +1019,16 @@ paths:
                 tanggal_lahir:
                   type: string
                   description: validation.date.
-                  example: '2026-01-20T03:47:41'
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: Coding
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
                   nullable: true
                 status:
                   type: string
@@ -941,12 +1107,21 @@ paths:
                 tanggal_lahir:
                   type: string
                   description: validation.date.
-                  example: '2026-01-20T03:47:41'
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: Non-Coding
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
                   nullable: true
                 status:
                   type: string
                   description: ''
-                  example: aktif
+                  example: nonaktif
                   enum:
                     - aktif
                     - nonaktif
@@ -966,6 +1141,2444 @@ paths:
         in: path
         name: employee_id
         description: 'The ID of the employee.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/jadwal-kerja:
+    get:
+      summary: ''
+      operationId: getApiV2JadwalKerja
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2JadwalKerja
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori:
+                  type: string
+                  description: validation.max.
+                  example: b
+                mata_pelajaran:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                hari:
+                  type: string
+                  description: ''
+                  example: Senin
+                  enum:
+                    - Senin
+                    - Selasa
+                    - Rabu
+                    - Kamis
+                    - Jumat
+                    - Sabtu
+                    - Minggu
+                nomor_sesi:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                jam_mulai:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>.'
+                  example: '23:10'
+                jam_selesai:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>. validation.after.'
+                  example: '2052-02-17'
+                tarif:
+                  type: number
+                  description: validation.min.
+                  example: 39
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                ruangan_kelas:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                guru_pengajar_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: architecto
+              required:
+                - kategori
+                - hari
+                - jam_mulai
+                - jam_selesai
+                - tarif
+                - status
+                - guru_pengajar_id
+      security: []
+  /api/v2/jadwal-kerja/export:
+    get:
+      summary: ''
+      operationId: getApiV2JadwalKerjaExport
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/api/v2/jadwal-kerja/{jadwalKerja_id}':
+    get:
+      summary: ''
+      operationId: getApiV2JadwalKerjaJadwalKerja_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2JadwalKerjaJadwalKerja_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori:
+                  type: string
+                  description: validation.max.
+                  example: b
+                mata_pelajaran:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                hari:
+                  type: string
+                  description: ''
+                  example: Rabu
+                  enum:
+                    - Senin
+                    - Selasa
+                    - Rabu
+                    - Kamis
+                    - Jumat
+                    - Sabtu
+                    - Minggu
+                nomor_sesi:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                jam_mulai:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>.'
+                  example: '23:10'
+                jam_selesai:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>. validation.after.'
+                  example: '2052-02-17'
+                tarif:
+                  type: number
+                  description: validation.min.
+                  example: 39
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                ruangan_kelas:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                guru_pengajar_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: null
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2JadwalKerjaJadwalKerja_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: jadwalKerja_id
+        description: 'The ID of the jadwalKerja.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/realisasi-jadwal-kerja:
+    get:
+      summary: ''
+      operationId: getApiV2RealisasiJadwalKerja
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2RealisasiJadwalKerja
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                jadwal_kerja_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the jadwal_kerja table.'
+                  example: architecto
+                status:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                disetujui_oleh:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                sumber:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                ruangan_kelas:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                guru_pengajar_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: null
+                  nullable: true
+                guru_pengganti_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: null
+                  nullable: true
+              required:
+                - tanggal
+                - jadwal_kerja_id
+                - status
+      security: []
+  /api/v2/realisasi-jadwal-kerja/export:
+    get:
+      summary: ''
+      operationId: getApiV2RealisasiJadwalKerjaExport
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/realisasi-jadwal-kerja/sync:
+    post:
+      summary: ''
+      operationId: postApiV2RealisasiJadwalKerjaSync
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  '/api/v2/realisasi-jadwal-kerja/{realisasiJadwalKerja_id}':
+    get:
+      summary: ''
+      operationId: getApiV2RealisasiJadwalKerjaRealisasiJadwalKerja_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2RealisasiJadwalKerjaRealisasiJadwalKerja_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                jadwal_kerja_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the jadwal_kerja table.'
+                  example: null
+                status:
+                  type: string
+                  description: validation.max.
+                  example: b
+                disetujui_oleh:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                sumber:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                ruangan_kelas:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                guru_pengajar_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: null
+                  nullable: true
+                guru_pengganti_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: null
+                  nullable: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2RealisasiJadwalKerjaRealisasiJadwalKerja_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: realisasiJadwalKerja_id
+        description: 'The ID of the realisasiJadwalKerja.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/pengaturan-cuti:
+    get:
+      summary: ''
+      operationId: getApiV2PengaturanCuti
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2PengaturanCuti
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori_karyawan:
+                  type: string
+                  description: ''
+                  example: architecto
+                subtipe_kontrak:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: coding
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
+                    - all
+                    - coding
+                    - non_coding
+                jenis:
+                  type: string
+                  description: ''
+                  example: izin
+                  enum:
+                    - cuti
+                    - izin
+                    - sakit
+                periode:
+                  type: string
+                  description: ''
+                  example: bulanan
+                  enum:
+                    - bulanan
+                    - tahunan
+                maksimal_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                  nullable: true
+                minimal_hari_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 84
+                potongan_tipe:
+                  type: string
+                  description: ''
+                  example: per_hari
+                  enum:
+                    - per_hari
+                    - flat
+                    - none
+                potongan_nilai:
+                  type: number
+                  description: validation.min.
+                  example: 12
+                  nullable: true
+                aktif:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - kategori_karyawan
+                - divisi
+                - jenis
+                - periode
+                - minimal_hari_pengajuan
+                - potongan_tipe
+      security: []
+  '/api/v2/pengaturan-cuti/{rule_id}':
+    get:
+      summary: ''
+      operationId: getApiV2PengaturanCutiRule_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2PengaturanCutiRule_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori_karyawan:
+                  type: string
+                  description: ''
+                  example: architecto
+                subtipe_kontrak:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: all
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
+                    - all
+                    - coding
+                    - non_coding
+                jenis:
+                  type: string
+                  description: ''
+                  example: cuti
+                  enum:
+                    - cuti
+                    - izin
+                    - sakit
+                periode:
+                  type: string
+                  description: ''
+                  example: tahunan
+                  enum:
+                    - bulanan
+                    - tahunan
+                maksimal_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                  nullable: true
+                minimal_hari_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 84
+                potongan_tipe:
+                  type: string
+                  description: ''
+                  example: none
+                  enum:
+                    - per_hari
+                    - flat
+                    - none
+                potongan_nilai:
+                  type: number
+                  description: validation.min.
+                  example: 12
+                  nullable: true
+                aktif:
+                  type: boolean
+                  description: ''
+                  example: true
+      security: []
+    patch:
+      summary: ''
+      operationId: patchApiV2PengaturanCutiRule_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori_karyawan:
+                  type: string
+                  description: ''
+                  example: architecto
+                subtipe_kontrak:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                divisi:
+                  type: string
+                  description: ''
+                  example: Non-Coding
+                  enum:
+                    - Coding
+                    - Non-Coding
+                    - Operasional
+                    - all
+                    - coding
+                    - non_coding
+                jenis:
+                  type: string
+                  description: ''
+                  example: izin
+                  enum:
+                    - cuti
+                    - izin
+                    - sakit
+                periode:
+                  type: string
+                  description: ''
+                  example: tahunan
+                  enum:
+                    - bulanan
+                    - tahunan
+                maksimal_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                  nullable: true
+                minimal_hari_pengajuan:
+                  type: integer
+                  description: validation.min.
+                  example: 84
+                potongan_tipe:
+                  type: string
+                  description: ''
+                  example: flat
+                  enum:
+                    - per_hari
+                    - flat
+                    - none
+                potongan_nilai:
+                  type: number
+                  description: validation.min.
+                  example: 12
+                  nullable: true
+                aktif:
+                  type: boolean
+                  description: ''
+                  example: false
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2PengaturanCutiRule_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: rule_id
+        description: 'The ID of the rule.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/cuti:
+    get:
+      summary: ''
+      operationId: getApiV2Cuti
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2Cuti
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                karyawan_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: architecto
+                jenis:
+                  type: string
+                  description: ''
+                  example: sakit
+                  enum:
+                    - cuti
+                    - izin
+                    - sakit
+                start_date:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                end_date:
+                  type: string
+                  description: 'validation.date validation.after_or_equal.'
+                  example: '2052-02-17'
+                keterangan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                bukti_pendukung:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. validation.max.'
+                  nullable: true
+              required:
+                - karyawan_id
+                - jenis
+                - start_date
+                - end_date
+      security: []
+  /api/v2/cuti/export:
+    get:
+      summary: ''
+      operationId: getApiV2CutiExport
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/api/v2/cuti/{cuti_id}':
+    get:
+      summary: ''
+      operationId: getApiV2CutiCuti_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2CutiCuti_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: ditolak
+                  enum:
+                    - diajukan
+                    - disetujui
+                    - ditolak
+                    - dibatalkan
+                    - pembatalan_diajukan
+                start_date:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                end_date:
+                  type: string
+                  description: 'validation.date validation.after_or_equal.'
+                  example: '2052-02-17'
+                keterangan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                disetujui_oleh:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                potongan_tipe:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                potongan_nilai:
+                  type: number
+                  description: ''
+                  example: 4326.41688
+                  nullable: true
+                bukti_pendukung:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. validation.max.'
+                  nullable: true
+      security: []
+    patch:
+      summary: ''
+      operationId: patchApiV2CutiCuti_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: pembatalan_diajukan
+                  enum:
+                    - diajukan
+                    - disetujui
+                    - ditolak
+                    - dibatalkan
+                    - pembatalan_diajukan
+                start_date:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                end_date:
+                  type: string
+                  description: 'validation.date validation.after_or_equal.'
+                  example: '2052-02-17'
+                keterangan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                disetujui_oleh:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                potongan_tipe:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                potongan_nilai:
+                  type: number
+                  description: ''
+                  example: 4326.41688
+                  nullable: true
+                bukti_pendukung:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. validation.max.'
+                  nullable: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2CutiCuti_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: cuti_id
+        description: 'The ID of the cuti.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v2/cuti/{cuti_id}/approve':
+    post:
+      summary: ''
+      operationId: postApiV2CutiCuti_idApprove
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: cuti_id
+        description: 'The ID of the cuti.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v2/cuti/{cuti_id}/reject':
+    post:
+      summary: ''
+      operationId: postApiV2CutiCuti_idReject
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: cuti_id
+        description: 'The ID of the cuti.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v2/cuti/{cuti_id}/cancel':
+    post:
+      summary: ''
+      operationId: postApiV2CutiCuti_idCancel
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: cuti_id
+        description: 'The ID of the cuti.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/absensi/today:
+    get:
+      summary: ''
+      operationId: getApiV2AbsensiToday
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/absensi/export:
+    get:
+      summary: ''
+      operationId: getApiV2AbsensiExport
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v2/absensi/check-in:
+    post:
+      summary: ''
+      operationId: postApiV2AbsensiCheckIn
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 'validation.image validation.max.'
+                latitude:
+                  type: number
+                  description: 10MB.
+                  example: 4326.41688
+                longitude:
+                  type: number
+                  description: ''
+                  example: 4326.41688
+                qr_data:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+              required:
+                - photo
+                - latitude
+                - longitude
+      security: []
+  /api/v2/absensi/check-out:
+    post:
+      summary: ''
+      operationId: postApiV2AbsensiCheckOut
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 'validation.image validation.max.'
+                latitude:
+                  type: number
+                  description: ''
+                  example: 4326.41688
+                longitude:
+                  type: number
+                  description: ''
+                  example: 4326.41688
+              required:
+                - photo
+                - latitude
+                - longitude
+      security: []
+  /api/v2/absensi:
+    get:
+      summary: ''
+      operationId: getApiV2Absensi
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2Absensi
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                karyawan_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the karyawan table.'
+                  example: architecto
+                status_kehadiran:
+                  type: string
+                  description: ''
+                  example: alpa
+                  enum:
+                    - hadir
+                    - alpa
+                    - izin
+                    - sakit
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                jam_masuk:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>.'
+                  example: '23:10'
+                  nullable: true
+                jam_pulang:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>. validation.after.'
+                  example: '2052-02-17'
+                  nullable: true
+                sumber_absen:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+              required:
+                - karyawan_id
+                - status_kehadiran
+                - tanggal
+      security: []
+  '/api/v2/absensi/{absensi_id}':
+    get:
+      summary: ''
+      operationId: getApiV2AbsensiAbsensi_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2AbsensiAbsensi_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_kehadiran:
+                  type: string
+                  description: ''
+                  example: sakit
+                  enum:
+                    - hadir
+                    - alpa
+                    - izin
+                    - sakit
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                jam_masuk:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>.'
+                  example: '23:10'
+                  nullable: true
+                jam_pulang:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>. validation.after.'
+                  example: '2052-02-17'
+                  nullable: true
+                sumber_absen:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+      security: []
+    patch:
+      summary: ''
+      operationId: patchApiV2AbsensiAbsensi_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_kehadiran:
+                  type: string
+                  description: ''
+                  example: sakit
+                  enum:
+                    - hadir
+                    - alpa
+                    - izin
+                    - sakit
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                jam_masuk:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>.'
+                  example: '23:10'
+                  nullable: true
+                jam_pulang:
+                  type: string
+                  description: 'Must be a valid date in the format <code>H:i</code>. validation.after.'
+                  example: '2052-02-17'
+                  nullable: true
+                sumber_absen:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                catatan:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2AbsensiAbsensi_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: absensi_id
+        description: 'The ID of the absensi.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v2/rekap-bulanan:
+    get:
+      summary: 'Get Monthly Recap List'
+      operationId: getMonthlyRecapList
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bulan:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 4
+                tahun:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+              required:
+                - bulan
+                - tahun
+      security: []
+  '/api/v2/rekap-bulanan/{id}':
+    get:
+      summary: ''
+      operationId: getApiV2RekapBulananId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bulan:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 4
+                tahun:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+              required:
+                - bulan
+                - tahun
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the rekap bulanan.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/v2/payrolls:
+    get:
+      summary: 'List Generated Payrolls'
+      operationId: listGeneratedPayrolls
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bulan:
+                  type: integer
+                  description: ''
+                  example: 16
+                tahun:
+                  type: integer
+                  description: ''
+                  example: 16
+              required:
+                - bulan
+                - tahun
+      security: []
+  /api/v2/payrolls/generate:
+    post:
+      summary: 'Trigger Generation / Synchronization'
+      operationId: triggerGenerationSynchronization
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bulan:
+                  type: integer
+                  description: ''
+                  example: 16
+                tahun:
+                  type: integer
+                  description: ''
+                  example: 16
+              required:
+                - bulan
+                - tahun
+      security: []
+  '/api/v2/payrolls/{id}/export':
+    get:
+      summary: 'Export Payroll Slip (PDF)'
+      operationId: exportPayrollSlipPDF
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the payroll.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v2/payrolls/{id}':
+    get:
+      summary: 'Show Detail'
+      operationId: showDetail
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the payroll.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v2/payrolls/{id}/status':
+    put:
+      summary: 'Update Status (e.g. Mark as Paid)'
+      operationId: updateStatusegMarkAsPaid
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: draft
+                  enum:
+                    - draft
+                    - approved
+                    - paid
+                    - transferred
+              required:
+                - status
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the payroll.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/v2/catalog/jenjang:
+    get:
+      summary: ''
+      operationId: getApiV2CatalogJenjang
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2CatalogJenjang
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - kode
+                - nama
+                - status
+      security: []
+  '/api/v2/catalog/jenjang/{jenjang_id}':
+    get:
+      summary: ''
+      operationId: getApiV2CatalogJenjangJenjang_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2CatalogJenjangJenjang_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2CatalogJenjangJenjang_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - kode
+                - nama
+                - status
+      security: []
+    parameters:
+      -
+        in: path
+        name: jenjang_id
+        description: 'The ID of the jenjang.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/v2/catalog/jenjang/{id}':
+    put:
+      summary: ''
+      operationId: putApiV2CatalogJenjangId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - kode
+                - nama
+                - status
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the jenjang.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v2/catalog/program:
+    get:
+      summary: ''
+      operationId: getApiV2CatalogProgram
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2CatalogProgram
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                deskripsi:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                jenjang_ids:
+                  type: array
+                  description: 'The <code>id</code> of an existing record in the jenjang table.'
+                  example: null
+                  items:
+                    type: string
+              required:
+                - kode
+                - nama
+                - status
+      security: []
+  '/api/v2/catalog/program/{program_id}':
+    get:
+      summary: ''
+      operationId: getApiV2CatalogProgramProgram_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2CatalogProgramProgram_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                deskripsi:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+                jenjang_ids:
+                  type: array
+                  description: 'The <code>id</code> of an existing record in the jenjang table.'
+                  example: null
+                  items:
+                    type: string
+              required:
+                - kode
+                - nama
+                - status
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2CatalogProgramProgram_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: program_id
+        description: 'The ID of the program.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v2/catalog/paket:
+    get:
+      summary: ''
+      operationId: getApiV2CatalogPaket
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2CatalogPaket
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                tipe:
+                  type: string
+                  description: ''
+                  example: architecto
+                pertemuan_per_bulan:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                  nullable: true
+                durasi_menit:
+                  type: integer
+                  description: validation.min.
+                  example: 67
+                boleh_mix_mapel:
+                  type: boolean
+                  description: ''
+                  example: true
+                max_mapel:
+                  type: integer
+                  description: validation.min.
+                  example: 66
+                  nullable: true
+                bisa_tambah_pertemuan:
+                  type: boolean
+                  description: ''
+                  example: true
+                bisa_ganti_hari:
+                  type: boolean
+                  description: ''
+                  example: true
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - kode
+                - nama
+                - tipe
+                - durasi_menit
+                - status
+      security: []
+  '/api/v2/catalog/paket/{paket_id}':
+    get:
+      summary: ''
+      operationId: getApiV2CatalogPaketPaket_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2CatalogPaketPaket_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kode:
+                  type: string
+                  description: validation.max.
+                  example: b
+                nama:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                tipe:
+                  type: string
+                  description: ''
+                  example: architecto
+                pertemuan_per_bulan:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                  nullable: true
+                durasi_menit:
+                  type: integer
+                  description: validation.min.
+                  example: 67
+                boleh_mix_mapel:
+                  type: boolean
+                  description: ''
+                  example: false
+                max_mapel:
+                  type: integer
+                  description: validation.min.
+                  example: 66
+                  nullable: true
+                bisa_tambah_pertemuan:
+                  type: boolean
+                  description: ''
+                  example: false
+                bisa_ganti_hari:
+                  type: boolean
+                  description: ''
+                  example: false
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - kode
+                - nama
+                - tipe
+                - durasi_menit
+                - status
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2CatalogPaketPaket_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: paket_id
+        description: 'The ID of the paket.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v2/catalog/harga/lookup:
+    get:
+      summary: ''
+      operationId: getApiV2CatalogHargaLookup
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                program_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                jenjang_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                paket_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                jumlah_siswa:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                tanggal:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+              required:
+                - program_id
+                - jenjang_id
+                - paket_id
+                - jumlah_siswa
+      security: []
+  /api/v2/catalog/harga:
+    get:
+      summary: ''
+      operationId: getApiV2CatalogHarga
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV2CatalogHarga
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                program_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the program table.'
+                  example: architecto
+                jenjang_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the jenjang table.'
+                  example: architecto
+                paket_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the paket table.'
+                  example: architecto
+                min_siswa:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                max_siswa:
+                  type: integer
+                  description: ''
+                  example: 16
+                harga:
+                  type: number
+                  description: validation.min.
+                  example: 39
+                effective_from:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                effective_to:
+                  type: string
+                  description: 'validation.date validation.after_or_equal.'
+                  example: '2052-02-17'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: 'Non Aktif'
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - program_id
+                - jenjang_id
+                - paket_id
+                - min_siswa
+                - max_siswa
+                - harga
+                - status
+      security: []
+  '/api/v2/catalog/harga/{harga_id}':
+    get:
+      summary: ''
+      operationId: getApiV2CatalogHargaHarga_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV2CatalogHargaHarga_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                program_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the program table.'
+                  example: architecto
+                jenjang_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the jenjang table.'
+                  example: architecto
+                paket_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the paket table.'
+                  example: architecto
+                min_siswa:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                max_siswa:
+                  type: integer
+                  description: ''
+                  example: 16
+                harga:
+                  type: number
+                  description: validation.min.
+                  example: 39
+                effective_from:
+                  type: string
+                  description: validation.date.
+                  example: '2026-01-24T23:10:03'
+                  nullable: true
+                effective_to:
+                  type: string
+                  description: 'validation.date validation.after_or_equal.'
+                  example: '2052-02-17'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: Aktif
+                  enum:
+                    - Aktif
+                    - 'Non Aktif'
+              required:
+                - program_id
+                - jenjang_id
+                - paket_id
+                - min_siswa
+                - max_siswa
+                - harga
+                - status
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV2CatalogHargaHarga_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: harga_id
+        description: 'The ID of the harga.'
         example: 16
         required: true
         schema:
