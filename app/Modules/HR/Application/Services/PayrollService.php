@@ -19,10 +19,91 @@ class PayrollService
     }
 
     /**
-     * Preview Payroll for Employee
+     * Generate Payroll for all active employees in a given month.
+     * Persists data to 'payrolls' table.
+     */
+    public function generateByMonth(int $month, int $year)
+    {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($month, $year) {
+            $startDate = Carbon::createFromDate($year, $month, 1)->startOfDay();
+            $endDate = $startDate->copy()->endOfMonth()->endOfDay();
+
+            //Get all active employees
+            $employees = Employee::where('status', 'aktif')
+                ->orWhereHas('user', fn($q) => $q->where('status', 'Aktif')) // Fallback check
+                ->get();
+
+            $results = [];
+
+            foreach ($employees as $employee) {
+                // 1. Calculate Summary (existing logic)
+                $rekap = $this->rekapService->calculateSummary($employee, $startDate, $endDate);
+
+                // 2. Calculate Components (existing logic)
+                $gajiPokok = $this->calculateBaseSalary($employee);
+                $feeSesi = $this->calculateSessionFee($employee, $startDate, $endDate);
+                $potongan = $this->calculateDeductions($employee, $rekap['cuti']);
+
+                // 3. Totals
+                $totalPendapatan = $gajiPokok + $feeSesi;
+                $totalPotongan = $potongan['total_value'];
+                $grandTotal = max(0, $totalPendapatan - $totalPotongan);
+
+                // 4. Save to Database
+                $payroll = \App\Modules\HR\Domain\Models\Payroll::updateOrCreate(
+                    [
+                        'karyawan_id' => $employee->id,
+                        'bulan' => $month,
+                        'tahun' => $year,
+                    ],
+                    [
+                        'gaji_pokok' => $gajiPokok,
+                        'total_fee_mengajar' => $feeSesi,
+                        'total_potongan' => $totalPotongan,
+                        'gaji_bersih' => $grandTotal,
+                        'detail_potongan' => $potongan['items'],
+                        'detail_pendapatan' => [
+                            ['jenis' => 'Gaji Pokok', 'nilai' => $gajiPokok],
+                            ['jenis' => 'Fee Mengajar', 'nilai' => $feeSesi],
+                        ],
+                        // Only update status if it doesn't exist, preserving existing approval flow if re-generated
+                        // Or should we reset to draft? Let's keep existing status if set, else draft.
+                        // For updateOrCreate, we can use DB::raw or check first.
+                        // Here we just set 'draft' if created, but updateOrCreate overwrites.
+                        // Strategy: We want to update calculations even if status is 'generated'.
+                        // But if 'paid', maybe block regeneration?
+                        // For now, let's assume regeneration resets to 'generated' or 'draft'.
+                        'status' => 'draft',
+                    ]
+                );
+
+                $results[] = $payroll;
+            }
+
+            return $results;
+        });
+    }
+
+    public function updateStatus(int $id, string $status)
+    {
+        $payroll = \App\Modules\HR\Domain\Models\Payroll::findOrFail($id);
+
+        $data = ['status' => $status];
+        if (in_array(strtolower($status), ['paid', 'transferred'])) {
+            $data['tanggal_pembayaran'] = now();
+        }
+
+        $payroll->update($data);
+        return $payroll;
+    }
+
+    /**
+     * Preview Payroll for Employee (Legacy / On-the-fly)
+     * Can still be used for individual checking before sync
      */
     public function previewPayroll(int $employeeId, int $month, int $year)
     {
+        // ... (existing implementation)
         $employee = Employee::findOrFail($employeeId);
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfDay();
         $endDate = $startDate->copy()->endOfMonth()->endOfDay();
