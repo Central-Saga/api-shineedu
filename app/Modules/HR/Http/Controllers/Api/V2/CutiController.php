@@ -41,10 +41,6 @@ class CutiController
 
             $cuti = $this->service->createCuti($data);
 
-            if ($request->hasFile('bukti_pendukung')) {
-                $cuti->addMediaFromRequest('bukti_pendukung')->toMediaCollection('bukti_cuti');
-            }
-
             return ApiResponse::created(
                 new CutiResource($cuti->load('karyawan.user')),
                 'Pengajuan cuti berhasil dibuat'
