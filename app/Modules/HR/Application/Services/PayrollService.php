@@ -151,6 +151,11 @@ class PayrollService
 
     public function calculateSessionFee(Employee $employee, Carbon $startDate, Carbon $endDate)
     {
+        // STRICT: Only Freelance gets session fee
+        if (strtolower($employee->kategori_karyawan) !== 'freelance') {
+            return 0;
+        }
+
         // Get realized sessions where this employee gets the money
         // Conditions:
         // 1. Status 'disetujui'
@@ -189,19 +194,6 @@ class PayrollService
 
     public function calculateDeductions(Employee $employee, array $cutiSummary)
     {
-        // Filter rules by Employee Attributes
-        // Note: Rules might need "kategori_mapel" but Employee doesn't have it directly in schema shown?
-        // Assumption: Ignore kategori_mapel or assume it's N/A for generic deduction
-        // or check if Employee has subject? For now match Category + Contract.
-
-        $rules = PengaturanCutiRules::where('aktif', true)
-            ->where('kategori_karyawan', $employee->kategori_karyawan)
-            ->where(function ($q) use ($employee) {
-                $q->where('subtipe_kontrak', $employee->subtipe_kontrak)
-                    ->orWhereNull('subtipe_kontrak');
-            })
-            ->get();
-
         $deductions = [];
         $totalDeduction = 0;
 
@@ -218,11 +210,20 @@ class PayrollService
 
             // Find applicable rule using service
             $subtipe = $employee->kategori_karyawan === 'Kontrak' ? $employee->subtipe_kontrak : null;
-            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $ruleJenis);
+
+            // Fix: Pass Divisi to findRule
+            $rule = $this->ruleService->findRule(
+                $employee->kategori_karyawan,
+                $subtipe,
+                $ruleJenis,
+                $employee->divisi
+            );
 
             if ($rule && $rule->potongan_nilai > 0) {
                 // Calculation Type
                 $amount = 0;
+                $unitValue = 0;
+
                 if ($rule->potongan_tipe === 'per_hari') {
                     // Formula: (Gaji Pokok / 25) * Koefisien * Jumlah Hari
                     $dailyRate = $employee->gaji_pokok / 25;
