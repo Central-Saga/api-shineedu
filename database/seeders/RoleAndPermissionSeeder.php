@@ -97,6 +97,10 @@ class RoleAndPermissionSeeder extends Seeder
             'enrollment.view',
             'catalog.view',
             'users.view', // kalau guru boleh lihat profil murid tertentu, nanti bisa refine policy
+            'cuti.view',
+            'cuti.create',
+            'cuti.update',
+            'cuti.delete',
         ]);
 
         // Student: mostly view

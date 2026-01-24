@@ -91,6 +91,7 @@ Route::prefix('v2')->group(function () {
         Route::delete('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'destroy'])->middleware('permission:cuti.delete');
         Route::post('/cuti/{cuti}/approve', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'approve'])->middleware('permission:cuti.manage');
         Route::post('/cuti/{cuti}/reject', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'reject'])->middleware('permission:cuti.manage');
+        Route::post('/cuti/{cuti}/cancel', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'cancel']);
 
         // Absensi
         Route::get('/absensi/today', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'todayStatus'])->middleware('permission:absensi.create');

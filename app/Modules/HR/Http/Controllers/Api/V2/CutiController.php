@@ -122,4 +122,27 @@ class CutiController
             'Pengajuan cuti ditolak'
         );
     }
+
+    public function cancel(Cuti $cuti): JsonResponse
+    {
+        $user = auth()->user();
+        $isOwner = $cuti->karyawan->user_id === $user->id;
+        $canManage = $user->can('cuti.manage');
+
+        if (! $canManage && ! $isOwner) {
+            return ApiResponse::forbidden('Anda tidak memiliki akses untuk membatalkan pengajuan ini');
+        }
+
+        // Owner can cancel 'diajukan' or 'disetujui'
+        if ($isOwner && ! $canManage && ! in_array($cuti->status, ['diajukan', 'disetujui'])) {
+            return ApiResponse::forbidden('Hanya pengajuan berstatus diajukan atau disetujui yang dapat dibatalkan');
+        }
+
+        $updated = $this->service->cancel($cuti, $user->id);
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti berhasil dibatalkan'
+        );
+    }
 }

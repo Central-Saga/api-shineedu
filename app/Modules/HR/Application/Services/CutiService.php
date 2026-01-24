@@ -207,4 +207,15 @@ class CutiService
 
         return $cuti;
     }
+
+    public function cancel(Cuti $cuti, int $userId): Cuti
+    {
+        // Reset approval info if it was approved
+        $cuti->update([
+            'status' => 'dibatalkan',
+            'disetujui_oleh' => null,
+        ]);
+
+        return $cuti;
+    }
 }
