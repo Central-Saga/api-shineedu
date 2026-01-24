@@ -187,4 +187,24 @@ class CutiService
     {
         $cuti->delete();
     }
+
+    public function approve(Cuti $cuti, int $userId): Cuti
+    {
+        $cuti->update([
+            'status' => 'disetujui',
+            'disetujui_oleh' => $userId,
+        ]);
+
+        return $cuti;
+    }
+
+    public function reject(Cuti $cuti, int $userId): Cuti
+    {
+        $cuti->update([
+            'status' => 'ditolak',
+            'disetujui_oleh' => $userId,
+        ]);
+
+        return $cuti;
+    }
 }
