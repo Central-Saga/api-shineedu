@@ -125,32 +125,61 @@ class CutiService
                 $month = $startDate->month;
                 $year = $startDate->year;
 
-                $count = Cuti::where('karyawan_id', $employee->id)
+                $existingDays = Cuti::where('karyawan_id', $employee->id)
                     ->where('jenis', $jenis)
                     ->whereYear('start_date', $year)
                     ->whereMonth('start_date', $month)
                     ->whereNotIn('status', ['ditolak', 'dibatalkan'])
-                    ->count();
+                    ->get()
+                    ->sum(fn($c) => Carbon::parse($c->start_date)->startOfDay()->diffInDays(Carbon::parse($c->end_date)->startOfDay()) + 1);
 
-                if ($count >= $maksimalPengajuan) {
+                $newDays = $startDate->startOfDay()->diffInDays($endDate->startOfDay()) + 1;
+
+                if (($existingDays + $newDays) > $maksimal_pengajuan_value = (int)$maksimalPengajuan) {
+                    $remaining = $maksimal_pengajuan_value - $existingDays;
+                    $remaining = max(0, $remaining);
                     throw ValidationException::withMessages([
-                        'jenis' => "Kuota pengajuan {$jenis} bulan ini sudah habis (Maks: {$maksimalPengajuan})."
+                        'jenis' => "Kuota {$jenis} bulan ini tidak mencukupi. Tersisa: {$remaining} hari. Pengajuan ini: {$newDays} hari."
                     ]);
                 }
             }
 
             // 6. Create
-            return Cuti::create(array_merge($data, [
+            $bukti = $data['bukti_pendukung'] ?? null;
+            $dataToSave = collect($data)->except(['bukti_pendukung'])->toArray();
+            if (isset($data['catatan']) && !isset($data['keterangan'])) {
+                $dataToSave['keterangan'] = $data['catatan'];
+            }
+
+            $cuti = Cuti::create(array_merge($dataToSave, [
                 'status' => 'diajukan',
                 'potongan_tipe' => $potonganTipe,
                 'potongan_nilai' => $potonganNilai,
             ]));
+
+            if ($bukti instanceof \Illuminate\Http\UploadedFile) {
+                $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
+            }
+
+            return $cuti;
         });
     }
 
     public function update(Cuti $cuti, array $data): Cuti
     {
-        $cuti->update($data);
+        $bukti = $data['bukti_pendukung'] ?? null;
+        $dataToUpdate = collect($data)->except(['bukti_pendukung'])->toArray();
+        if (isset($data['catatan']) && !isset($data['keterangan'])) {
+            $dataToUpdate['keterangan'] = $data['catatan'];
+        }
+
+        $cuti->update($dataToUpdate);
+
+        if ($bukti instanceof \Illuminate\Http\UploadedFile) {
+            $cuti->clearMediaCollection('bukti_cuti');
+            $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
+        }
+
         return $cuti;
     }
 

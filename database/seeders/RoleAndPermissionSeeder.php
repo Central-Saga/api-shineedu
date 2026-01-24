@@ -48,6 +48,8 @@ class RoleAndPermissionSeeder extends Seeder
             'cuti',           // cuti/izin/sakit
             'absensi',        // kehadiran manual/mesin
             'pengaturan_cuti', // setting kuota cuti
+            'rekap_bulanan',
+            'gaji',
         ];
 
         // Pola CRUD umum per modul

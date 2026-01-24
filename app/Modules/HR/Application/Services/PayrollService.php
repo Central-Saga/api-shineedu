@@ -1,0 +1,169 @@
+<?php
+
+namespace App\Modules\HR\Application\Services;
+
+use App\Modules\HR\Domain\Models\Employee;
+use App\Modules\HR\Domain\Models\PengaturanCutiRules;
+use App\Modules\Scheduling\Domain\Models\RealisasiJadwalKerja;
+use Carbon\Carbon;
+
+class PayrollService
+{
+    protected $rekapService;
+    protected $ruleService;
+
+    public function __construct(RekapBulananService $rekapService, PengaturanCutiService $ruleService)
+    {
+        $this->rekapService = $rekapService;
+        $this->ruleService = $ruleService;
+    }
+
+    /**
+     * Preview Payroll for Employee
+     */
+    public function previewPayroll(int $employeeId, int $month, int $year)
+    {
+        $employee = Employee::findOrFail($employeeId);
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfDay();
+        $endDate = $startDate->copy()->endOfMonth()->endOfDay();
+
+        // 1. Base Data
+        $rekap = $this->rekapService->calculateSummary($employee, $startDate, $endDate);
+
+        // 2. Components
+        $gajiPokok = $this->calculateBaseSalary($employee);
+        $feeSesi = $this->calculateSessionFee($employee, $startDate, $endDate);
+        $potongan = $this->calculateDeductions($employee, $rekap['cuti']);
+
+        // 3. Totals
+        $totalPendapatan = $gajiPokok + $feeSesi;
+        $totalPotongan = $potongan['total_value'];
+        $grandTotal = $totalPendapatan - $totalPotongan;
+
+        return [
+            'employee' => $employee,
+            'periode' => ['month' => $month, 'year' => $year],
+            'komponen' => [
+                'gaji_pokok' => $gajiPokok,
+                'fee_sesi' => $feeSesi,
+                'potongan' => $potongan['items'], // Breakdown
+            ],
+            'totals' => [
+                'total_pendapatan' => $totalPendapatan,
+                'total_potongan' => $totalPotongan,
+                'gaji_bersih' => $grandTotal < 0 ? 0 : $grandTotal,
+            ]
+        ];
+    }
+
+    public function calculateBaseSalary(Employee $employee)
+    {
+        // Rule: Only if tipe_gaji = 'Bulanan' use gaji_pokok.
+        // If 'Per Sesi', base is 0.
+        // Normalize string case just in case.
+        $type = strtolower($employee->tipe_gaji);
+        if ($type === 'bulanan') {
+            return (float) $employee->gaji_pokok;
+        }
+        return 0.0;
+    }
+
+    public function calculateSessionFee(Employee $employee, Carbon $startDate, Carbon $endDate)
+    {
+        // Get realized sessions where this employee gets the money
+        // Conditions:
+        // 1. Status 'disetujui'
+        // 2. I am Pengajar AND No Pengganti
+        // 3. OR I am Pengganti
+
+        $sessions = RealisasiJadwalKerja::query()
+            ->with('jadwalKerja')
+            ->whereDate('tanggal', '>=', $startDate)
+            ->whereDate('tanggal', '<=', $endDate)
+            ->where('status', 'disetujui')
+            ->where(function ($q) use ($employee) {
+                $q->where(function ($sub) use ($employee) {
+                    $sub->where('guru_pengajar_id', $employee->id)
+                        ->whereNull('guru_pengganti_id');
+                })->orWhere('guru_pengganti_id', $employee->id);
+            })
+            ->get();
+
+        $totalFee = 0;
+        foreach ($sessions as $session) {
+            // Priority: Realisasi tarif (not explicitly in table schema provided but standard practice)
+            // If not in Realisasi, fallback to JadwalKerja tarif
+            // Current Schema Realisasi doesn't have 'tarif' column shown in previous view_file,
+            // so we rely on $session->jadwalKerja->tarif
+
+            $tarif = 0;
+            if ($session->jadwalKerja) {
+                $tarif = (float) $session->jadwalKerja->tarif;
+            }
+            $totalFee += $tarif;
+        }
+
+        return $totalFee;
+    }
+
+    public function calculateDeductions(Employee $employee, array $cutiSummary)
+    {
+        // Filter rules by Employee Attributes
+        // Note: Rules might need "kategori_mapel" but Employee doesn't have it directly in schema shown?
+        // Assumption: Ignore kategori_mapel or assume it's N/A for generic deduction
+        // or check if Employee has subject? For now match Category + Contract.
+
+        $rules = PengaturanCutiRules::where('aktif', true)
+            ->where('kategori_karyawan', $employee->kategori_karyawan)
+            ->where(function ($q) use ($employee) {
+                $q->where('subtipe_kontrak', $employee->subtipe_kontrak)
+                    ->orWhereNull('subtipe_kontrak');
+            })
+            ->get();
+
+        $deductions = [];
+        $totalDeduction = 0;
+
+        // Map summary keys to Rule 'jenis'
+        $map = [
+            'cuti_disetujui' => 'cuti',
+            'izin_disetujui' => 'izin',
+            'sakit_disetujui' => 'sakit'
+        ];
+
+        foreach ($map as $summaryKey => $ruleJenis) {
+            $count = $cutiSummary[$summaryKey] ?? 0;
+            if ($count <= 0) continue;
+
+            // Find applicable rule using service
+            $subtipe = $employee->kategori_karyawan === 'Kontrak' ? $employee->subtipe_kontrak : null;
+            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $ruleJenis);
+
+            if ($rule && $rule->potongan_nilai > 0) {
+                // Calculation Type
+                $amount = 0;
+                if ($rule->potongan_tipe === 'per_hari') {
+                    $amount = $rule->potongan_nilai * $count;
+                } else {
+                    $amount = $rule->potongan_nilai * $count;
+                }
+
+                if ($amount > 0) {
+                    $deductions[] = [
+                        'jenis' => $ruleJenis,
+                        'jumlah_hari' => $count,
+                        'rule' => $rule->potongan_tipe,
+                        'nilai_satuan' => $rule->potongan_nilai,
+                        'total' => $amount
+                    ];
+                    $totalDeduction += $amount;
+                }
+            }
+        }
+
+        return [
+            'total_value' => $totalDeduction,
+            'items' => $deductions
+        ];
+    }
+}

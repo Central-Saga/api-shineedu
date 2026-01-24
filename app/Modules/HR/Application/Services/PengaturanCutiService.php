@@ -92,22 +92,19 @@ class PengaturanCutiService
      */
     public function findRule(string $kategori, ?string $subtipe, string $jenis): ?PengaturanCutiRules
     {
-        $query = PengaturanCutiRules::query()
+        return PengaturanCutiRules::query()
             ->where('aktif', true)
-            ->where('kategori_karyawan', $kategori)
-            ->where('jenis', $jenis);
-
-        if ($subtipe) {
-            $query->where('subtipe_kontrak', $subtipe);
-        } else {
-            // If subtipe not provided or null, maybe we should match null?
-            // Or if rule has null subtipe it applies to all?
-            // Domain rule: Contrak has subtipe. Others don't.
-            // If kategori != Kontrak, subtipe should be ignored or null in DB.
-            // If parameter passed is null, we look for rule with null subtipe.
-            $query->whereNull('subtipe_kontrak');
-        }
-
-        return $query->first();
+            ->whereRaw('LOWER(kategori_karyawan) = ?', [strtolower($kategori)])
+            ->whereRaw('LOWER(jenis) = ?', [strtolower($jenis)])
+            ->where(function ($q) use ($subtipe) {
+                if ($subtipe) {
+                    $q->whereRaw('LOWER(subtipe_kontrak) = ?', [strtolower($subtipe)])
+                        ->orWhereNull('subtipe_kontrak');
+                } else {
+                    $q->whereNull('subtipe_kontrak');
+                }
+            })
+            ->orderByRaw('subtipe_kontrak IS NULL ASC') // Prefer exact match (non-null) first
+            ->first();
     }
 }
