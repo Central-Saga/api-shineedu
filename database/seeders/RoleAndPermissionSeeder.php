@@ -34,7 +34,6 @@ class RoleAndPermissionSeeder extends Seeder
             // Finance & Ops
             'invoices',       // invoice & pembayaran
             'payments',
-            'payroll',        // payroll guru + potongan
             'reports',
             'documents',      // dokumen & upload umum
             'notifications',
