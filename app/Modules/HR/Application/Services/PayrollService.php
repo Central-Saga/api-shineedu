@@ -224,9 +224,14 @@ class PayrollService
                 // Calculation Type
                 $amount = 0;
                 if ($rule->potongan_tipe === 'per_hari') {
-                    $amount = $rule->potongan_nilai * $count;
+                    // Formula: (Gaji Pokok / 25) * Koefisien * Jumlah Hari
+                    $dailyRate = $employee->gaji_pokok / 25;
+                    $amount = $dailyRate * $rule->potongan_nilai * $count;
+                    $unitValue = $dailyRate * $rule->potongan_nilai;
                 } else {
+                    // Flat Nominal
                     $amount = $rule->potongan_nilai * $count;
+                    $unitValue = $rule->potongan_nilai;
                 }
 
                 if ($amount > 0) {
@@ -234,7 +239,7 @@ class PayrollService
                         'jenis' => $ruleJenis,
                         'jumlah_hari' => $count,
                         'rule' => $rule->potongan_tipe,
-                        'nilai_satuan' => $rule->potongan_nilai,
+                        'nilai_satuan' => $unitValue,
                         'total' => $amount
                     ];
                     $totalDeduction += $amount;

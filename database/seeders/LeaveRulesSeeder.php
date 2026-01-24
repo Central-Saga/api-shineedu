@@ -27,14 +27,14 @@ class LeaveRulesSeeder extends Seeder
                     ],
                     [
                         'potongan_tipe' => 'per_hari',
-                        'potongan_nilai' => 100000,
+                        'potongan_nilai' => 2, // 2x GAJI PER HARI
                         'aktif' => true,
                     ]
                 );
             }
         }
 
-        // 2. Group: Part Time (50k)
+        // 2. Group: Part Time (50k nominal previously -> 1x Gaji per hari)
         foreach ($leaveTypes as $type) {
             PengaturanCutiRules::updateOrCreate(
                 [
@@ -44,7 +44,7 @@ class LeaveRulesSeeder extends Seeder
                 ],
                 [
                     'potongan_tipe' => 'per_hari',
-                    'potongan_nilai' => 50000,
+                    'potongan_nilai' => 1, // 1x GAJI PER HARI
                     'aktif' => true,
                 ]
             );

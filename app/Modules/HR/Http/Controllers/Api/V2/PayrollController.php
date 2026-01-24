@@ -43,7 +43,7 @@ class PayrollController extends Controller
         $data = $query->paginate($request->get('per_page', 15));
 
         return ApiResponse::paginated(
-            $data,
+            $data->items(),
             $data,
             'Data payroll berhasil diambil'
         );
