@@ -130,7 +130,8 @@
                 <h1 class="company-name">Shine Education Bali</h1>
                 <p class="company-tagline">Smart Learning, Bright Future</p>
                 <p style="font-size: 8pt; color: #666; margin: 5px 0 0 0;">
-                    Munggu, Kec. Mengwi, Kabupaten Badung, Bali &bull; info@shineedu.com &bull; +62 812-3456-7890
+                    Jl. Bakisan, Denbantas, Kec. Tabanan, Kabupaten Tabanan, Bali 82123 &bull; info@shineedu.com &bull;
+                    0812-3752-2400
                 </p>
             </div>
         </div>
