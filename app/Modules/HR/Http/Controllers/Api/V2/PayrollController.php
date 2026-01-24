@@ -89,4 +89,19 @@ class PayrollController extends Controller
         $payroll = Payroll::with(['employee.user'])->findOrFail($id);
         return ApiResponse::ok($payroll, 'Detail payroll berhasil diambil');
     }
+
+    /**
+     * Export Payroll Slip (PDF)
+     */
+    public function export($id)
+    {
+        $payroll = Payroll::with(['employee.user'])->findOrFail($id);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.slip_gaji', compact('payroll'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = 'slip_gaji_' . $payroll->employee->kode_karyawan . '_' . $payroll->bulan . '_' . $payroll->tahun . '.pdf';
+
+        return $pdf->download($filename);
+    }
 }

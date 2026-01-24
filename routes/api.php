@@ -111,6 +111,7 @@ Route::prefix('v2')->group(function () {
         // Penggajian
         Route::get('/payrolls', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'index'])->middleware('permission:gaji.view');
         Route::post('/payrolls/generate', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'generate'])->middleware('permission:gaji.manage');
+        Route::get('/payrolls/{id}/export', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'export'])->middleware('permission:gaji.view');
         Route::get('/payrolls/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'show'])->middleware('permission:gaji.view');
         Route::put('/payrolls/{id}/status', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'updateStatus'])->middleware('permission:gaji.manage');
     });
