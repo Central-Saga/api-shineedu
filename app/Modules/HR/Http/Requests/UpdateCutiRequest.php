@@ -18,10 +18,12 @@ class UpdateCutiRequest extends FormRequest
             'start_date' => 'sometimes|date',
             'end_date' => 'sometimes|date|after_or_equal:start_date',
             'keterangan' => 'nullable|string',
+            'catatan' => 'nullable|string',
             'disetujui_oleh' => 'nullable|exists:users,id',
             // Allow updating rule snapshot if needed (admin override)
             'potongan_tipe' => 'nullable|string',
             'potongan_nilai' => 'nullable|numeric',
+            'bukti_pendukung' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ];
     }
 }

@@ -89,8 +89,9 @@ Route::prefix('v2')->group(function () {
         Route::put('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'update'])->middleware('permission:cuti.update');
         Route::patch('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'update'])->middleware('permission:cuti.update');
         Route::delete('/cuti/{cuti}', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'destroy'])->middleware('permission:cuti.delete');
-        // Optional custom approval routes if separate from update
-        // Route::post('/cuti/{cuti}/approve', ...)->middleware('permission:cuti.approve');
+        Route::post('/cuti/{cuti}/approve', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'approve'])->middleware('permission:cuti.manage');
+        Route::post('/cuti/{cuti}/reject', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'reject'])->middleware('permission:cuti.manage');
+        Route::post('/cuti/{cuti}/cancel', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'cancel']);
 
         // Absensi
         Route::get('/absensi/today', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'todayStatus'])->middleware('permission:absensi.create');
@@ -103,5 +104,16 @@ Route::prefix('v2')->group(function () {
         Route::put('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
         Route::patch('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
         Route::delete('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'destroy'])->middleware('permission:absensi.delete');
+
+        // Rekap Bulanan
+        Route::get('/rekap-bulanan', [\App\Modules\HR\Http\Controllers\Api\V2\RekapBulananController::class, 'index'])->middleware('permission:rekap_bulanan.view');
+        Route::get('/rekap-bulanan/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\RekapBulananController::class, 'show'])->middleware('permission:rekap_bulanan.view');
+
+        // Penggajian
+        Route::get('/payrolls', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'index'])->middleware('permission:gaji.view');
+        Route::post('/payrolls/generate', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'generate'])->middleware('permission:gaji.manage');
+        Route::get('/payrolls/{id}/export', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'export'])->middleware('permission:gaji.view');
+        Route::get('/payrolls/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'show'])->middleware('permission:gaji.view');
+        Route::put('/payrolls/{id}/status', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'updateStatus'])->middleware('permission:gaji.manage');
     });
 });

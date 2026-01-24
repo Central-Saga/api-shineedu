@@ -90,28 +90,34 @@ class PengaturanCutiService
      * Find active rule for specific criteria
      * Used by CutiService
      */
-    public function findRule(string $kategori, ?string $subtipe, ?string $divisi, string $jenis): ?PengaturanCutiRules
+    public function findRule(string $kategori, ?string $subtipe, string $jenis, ?string $divisi = null): ?PengaturanCutiRules
     {
         $query = PengaturanCutiRules::query()
             ->where('aktif', true)
-            ->where('kategori_karyawan', $kategori)
-            ->where('jenis', $jenis);
+            ->whereRaw('LOWER(kategori_karyawan) = ?', [strtolower($kategori)])
+            ->whereRaw('LOWER(jenis) = ?', [strtolower($jenis)])
+            ->where(function ($q) use ($subtipe) {
+                if ($subtipe) {
+                    $q->whereRaw('LOWER(subtipe_kontrak) = ?', [strtolower($subtipe)])
+                        ->orWhereNull('subtipe_kontrak');
+                } else {
+                    $q->whereNull('subtipe_kontrak');
+                }
+            });
 
-        if ($subtipe) {
-            $query->where('subtipe_kontrak', $subtipe);
-        } else {
-            $query->whereNull('subtipe_kontrak');
-        }
-
+        // Filter Divisi
         if ($divisi) {
             $query->where(function ($q) use ($divisi) {
                 $q->where('divisi', $divisi)
-                    ->orWhere('divisi', 'all');
+                    ->orWhereNull('divisi')
+                    ->orWhere('divisi', 'Semua Divisi'); // Handle UI text if stored
             });
-        } else {
-            $query->where('divisi', 'all');
         }
 
-        return $query->first();
+        return $query
+            // Prioritize specific matches
+            ->orderByRaw("divisi = ? DESC", [$divisi ?? ''])
+            ->orderByRaw('subtipe_kontrak IS NOT NULL DESC')
+            ->first();
     }
 }

@@ -21,9 +21,10 @@ class CutiResource extends JsonResource
             'jenis' => $this->jenis,
             'status' => $this->status,
             'tanggal' => $this->tanggal,
-            'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
+            'start_date' => $this->start_date instanceof \Carbon\Carbon ? $this->start_date->format('Y-m-d') : $this->start_date,
+            'end_date' => $this->end_date instanceof \Carbon\Carbon ? $this->end_date->format('Y-m-d') : $this->end_date,
             'keterangan' => $this->keterangan,
+            'bukti_url' => $this->getFirstMediaUrl('bukti_cuti'),
             'disetujui_oleh' => $this->disetujui_oleh,
             'approver_name' => $this->approver->name ?? null,
             'potongan_tipe' => $this->potongan_tipe,
@@ -31,6 +32,10 @@ class CutiResource extends JsonResource
             'bukti_pendukung_url' => $this->getFirstMediaUrl('bukti_cuti'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'approver' => $this->approver ? [
+                'id' => $this->approver->id,
+                'name' => $this->approver->name,
+            ] : null,
             // Include employee details for context if needed in list
             'karyawan' => new EmployeeResource($this->whenLoaded('karyawan')),
         ];

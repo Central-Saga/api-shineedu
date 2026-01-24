@@ -41,10 +41,6 @@ class CutiController
 
             $cuti = $this->service->createCuti($data);
 
-            if ($request->hasFile('bukti_pendukung')) {
-                $cuti->addMediaFromRequest('bukti_pendukung')->toMediaCollection('bukti_cuti');
-            }
-
             return ApiResponse::created(
                 new CutiResource($cuti->load('karyawan.user')),
                 'Pengajuan cuti berhasil dibuat'
@@ -105,5 +101,48 @@ class CutiController
         };
 
         return Excel::download(new CutiExport($request), $filename . '.' . $format, $ext);
+    }
+
+    public function approve(Cuti $cuti): JsonResponse
+    {
+        $updated = $this->service->approve($cuti, auth()->id());
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti berhasil disetujui'
+        );
+    }
+
+    public function reject(Cuti $cuti): JsonResponse
+    {
+        $updated = $this->service->reject($cuti, auth()->id());
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti ditolak'
+        );
+    }
+
+    public function cancel(Cuti $cuti): JsonResponse
+    {
+        $user = auth()->user();
+        $isOwner = $cuti->karyawan->user_id === $user->id;
+        $canManage = $user->can('cuti.manage');
+
+        if (! $canManage && ! $isOwner) {
+            return ApiResponse::forbidden('Anda tidak memiliki akses untuk membatalkan pengajuan ini');
+        }
+
+        // Owner can cancel 'diajukan' or 'disetujui'
+        if ($isOwner && ! $canManage && ! in_array($cuti->status, ['diajukan', 'disetujui'])) {
+            return ApiResponse::forbidden('Hanya pengajuan berstatus diajukan atau disetujui yang dapat dibatalkan');
+        }
+
+        $updated = $this->service->cancel($cuti, $user->id);
+
+        return ApiResponse::ok(
+            new CutiResource($updated),
+            'Pengajuan cuti berhasil dibatalkan'
+        );
     }
 }
