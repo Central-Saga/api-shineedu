@@ -42,21 +42,20 @@ class RekapBulananController extends Controller
         $perPage = $request->input('per_page', 15);
         $employees = $query->paginate($perPage);
 
-        // 4. Transform: Calculate Summary for each Employee in the current page
+        // 4. Calculate Summary for each Employee in the current page
         $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfDay();
-        $endDate = $startDate->copy()->endOfMonth()->endOfDay();
+        $endDate = (clone $startDate)->endOfMonth()->endOfDay();
 
-        $employees->getCollection()->transform(function ($employee) use ($startDate, $endDate) {
+        $resourceCollection = $employees->getCollection()->map(function ($employee) use ($startDate, $endDate) {
             $summary = $this->rekapService->calculateSummary($employee, $startDate, $endDate);
-            $employee->setAttribute('summary', $summary);
-            return $employee;
+            return new RekapBulananResource($employee, $summary);
         });
 
         return ApiResponse::paginated(
-            RekapBulananResource::collection($employees),
+            $resourceCollection,
             $employees,
             'Rekap bulanan retrieved successfully',
-            ['periode' => ['bulan' => $bulan, 'tahun' => $tahun]]
+            ['periode' => ['bulan' => (int)$bulan, 'tahun' => (int)$tahun]]
         );
     }
 

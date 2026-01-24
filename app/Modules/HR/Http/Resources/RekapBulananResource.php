@@ -17,13 +17,17 @@ class RekapBulananResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        // If summary is passed explicitly (list view where calculation happens in controller/service loop)
-        // Or if attached to resource via some other means.
-        // For list view, we likely passed [employee, summary] or just employee and computed summary?
-        // Let's assume the controller attaches the computed summary to the employee object temporarily
-        // or we pass it in constructor.
+        $s = $this->summary ?? $this->resource->summary_data;
 
-        $s = $this->summary ?? $this->resource->summary ?? [];
+        if (!$s) {
+            $bulan = $request->input('bulan', now()->month);
+            $tahun = $request->input('tahun', now()->year);
+            $startDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfDay();
+            $endDate = $startDate->copy()->endOfMonth()->endOfDay();
+
+            $service = app(\App\Modules\HR\Application\Services\RekapBulananService::class);
+            $s = $service->calculateSummary($this->resource, $startDate, $endDate);
+        }
 
         return [
             'employee' => [
