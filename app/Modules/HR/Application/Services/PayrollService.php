@@ -209,7 +209,7 @@ class PayrollService
             if ($count <= 0) continue;
 
             // Find applicable rule using service
-            $subtipe = $employee->kategori_karyawan === 'Kontrak' ? $employee->subtipe_kontrak : null;
+            $subtipe = strtolower($employee->kategori_karyawan) === 'kontrak' ? $employee->subtipe_kontrak : null;
 
             // Fix: Pass Divisi to findRule
             $rule = $this->ruleService->findRule(
