@@ -23,15 +23,6 @@ class CutiService
     {
         $query = Cuti::query()->with(['karyawan.user', 'approver']);
 
-        // Apply permission-based filtering
-        $user = auth()->user();
-        if ($user && !$user->can('cuti.view')) {
-            // If they can't view all, they can only see their own
-            $query->whereHas('karyawan', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            });
-        }
-
         // Search
         if (! empty($params['q'] ?? null)) {
             $keyword = (string) $params['q'];
@@ -73,33 +64,14 @@ class CutiService
     {
         return DB::transaction(function () use ($data) {
             $employee = Employee::findOrFail($data['karyawan_id']);
-
-            $start = $data['start_date'] ?? $data['tanggal'] ?? null;
-            $end = $data['end_date'] ?? $data['tanggal'] ?? null;
-
-            if (!$start || !$end) {
-                throw ValidationException::withMessages(['start_date' => 'Tanggal pengajuan wajib diisi']);
-            }
-
-            $startDate = Carbon::parse($start);
-            $endDate = Carbon::parse($end);
+            $startDate = Carbon::parse($data['start_date']);
+            $endDate = Carbon::parse($data['end_date']);
             $jenis = $data['jenis'];
-
-            $status = $data['status'] ?? 'diajukan';
-
-            // Special Rule: 'sakit' only for today
-            if ($jenis === 'sakit') {
-                if (!Carbon::parse($start)->isToday()) {
-                    throw ValidationException::withMessages([
-                        'start_date' => 'Pengajuan sakit hanya bisa dilakukan untuk hari ini.'
-                    ]);
-                }
-            }
 
             // 1. Check Freelance - Unlimited
             if ($employee->kategori_karyawan === 'Freelance') {
                 return Cuti::create(array_merge($data, [
-                    'status' => $status,
+                    'status' => 'diajukan',
                     'potongan_tipe' => 'none',
                     'potongan_nilai' => 0
                 ]));
@@ -109,10 +81,7 @@ class CutiService
             // Subtipe null for non-contract usually, or specific logic?
             // Existing logic: Contract has subtipe. Others null.
             $subtipe = $employee->kategori_karyawan === 'Kontrak' ? $employee->subtipe_kontrak : null;
-
-            // Normalize divisi: "Coding" -> "coding", "Non-Coding" -> "non_coding"
-            $divisi = $employee->divisi ? str_replace('-', '_', strtolower($employee->divisi)) : null;
-            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $divisi, $jenis);
+            $rule = $this->ruleService->findRule($employee->kategori_karyawan, $subtipe, $jenis);
 
             // 3. Fallback / Hardcoded Rules if Rule not found or for specific defaults
             // Spec: "Jika settings table kosong, fallback ke hard-coded default"
@@ -149,79 +118,73 @@ class CutiService
                 }
             }
 
-            // 5. Validate Maksimal Durasi & Quota
-            $durationDays = $startDate->diffInDays($endDate) + 1;
-
+            // 5. Validate Maksimal Pengajuan (Quota)
             if (! is_null($maksimalPengajuan)) {
-                // If the user meant "Max days per request" (duration)
-                if ($durationDays > $maksimalPengajuan) {
-                    throw ValidationException::withMessages([
-                        'start_date' => "Durasi pengajuan {$jenis} tidak boleh melebihi {$maksimalPengajuan} hari."
-                    ]);
-                }
-
-                // If the user also meant "Total quota per period"
                 // Period: Bulanan usually.
+                // Check existing cuti in same month/year of start_date
                 $month = $startDate->month;
                 $year = $startDate->year;
 
-                $totalDaysMonth = Cuti::where('karyawan_id', $employee->id)
+                $existingDays = Cuti::where('karyawan_id', $employee->id)
                     ->where('jenis', $jenis)
                     ->whereYear('start_date', $year)
                     ->whereMonth('start_date', $month)
                     ->whereNotIn('status', ['ditolak', 'dibatalkan'])
                     ->get()
-                    ->sum(function ($c) {
-                        return Carbon::parse($c->start_date)->diffInDays(Carbon::parse($c->end_date)) + 1;
-                    });
+                    ->sum(fn($c) => Carbon::parse($c->start_date)->startOfDay()->diffInDays(Carbon::parse($c->end_date)->startOfDay()) + 1);
 
-                // This is optional depending on business rule, but let's prioritize the "Max Days Per Request" for now
-                // since that's what the user seems to be using it for.
+                $newDays = $startDate->startOfDay()->diffInDays($endDate->startOfDay()) + 1;
+
+                if (($existingDays + $newDays) > $maksimal_pengajuan_value = (int)$maksimalPengajuan) {
+                    $remaining = $maksimal_pengajuan_value - $existingDays;
+                    $remaining = max(0, $remaining);
+                    throw ValidationException::withMessages([
+                        'jenis' => "Kuota {$jenis} bulan ini tidak mencukupi. Tersisa: {$remaining} hari. Pengajuan ini: {$newDays} hari."
+                    ]);
+                }
             }
 
             // 6. Create
-            return Cuti::create([
-                'karyawan_id' => $data['karyawan_id'],
-                'jenis' => $jenis,
-                'start_date' => $startDate->toDateString(),
-                'end_date' => $endDate->toDateString(),
-                'tanggal' => $startDate->toDateString(),
-                'keterangan' => $data['keterangan'] ?? $data['catatan'] ?? null,
-                'status' => $status,
+            $bukti = $data['bukti_pendukung'] ?? null;
+            $dataToSave = collect($data)->except(['bukti_pendukung'])->toArray();
+            if (isset($data['catatan']) && !isset($data['keterangan'])) {
+                $dataToSave['keterangan'] = $data['catatan'];
+            }
+
+            $cuti = Cuti::create(array_merge($dataToSave, [
+                'status' => 'diajukan',
                 'potongan_tipe' => $potonganTipe,
                 'potongan_nilai' => $potonganNilai,
-            ]);
+            ]));
+
+            if ($bukti instanceof \Illuminate\Http\UploadedFile) {
+                $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
+            }
+
+            return $cuti;
         });
     }
 
     public function update(Cuti $cuti, array $data): Cuti
     {
-        $cuti->update($data);
+        $bukti = $data['bukti_pendukung'] ?? null;
+        $dataToUpdate = collect($data)->except(['bukti_pendukung'])->toArray();
+        if (isset($data['catatan']) && !isset($data['keterangan'])) {
+            $dataToUpdate['keterangan'] = $data['catatan'];
+        }
+
+        $cuti->update($dataToUpdate);
+
+        if ($bukti instanceof \Illuminate\Http\UploadedFile) {
+            $cuti->clearMediaCollection('bukti_cuti');
+            $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
+        }
+
         return $cuti;
     }
 
     public function delete(Cuti $cuti): void
     {
         $cuti->delete();
-    }
-
-    public function approve(Cuti $cuti, ?int $approverId): Cuti
-    {
-        $cuti->update([
-            'status' => 'disetujui',
-            'disetujui_oleh' => $approverId,
-        ]);
-
-        return $cuti->fresh(['karyawan.user', 'approver']);
-    }
-
-    public function reject(Cuti $cuti, ?int $approverId): Cuti
-    {
-        $cuti->update([
-            'status' => 'ditolak',
-            'disetujui_oleh' => $approverId,
-        ]);
-
-        return $cuti->fresh(['karyawan.user', 'approver']);
     }
 }

@@ -103,5 +103,12 @@ Route::prefix('v2')->group(function () {
         Route::put('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
         Route::patch('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'update'])->middleware('permission:absensi.update');
         Route::delete('/absensi/{absensi}', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'destroy'])->middleware('permission:absensi.delete');
+
+        // Rekap Bulanan
+        Route::get('/rekap-bulanan', [\App\Modules\HR\Http\Controllers\Api\V2\RekapBulananController::class, 'index'])->middleware('permission:rekap_bulanan.view');
+        Route::get('/rekap-bulanan/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\RekapBulananController::class, 'show'])->middleware('permission:rekap_bulanan.view');
+
+        // Penggajian
+        Route::get('/gaji/preview', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'preview'])->middleware('permission:gaji.view');
     });
 });

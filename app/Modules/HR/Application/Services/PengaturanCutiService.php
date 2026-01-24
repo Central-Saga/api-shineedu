@@ -90,28 +90,21 @@ class PengaturanCutiService
      * Find active rule for specific criteria
      * Used by CutiService
      */
-    public function findRule(string $kategori, ?string $subtipe, ?string $divisi, string $jenis): ?PengaturanCutiRules
+    public function findRule(string $kategori, ?string $subtipe, string $jenis): ?PengaturanCutiRules
     {
-        $query = PengaturanCutiRules::query()
+        return PengaturanCutiRules::query()
             ->where('aktif', true)
-            ->where('kategori_karyawan', $kategori)
-            ->where('jenis', $jenis);
-
-        if ($subtipe) {
-            $query->where('subtipe_kontrak', $subtipe);
-        } else {
-            $query->whereNull('subtipe_kontrak');
-        }
-
-        if ($divisi) {
-            $query->where(function ($q) use ($divisi) {
-                $q->where('divisi', $divisi)
-                    ->orWhere('divisi', 'all');
-            });
-        } else {
-            $query->where('divisi', 'all');
-        }
-
-        return $query->first();
+            ->whereRaw('LOWER(kategori_karyawan) = ?', [strtolower($kategori)])
+            ->whereRaw('LOWER(jenis) = ?', [strtolower($jenis)])
+            ->where(function ($q) use ($subtipe) {
+                if ($subtipe) {
+                    $q->whereRaw('LOWER(subtipe_kontrak) = ?', [strtolower($subtipe)])
+                        ->orWhereNull('subtipe_kontrak');
+                } else {
+                    $q->whereNull('subtipe_kontrak');
+                }
+            })
+            ->orderByRaw('subtipe_kontrak IS NULL ASC') // Prefer exact match (non-null) first
+            ->first();
     }
 }
