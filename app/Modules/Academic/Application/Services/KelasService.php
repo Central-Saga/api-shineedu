@@ -12,7 +12,7 @@ class KelasService
 {
     public function listKelas(array $filters)
     {
-        $query = Kelas::with(['program', 'jenjang', 'creator']);
+        $query = Kelas::with(['program', 'jenjang', 'creator'])->withCount('enrollments');
 
         if (!empty($filters['q'])) {
             $query->where(function ($q) use ($filters) {
@@ -65,7 +65,8 @@ class KelasService
 
     public function showKelas(Kelas $kelas)
     {
-        return $kelas->load(['program', 'jenjang', 'creator'])->loadCount('enrollments');
+        // Must load enrollments to show members in Detail Page
+        return $kelas->load(['program', 'jenjang', 'creator', 'enrollments.murid', 'enrollments.paket'])->loadCount('enrollments');
     }
 
     public function addAnggota(Kelas $kelas, array $enrollmentIds)
