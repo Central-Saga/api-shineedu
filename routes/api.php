@@ -168,5 +168,17 @@ Route::prefix('v2')->group(function () {
         Route::get('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'show'])->middleware('permission:enrollment.view');
         Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
         Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
+
+        // Kelas (Academic)
+        Route::get('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'index'])->middleware('permission:class.view');
+        Route::post('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'store'])->middleware('permission:class.create');
+        Route::get('/kelas/{id}', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'show'])->middleware('permission:class.view');
+        Route::put('/kelas/{id}', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'update'])->middleware('permission:class.update');
+        Route::delete('/kelas/{id}', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'destroy'])->middleware('permission:class.delete');
+
+        // Kelas Members
+        Route::get('/kelas/{id}/anggota', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'index'])->middleware('permission:class.view');
+        Route::post('/kelas/{id}/anggota', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'store'])->middleware('permission:class.manage_members');
+        Route::delete('/kelas/{id}/anggota/{enrollmentId}', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'destroy'])->middleware('permission:class.manage_members');
     });
 });

@@ -28,6 +28,7 @@ class RoleAndPermissionSeeder extends Seeder
             'catalog.program',
             'catalog.paket',
             'catalog.harga',
+            'kelas',          // kelas akademik
             'scheduling',     // jadwal, reschedule rules
             'enrollment',     // sesi, carry over, paket berjalan
             'attendance',     // absensi guru/murid
@@ -108,6 +109,7 @@ class RoleAndPermissionSeeder extends Seeder
             'assessments.view',
             'assessments.manage',
             'enrollment.view',
+            'kelas.view', // Guru liat kelas
             'catalog.view',
             'users.view', // kalau guru boleh lihat profil murid tertentu, nanti bisa refine policy
             'cuti.view',
@@ -124,6 +126,7 @@ class RoleAndPermissionSeeder extends Seeder
             'materials.view',
             'assessments.view',
             'enrollment.view',
+            'kelas.view', // Murid liat kelasnya
             'catalog.view',
         ]);
     }
