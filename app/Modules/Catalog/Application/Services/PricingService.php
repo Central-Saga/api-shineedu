@@ -59,8 +59,11 @@ class PricingService
         $newMax = $data['max_siswa'];
 
         $query->where(function ($q) use ($newMin, $newMax) {
-            $q->where('min_siswa', '<=', $newMax)
-                ->where('max_siswa', '>=', $newMin);
+            $q->where('min_siswa', '<=', $newMax ?: 999999)
+                ->where(function ($sub) use ($newMin) {
+                    $sub->where('max_siswa', '>=', $newMin)
+                        ->orWhereNull('max_siswa');
+                });
         });
 
         return $query->exists();
@@ -80,7 +83,10 @@ class PricingService
             ->where('status', 'Aktif')
             // Student count check
             ->where('min_siswa', '<=', $studentCount)
-            ->where('max_siswa', '>=', $studentCount)
+            ->where(function ($q) use ($studentCount) {
+                $q->where('max_siswa', '>=', $studentCount)
+                    ->orWhereNull('max_siswa');
+            })
             // Date check
             ->where(function ($q) use ($targetDate) {
                 $q->where(function ($sub) use ($targetDate) {

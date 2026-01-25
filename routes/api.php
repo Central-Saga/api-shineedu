@@ -161,5 +161,12 @@ Route::prefix('v2')->group(function () {
             Route::put('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'update'])->middleware('permission:catalog.harga.update');
             Route::delete('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'destroy'])->middleware('permission:catalog.harga.delete');
         });
+
+        // Enrollments
+        Route::get('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:enrollment.view');
+        Route::post('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'store'])->middleware('permission:enrollment.create');
+        Route::get('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'show'])->middleware('permission:enrollment.view');
+        Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
+        Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
     });
 });
