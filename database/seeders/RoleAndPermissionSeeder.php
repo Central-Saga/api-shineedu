@@ -24,6 +24,10 @@ class RoleAndPermissionSeeder extends Seeder
 
             // Core Bimbel
             'catalog',        // paket les, program, subject
+            'catalog.jenjang',
+            'catalog.program',
+            'catalog.paket',
+            'catalog.harga',
             'scheduling',     // jadwal, reschedule rules
             'enrollment',     // sesi, carry over, paket berjalan
             'attendance',     // absensi guru/murid
