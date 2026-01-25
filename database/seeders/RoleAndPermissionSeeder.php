@@ -34,6 +34,11 @@ class RoleAndPermissionSeeder extends Seeder
             'logbook',        // catatan sesi / laporan guru
             'materials',      // materi upload
             'assessments',    // penilaian/sertifikat
+            'student',        // data murid
+            'student.view',   // view murid
+            'student.create', // create murid
+            'student.update', // update murid
+            'student.delete', // delete murid
 
             // Finance & Ops
             'invoices',       // invoice & pembayaran
