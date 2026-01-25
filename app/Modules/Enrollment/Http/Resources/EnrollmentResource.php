@@ -12,6 +12,7 @@ class EnrollmentResource extends JsonResource
         return [
             'id' => $this->id,
             'kode_enrollment' => $this->kode_enrollment,
+            'murid_id' => $this->murid_id,
             'murid' => $this->whenLoaded('murid', function () {
                 return [
                     'id' => $this->murid->id,

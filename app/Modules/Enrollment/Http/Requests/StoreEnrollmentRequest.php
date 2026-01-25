@@ -30,6 +30,13 @@ class StoreEnrollmentRequest extends FormRequest
             // Validate murid_baru content if present
             'murid_baru.nama_lengkap' => ['required_with:murid_baru', 'string', 'max:255'],
             'murid_baru.no_hp' => ['required_with:murid_baru', 'string', 'max:20'],
+            'murid_baru.jenis_kelamin' => ['nullable', 'in:L,P'],
+            'murid_baru.tanggal_lahir' => ['nullable', 'date'],
+            'murid_baru.alamat' => ['nullable', 'string'],
+            'murid_baru.nama_wali' => ['nullable', 'string', 'max:255'],
+            'murid_baru.no_hp_wali' => ['nullable', 'string', 'max:20'],
+            'murid_baru.email_wali' => ['nullable', 'email', 'max:255'],
+            'murid_baru.hubungan_wali' => ['nullable', 'string', 'max:50'],
             // Add other required fields for Murid creation if necessary, mirroring StoreMuridRequest
 
             'program_id' => ['required', 'exists:program,id'],

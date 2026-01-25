@@ -78,6 +78,8 @@ class EnrollmentService
 
             if (! $muridId && $muridBaruData) {
                 // Inline create murid
+                // Add jenjang_id to murid data from the enrollment data
+                $muridBaruData['jenjang_id'] = $data['jenjang_id'];
                 $murid = $this->muridService->create($muridBaruData);
                 $muridId = $murid->id;
             } elseif ($muridId) {
