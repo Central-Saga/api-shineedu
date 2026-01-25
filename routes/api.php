@@ -116,6 +116,14 @@ Route::prefix('v2')->group(function () {
         Route::get('/payrolls/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'show'])->middleware('permission:gaji.view');
         Route::put('/payrolls/{id}/status', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'updateStatus'])->middleware('permission:gaji.manage');
 
+
+        // Murid
+        Route::get('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'index'])->middleware('permission:student.view');
+        Route::post('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'store'])->middleware('permission:student.create');
+        Route::get('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'show'])->middleware('permission:student.view');
+        Route::put('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'update'])->middleware('permission:student.update');
+        Route::delete('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'destroy'])->middleware('permission:student.delete');
+
         // Catalog (Jenjang, Program, Paket, Harga)
         Route::prefix('catalog')->group(function () {
             // Jenjang
