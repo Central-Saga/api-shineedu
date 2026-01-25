@@ -39,6 +39,10 @@ class RoleAndPermissionSeeder extends Seeder
             'student.create', // create murid
             'student.update', // update murid
             'student.delete', // delete murid
+            'enrollment.view',
+            'enrollment.create',
+            'enrollment.update',
+            'enrollment.delete',
 
             // Finance & Ops
             'invoices',       // invoice & pembayaran
