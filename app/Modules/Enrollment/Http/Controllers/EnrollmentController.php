@@ -82,4 +82,20 @@ class EnrollmentController extends Controller
             'message' => 'Enrollment deleted successfully',
         ]);
     }
+
+    public function updateRegistrationFeeStatus(Request $request, Enrollment $enrollment): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:UNPAID,PAID,WAIVED'],
+            'due_date' => ['nullable', 'date'],
+        ]);
+
+        $enrollment = $this->service->updateRegistrationFeeStatus($enrollment, $validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration fee status updated successfully',
+            'data' => new EnrollmentResource($enrollment),
+        ]);
+    }
 }
