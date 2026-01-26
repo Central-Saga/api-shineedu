@@ -74,4 +74,11 @@ class Enrollment extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function kelas()
+    {
+        return $this->belongsToMany(\App\Modules\Academic\Domain\Models\Kelas::class, 'kelas_enrollment', 'enrollment_id', 'kelas_id')
+            ->withPivot('status_anggota', 'tanggal_masuk', 'tanggal_keluar')
+            ->withTimestamps();
+    }
 }

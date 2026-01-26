@@ -141,7 +141,7 @@ class EnrollmentService
      */
     public function show(Enrollment $enrollment): Enrollment
     {
-        return $enrollment->load(['murid', 'program', 'jenjang', 'paket', 'creator']);
+        return $enrollment->load(['murid', 'program', 'jenjang', 'paket', 'creator', 'kelas.schedules.guru.user']);
     }
 
     /**

@@ -18,6 +18,15 @@ class JadwalKerjaController
     {
         $query = JadwalKerja::query()->with('guru.user');
 
+        if ($request->has('kelas_id')) {
+            $kelasId = $request->get('kelas_id');
+            if ($kelasId === 'null') {
+                $query->whereNull('kelas_id');
+            } else {
+                $query->where('kelas_id', $kelasId);
+            }
+        }
+
         // Search
         if ($keyword = $request->get('q')) {
             $query->where(function ($q) use ($keyword) {

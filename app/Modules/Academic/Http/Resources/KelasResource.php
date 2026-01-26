@@ -27,6 +27,7 @@ class KelasResource extends JsonResource
             'created_by' => $this->whenLoaded('creator'),
             'enrollments_count' => $this->when(isset($this->enrollments_count), $this->enrollments_count),
             'enrollments' => $this->whenLoaded('enrollments'), // Will include pivot and enrollment details
+            'schedules' => \App\Modules\Scheduling\Http\Resources\JadwalKerjaResource::collection($this->whenLoaded('schedules')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
