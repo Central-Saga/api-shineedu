@@ -30,6 +30,10 @@ class Enrollment extends Model
         'status',
         'catatan',
         'created_by',
+        'biaya_pendaftaran_amount',
+        'biaya_pendaftaran_status',
+        'biaya_pendaftaran_due_date',
+        'registration_fee_transaction_id',
     ];
 
     protected $casts = [
@@ -37,6 +41,8 @@ class Enrollment extends Model
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
         'jumlah_siswa' => 'integer',
+        'biaya_pendaftaran_amount' => 'decimal:2',
+        'biaya_pendaftaran_due_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',

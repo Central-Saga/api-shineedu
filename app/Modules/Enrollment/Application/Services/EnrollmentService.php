@@ -109,6 +109,10 @@ class EnrollmentService
                 throw new Exception("Harga tidak ditemukan untuk kombinasi Program/Jenjang/Paket/Jumlah Siswa tersebut.", 422);
             }
 
+            // Registration Fee Logic
+            $regFeeAmount = $data['biaya_pendaftaran_amount'] ?? 0;
+            $regFeeStatus = ($regFeeAmount > 0) ? 'UNPAID' : 'WAIVED';
+
             // 3. Create Enrollment
             $enrollment = Enrollment::create([
                 'kode_enrollment' => $this->generateKodeEnrollment(),
@@ -122,6 +126,8 @@ class EnrollmentService
                 'tanggal_selesai' => $data['tanggal_selesai'] ?? null,
                 'status' => 'Aktif',
                 'catatan' => $data['catatan'] ?? null,
+                'biaya_pendaftaran_amount' => $regFeeAmount,
+                'biaya_pendaftaran_status' => $regFeeStatus,
                 'created_by' => auth()->id(),
             ]);
 

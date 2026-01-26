@@ -53,6 +53,7 @@ class StoreEnrollmentRequest extends FormRequest
             'tanggal_mulai' => ['nullable', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
             'catatan' => ['nullable', 'string'],
+            'biaya_pendaftaran_amount' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

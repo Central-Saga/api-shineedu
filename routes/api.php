@@ -167,6 +167,7 @@ Route::prefix('v2')->group(function () {
         Route::post('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'store'])->middleware('permission:enrollment.create');
         Route::get('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'show'])->middleware('permission:enrollment.view');
         Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
+        Route::put('/enrollments/{enrollment}/registration-fee-status', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'updateRegistrationFeeStatus'])->middleware('permission:enrollment.update');
         Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
 
         // Kelas (Academic)
@@ -180,5 +181,28 @@ Route::prefix('v2')->group(function () {
         Route::get('/kelas/{id}/anggota', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'index'])->middleware('permission:kelas.view');
         Route::post('/kelas/{id}/anggota', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'store'])->middleware('permission:kelas.manage_members');
         Route::delete('/kelas/{id}/anggota/{enrollmentId}', [\App\Modules\Academic\Http\Controllers\KelasAnggotaController::class, 'destroy'])->middleware('permission:kelas.manage_members');
+        // Academic Sessions (Jadwal Kelas & Sesi)
+        // Jadwal Kelas
+        Route::get('/kelas/{kelasId}/jadwal', [\App\Modules\AcademicSessions\Http\Controllers\JadwalKelasController::class, 'index'])->middleware('permission:schedule.manage');
+        Route::post('/kelas/{kelasId}/jadwal', [\App\Modules\AcademicSessions\Http\Controllers\JadwalKelasController::class, 'store'])->middleware('permission:schedule.manage');
+
+        // Sesi
+        Route::get('/kelas/{kelasId}/sesi', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'indexByKelas'])->middleware('permission:session.view');
+        Route::post('/kelas/{kelasId}/sesi/generate', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'generate'])->middleware('permission:session.generate');
+
+        Route::get('/sesi/{id}', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'show'])->middleware('permission:session.view');
+        Route::put('/sesi/{id}', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'update'])->middleware('permission:session.update');
+        Route::post('/sesi/{id}/sync-anggota', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'syncAnggota'])->middleware('permission:session.attendance.manage');
+
+        // Absensi
+        Route::get('/sesi/{id}/absensi', [\App\Modules\AcademicSessions\Http\Controllers\SesiAbsensiController::class, 'index'])->middleware('permission:session.attendance.manage');
+        Route::put('/sesi/{id}/absensi/bulk', [\App\Modules\AcademicSessions\Http\Controllers\SesiAbsensiController::class, 'bulkUpdate'])->middleware('permission:session.attendance.manage');
+
+        // Logbook
+        Route::get('/sesi/{id}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'show'])->middleware('permission:session.logbook.manage');
+        Route::put('/sesi/{id}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'upsert'])->middleware('permission:session.logbook.manage');
+
+        Route::get('/sesi/{id}/logbook-murid', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'showStudent'])->middleware('permission:session.logbook.manage');
+        Route::put('/sesi/{id}/logbook-murid/bulk', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'bulkUpsertStudent'])->middleware('permission:session.logbook.manage');
     });
 });
