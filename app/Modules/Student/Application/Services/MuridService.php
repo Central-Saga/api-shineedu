@@ -47,8 +47,14 @@ class MuridService
      */
     public function create(array $data): Murid
     {
-        // Auto-generate kode_murid if needed, or handle it here.
-        // For now trusting input or allow null to be null.
+        if (empty($data['kode_murid'])) {
+            $dateSource = !empty($data['tanggal_lahir']) ? $data['tanggal_lahir'] : date('Y-m-d');
+            $timestamp = strtotime($dateSource);
+            $ddmmyy = date('dmy', $timestamp);
+            $random = rand(1000, 9999);
+
+            $data['kode_murid'] = $ddmmyy . $random;
+        }
 
         return Murid::create($data);
     }
