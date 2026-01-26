@@ -12,7 +12,7 @@ class SesiService
     public function getSesiByKelas($kelasId, $filters = [])
     {
         $query = Session::where('kelas_id', $kelasId)
-            ->with(['guruPengajar', 'jadwal']); // Eager load
+            ->with(['guruPengajar.user', 'jadwal']); // Eager load
 
         if (!empty($filters['start_date'])) {
             $query->whereDate('tanggal', '>=', $filters['start_date']);
@@ -29,7 +29,7 @@ class SesiService
 
     public function findById($id)
     {
-        return Session::with(['kelas', 'guruPengajar', 'guruPengganti', 'jadwal', 'logbook', 'logbookMurid', 'absensi.enrollment.murid'])->findOrFail($id);
+        return Session::with(['kelas.program', 'kelas.jenjang', 'guruPengajar.user', 'guruPengganti.user', 'jadwal', 'logbook', 'logbookMurid', 'absensi.enrollment.murid'])->findOrFail($id);
     }
 
     public function update($id, array $data, $userId)

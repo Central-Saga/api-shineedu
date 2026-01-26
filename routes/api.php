@@ -197,6 +197,7 @@ Route::prefix('v2')->group(function () {
         // Absensi
         Route::get('/sesi/{id}/absensi', [\App\Modules\AcademicSessions\Http\Controllers\SesiAbsensiController::class, 'index'])->middleware('permission:session.attendance.manage');
         Route::put('/sesi/{id}/absensi/bulk', [\App\Modules\AcademicSessions\Http\Controllers\SesiAbsensiController::class, 'bulkUpdate'])->middleware('permission:session.attendance.manage');
+        Route::post('/sesi/{id}/absensi/move', [\App\Modules\AcademicSessions\Http\Controllers\SesiAbsensiController::class, 'moveAttendance'])->middleware('permission:session.attendance.manage');
 
         // Logbook
         Route::get('/sesi/{id}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'show'])->middleware('permission:session.logbook.manage');
