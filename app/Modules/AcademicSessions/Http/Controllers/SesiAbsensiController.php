@@ -17,7 +17,7 @@ class SesiAbsensiController
     public function index($id): JsonResponse
     {
         $absensi = SesiAbsensiMurid::where('realisasi_jadwal_kerja_id', $id)
-            ->with(['enrollment.student', 'createdBy']) // Adjust relations if needed
+            ->with(['enrollment.murid', 'createdBy']) // Adjust relations if needed
             ->get();
 
         return ApiResponse::ok(

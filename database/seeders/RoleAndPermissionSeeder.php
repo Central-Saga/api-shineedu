@@ -30,9 +30,13 @@ class RoleAndPermissionSeeder extends Seeder
             'catalog.harga',
             'kelas',          // kelas akademik
             'scheduling',     // jadwal, reschedule rules
+            'schedule',       // FIX: route uses 'schedule.manage'
             'enrollment',     // sesi, carry over, paket berjalan
             'attendance',     // absensi guru/murid
             'logbook',        // catatan sesi / laporan guru
+            'session',        // NEW: sesi kelas
+            'session.attendance', // NEW: absensi sesi
+            'session.logbook',    // NEW: logbook sesi
             'materials',      // materi upload
             'assessments',    // penilaian/sertifikat
             'student',        // data murid
@@ -77,6 +81,9 @@ class RoleAndPermissionSeeder extends Seeder
             }
         }
 
+        // Extra permissions specific to routes
+        Permission::firstOrCreate(['name' => 'session.generate', 'guard_name' => 'web']);
+
         // Roles
         $superadmin = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'web']);
         $admin      = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
@@ -100,10 +107,18 @@ class RoleAndPermissionSeeder extends Seeder
         $teacher->syncPermissions([
             'scheduling.view',
             'scheduling.manage',
+            'schedule.manage', // FIX
             'attendance.view',
             'attendance.manage',
             'logbook.view',
             'logbook.manage',
+            // Sesi Permissions
+            'session.view',
+            'session.generate',
+            'session.update',
+            'session.attendance.manage',
+            'session.logbook.manage',
+
             'materials.view',
             'materials.manage',
             'assessments.view',

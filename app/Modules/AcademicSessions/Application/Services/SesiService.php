@@ -29,7 +29,7 @@ class SesiService
 
     public function findById($id)
     {
-        return Session::with(['kelas', 'guruPengajar', 'guruPengganti', 'jadwal', 'logbook', 'logbookMurid', 'absensi.enrollment.student'])->findOrFail($id);
+        return Session::with(['kelas', 'guruPengajar', 'guruPengganti', 'jadwal', 'logbook', 'logbookMurid', 'absensi.enrollment.murid'])->findOrFail($id);
     }
 
     public function update($id, array $data, $userId)
