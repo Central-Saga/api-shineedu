@@ -69,8 +69,9 @@ class KelasService
         return $kelas->load(['program', 'jenjang', 'creator', 'enrollments.murid', 'enrollments.paket'])->loadCount('enrollments');
     }
 
-    public function addAnggota(Kelas $kelas, array $enrollmentIds)
+    public function addAnggota(Kelas $kelas, array $data)
     {
+        $enrollmentIds = $data['enrollment_ids'] ?? [];
         // Validate enrollments
         $enrollments = Enrollment::whereIn('id', $enrollmentIds)->get();
 
@@ -113,12 +114,13 @@ class KelasService
                     }
                 }
 
-                // Rule 5: Duplicate Membership (Already handled by unique constraint or check exist)
+                $tanggalMasuk = isset($data['tanggal_masuk'])
+                    ? \Carbon\Carbon::parse($data['tanggal_masuk'])->toDateString()
+                    : date('Y-m-d');
+
+                // Rule 5: Duplicate Membership
                 $exists = $kelas->enrollments()->where('enrollment_id', $enrollment->id)->exists();
                 if ($exists) {
-                    // Check if status is 'Keluar', maybe re-activate? Or just throw error.
-                    // User requirement says unique pivot. If exist, we might update or fail.
-                    // Let's check status.
                     $pivot = $kelas->enrollments()->where('enrollment_id', $enrollment->id)->first();
                     if ($pivot->pivot->status_anggota === 'Aktif') {
                         throw ValidationException::withMessages(['enrollment_ids' => "Enrollment {$enrollment->id} sudah ada di kelas ini."]);
@@ -126,17 +128,24 @@ class KelasService
                         // Re-activate
                         $kelas->enrollments()->updateExistingPivot($enrollment->id, [
                             'status_anggota' => 'Aktif',
-                            'tanggal_masuk' => now(), // Reset or keep history? Usually new entry date.
+                            'tanggal_masuk' => $tanggalMasuk,
                             'tanggal_keluar' => null
                         ]);
                         continue;
                     }
                 }
 
+                // Rule 6: Joining Date vs Class Period
+                if ($kelas->periode_mulai && $tanggalMasuk < $kelas->periode_mulai->toDateString()) {
+                    throw ValidationException::withMessages([
+                        'tanggal_masuk' => "Tanggal masuk tidak boleh lebih awal dari periode mulai kelas (" . $kelas->periode_mulai->format('d-m-Y') . ")."
+                    ]);
+                }
+
                 // Attach
                 $kelas->enrollments()->attach($enrollment->id, [
                     'status_anggota' => 'Aktif',
-                    'tanggal_masuk' => $data['tanggal_masuk'] ?? now(),
+                    'tanggal_masuk' => $tanggalMasuk,
                 ]);
             }
             DB::commit();
