@@ -12,6 +12,8 @@ class KelasResource extends JsonResource
             'id' => $this->id,
             'kode_kelas' => $this->kode_kelas,
             'nama_kelas' => $this->nama_kelas,
+            'program_id' => $this->program_id,
+            'jenjang_id' => $this->jenjang_id,
             'program' => $this->whenLoaded('program'),
             'jenjang' => $this->whenLoaded('jenjang'),
             'tipe_kelas' => $this->tipe_kelas,
