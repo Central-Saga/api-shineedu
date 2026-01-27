@@ -22,11 +22,11 @@
         @foreach($items as $item)
         <tr>
             <td>{{ $item->id }}</td>
-            <td>{{ $item->kelas?->nama ?? '-' }}</td>
-            <td>{{ $item->tanggal_sesi ? $item->tanggal_sesi->format('d/m/Y') : '-' }}</td>
-            <td>{{ $item->jam_mulai }} - {{ $item->jam_selesai }}</td>
-            <td>{{ $item->guru?->name ?? '-' }}</td>
-            <td>{{ $item->guruPengganti?->name ?? '-' }}</td>
+            <td>{{ $item->kelas?->nama_kelas ?? '-' }}</td>
+            <td>{{ $item->tanggal ? $item->tanggal->format('d/m/Y') : '-' }}</td>
+            <td>{{ $item->jam_mulai_aktual }} - {{ $item->jam_selesai_aktual }}</td>
+            <td>{{ $item->guruPengajar?->user?->name ?? '-' }}</td>
+            <td>{{ $item->guruPengganti?->user?->name ?? '-' }}</td>
             <td>{{ $item->status_sesi }}</td>
             <td>{{ $item->status_kehadiran_guru }}</td>
             <td>{{ $item->ruangan_kelas ?? '-' }}</td>

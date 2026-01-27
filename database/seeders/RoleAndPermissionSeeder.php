@@ -27,7 +27,7 @@ class RoleAndPermissionSeeder extends Seeder
             'catalog.jenjang',
             'catalog.program',
             'catalog.paket',
-            'catalog.harga',
+            'catalog.pricing',
             'kelas',          // kelas akademik
             'scheduling',     // jadwal, reschedule rules
             'schedule',       // FIX: route uses 'schedule.manage'

@@ -152,7 +152,7 @@ class PaketHargaController
             $query->chunk(100, function ($items) use ($handle) {
                 foreach ($items as $item) {
                     $sql = sprintf(
-                        "INSERT INTO paket_harga (id, program_id, jenjang_id, paket_id, min_siswa, max_siswa, harga, status, created_at, updated_at) VALUES (%d, %d, %d, %d, %d, %d, %s, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE program_id=VALUES(program_id), jenjang_id=VALUES(jenjang_id), paket_id=VALUES(paket_id), min_siswa=VALUES(min_siswa), max_siswa=VALUES(max_siswa), harga=VALUES(harga), status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                        "INSERT INTO paket_harga (id, program_id, jenjang_id, paket_id, min_siswa, max_siswa, harga, status, created_at, updated_at) VALUES (%d, %d, %d, %d, %d, %d, %s, '%s', %s, %s) ON DUPLICATE KEY UPDATE program_id=VALUES(program_id), jenjang_id=VALUES(jenjang_id), paket_id=VALUES(paket_id), min_siswa=VALUES(min_siswa), max_siswa=VALUES(max_siswa), harga=VALUES(harga), status=VALUES(status), updated_at=VALUES(updated_at);\n",
                         $item->id,
                         $item->program_id,
                         $item->jenjang_id,
@@ -161,8 +161,8 @@ class PaketHargaController
                         $item->max_siswa,
                         $item->harga,
                         $item->status,
-                        $item->created_at,
-                        $item->updated_at
+                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
                     );
                     fwrite($handle, $sql);
                 }

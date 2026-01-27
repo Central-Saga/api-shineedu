@@ -18,7 +18,7 @@ class ProgramExport implements FromQuery, WithHeadings, WithMapping
 
     public function query()
     {
-        $query = Program::query();
+        $query = Program::query()->with('jenjangs');
 
         if ($keyword = $this->request->get('q')) {
             $query->where(function ($q) use ($keyword) {

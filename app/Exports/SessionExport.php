@@ -61,11 +61,11 @@ class SessionExport implements FromQuery, WithHeadings, WithMapping
     {
         return [
             $sesi->id,
-            $sesi->kelas?->nama ?? '-',
+            $sesi->kelas?->nama_kelas ?? '-',
             $sesi->tanggal ? $sesi->tanggal->format('d/m/Y') : '-',
             $sesi->jam_mulai_aktual . ' - ' . $sesi->jam_selesai_aktual,
-            $sesi->guruPengajar?->user?->name ?? $sesi->guruPengajar?->nama ?? '-',
-            $sesi->guruPengganti?->user?->name ?? $sesi->guruPengganti?->nama ?? '-',
+            $sesi->guruPengajar?->user?->name ?? '-',
+            $sesi->guruPengganti?->user?->name ?? '-',
             $sesi->status_sesi,
             $sesi->status_kehadiran_guru,
             $sesi->ruangan_kelas ?? '-',

@@ -22,7 +22,7 @@ class EnrollmentExport implements FromQuery, WithHeadings, WithMapping
 
         if ($keyword = $this->request->get('q')) {
             $query->whereHas('murid', function ($q) use ($keyword) {
-                $q->where('nama', 'like', "%{$keyword}%");
+                $q->where('nama_lengkap', 'like', "%{$keyword}%");
             });
         }
 
@@ -56,11 +56,11 @@ class EnrollmentExport implements FromQuery, WithHeadings, WithMapping
     {
         return [
             $enrollment->id,
-            $enrollment->murid?->nama ?? '-',
+            $enrollment->murid?->nama_lengkap ?? '-',
             $enrollment->program?->nama ?? '-',
             $enrollment->jenjang?->nama ?? '-',
             $enrollment->paket?->nama ?? '-',
-            $enrollment->kelas?->nama ?? '-',
+            $enrollment->kelas->pluck('nama_kelas')->implode(', ') ?: '-',
             $enrollment->status,
             $enrollment->created_at ? $enrollment->created_at->format('Y-m-d') : '-',
         ];

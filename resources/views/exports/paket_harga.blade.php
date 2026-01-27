@@ -21,9 +21,9 @@
         @foreach($items as $index => $item)
         <tr>
             <td>{{ $index + 1 }}</td>
-            <td>{{ $item->program?->nama ?? '-' }}</td>
-            <td>{{ $item->jenjang?->nama ?? '-' }}</td>
-            <td>{{ $item->paket?->nama ?? '-' }}</td>
+            <td>{{ data_get($item, 'program.nama', '-') }}</td>
+            <td>{{ data_get($item, 'jenjang.nama', '-') }}</td>
+            <td>{{ data_get($item, 'paket.nama', '-') }}</td>
             <td>{{ $item->min_siswa }} - {{ $item->max_siswa }}</td>
             <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
             <td>{{ $item->effective_from ? $item->effective_from->format('d/m/Y') : '-' }}</td>

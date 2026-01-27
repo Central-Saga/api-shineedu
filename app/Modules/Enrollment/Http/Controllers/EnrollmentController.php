@@ -160,16 +160,15 @@ class EnrollmentController extends Controller
             $query->chunk(100, function ($items) use ($handle) {
                 foreach ($items as $item) {
                     $sql = sprintf(
-                        "INSERT INTO enrollments (id, murid_id, program_id, jenjang_id, paket_id, kelas_id, status, created_at, updated_at) VALUES (%d, %d, %d, %d, %d, %s, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                        "INSERT INTO enrollments (id, murid_id, program_id, jenjang_id, paket_id, status, created_at, updated_at) VALUES (%d, %d, %d, %d, %d, '%s', %s, %s) ON DUPLICATE KEY UPDATE status=VALUES(status), updated_at=VALUES(updated_at);\n",
                         $item->id,
                         $item->murid_id,
                         $item->program_id,
                         $item->jenjang_id,
                         $item->paket_id,
-                        $item->kelas_id ?? 'NULL',
                         $item->status,
-                        $item->created_at,
-                        $item->updated_at
+                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
                     );
                     fwrite($handle, $sql);
                 }

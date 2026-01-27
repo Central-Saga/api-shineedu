@@ -181,12 +181,12 @@ class MuridController extends Controller
                         addslashes((string)$murid->no_hp_wali),
                         addslashes((string)$murid->email_wali),
                         addslashes((string)$murid->hubungan_wali),
-                        addslashes((string)$murid->status),
-                        addslashes((string)$murid->created_at),
-                        addslashes((string)$murid->updated_at),
+                        $murid->status,
+                        $murid->created_at ? "'" . $murid->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $murid->updated_at ? "'" . $murid->updated_at->format('Y-m-d H:i:s') . "'" : "NULL",
                     ];
                     $sql = sprintf(
-                        "INSERT INTO murid (id, kode_murid, nama_lengkap, jenis_kelamin, tanggal_lahir, no_hp, email, alamat, jenjang_id, sekolah_asal, kelas_sekolah, nama_wali, no_hp_wali, email_wali, hubungan_wali, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', %s, '%s', '%s', '%s', %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') ON DUPLICATE KEY UPDATE nama_lengkap=VALUES(nama_lengkap), status=VALUES(status);\n",
+                        "INSERT INTO murid (id, kode_murid, nama_lengkap, jenis_kelamin, tanggal_lahir, no_hp, email, alamat, jenjang_id, sekolah_asal, kelas_sekolah, nama_wali, no_hp_wali, email_wali, hubungan_wali, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', %s, '%s', '%s', '%s', %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s, %s) ON DUPLICATE KEY UPDATE nama_lengkap=VALUES(nama_lengkap), status=VALUES(status);\n",
                         ...$vals
                     );
                     fwrite($handle, $sql);

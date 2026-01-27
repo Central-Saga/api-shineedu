@@ -21,11 +21,12 @@
         @foreach($items as $index => $item)
         <tr>
             <td>{{ $index + 1 }}</td>
-            <td>{{ $item->murid?->nama ?? '-' }}</td>
-            <td>{{ $item->program?->nama ?? '-' }}</td>
-            <td>{{ $item->jenjang?->nama ?? '-' }}</td>
-            <td>{{ $item->paket?->nama ?? '-' }}</td>
-            <td>{{ $item->kelas?->nama ?? '-' }}</td>
+            <td>{{ data_get($item, 'murid.nama_lengkap', '-') }}</td>
+            <td>{{ data_get($item, 'program.nama', '-') }}</td>
+            <td>{{ data_get($item, 'jenjang.nama', '-') }}</td>
+            <td>{{ data_get($item, 'paket.nama', '-') }}</td>
+            <td>{{ $item->kelas instanceof \Illuminate\Support\Collection ?
+                $item->kelas->pluck('nama_kelas')->implode(', ') : ($item->kelas?->nama_kelas ?? '-') }}</td>
             <td>{{ $item->status }}</td>
             <td>{{ $item->created_at ? $item->created_at->format('d/m/Y') : '-' }}</td>
         </tr>

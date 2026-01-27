@@ -155,14 +155,14 @@ class ProgramController
                 /** @var Program $item */
                 foreach ($items as $item) {
                     $sql = sprintf(
-                        "INSERT INTO program (id, kode, nama, deskripsi, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s') ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), deskripsi=VALUES(deskripsi), status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                        "INSERT INTO program (id, kode, nama, deskripsi, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', '%s', %s, %s) ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), deskripsi=VALUES(deskripsi), status=VALUES(status), updated_at=VALUES(updated_at);\n",
                         $item->id,
                         addslashes($item->kode),
                         addslashes($item->nama),
                         addslashes((string)$item->deskripsi),
                         $item->status,
-                        $item->created_at,
-                        $item->updated_at
+                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
                     );
                     fwrite($handle, $sql);
                 }

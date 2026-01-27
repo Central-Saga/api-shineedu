@@ -128,39 +128,33 @@ Route::prefix('v2')->group(function () {
         // Catalog (Jenjang, Program, Paket, Harga)
         Route::prefix('catalog')->group(function () {
             // Jenjang
-            Route::apiResource('jenjang', \App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class)
-                ->middleware(['permission:catalog.jenjang.view', 'permission:catalog.jenjang.create', 'permission:catalog.jenjang.update', 'permission:catalog.jenjang.delete', 'permission:catalog.jenjang.view']); // Granular check handled in Request for store/update but middleware usually good for base access or strictly resource map
-
-            // Actually, better to map manually if we want strict per-action middleware or rely on the controller/request authorization.
-            // Existing pattern seems to attach middleware to routes directly.
-
-            Route::get('jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'index'])->middleware('permission:catalog.jenjang.view');
             Route::get('jenjang/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'export'])->middleware('permission:catalog.jenjang.view');
+            Route::get('jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'index'])->middleware('permission:catalog.jenjang.view');
             Route::post('jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'store'])->middleware('permission:catalog.jenjang.create');
             Route::get('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'show'])->middleware('permission:catalog.jenjang.view');
             Route::put('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'update'])->middleware('permission:catalog.jenjang.update');
             Route::delete('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'destroy'])->middleware('permission:catalog.jenjang.delete');
 
             // Program
-            Route::get('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'index'])->middleware('permission:catalog.program.view');
             Route::get('program/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'export'])->middleware('permission:catalog.program.view');
+            Route::get('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'index'])->middleware('permission:catalog.program.view');
             Route::post('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'store'])->middleware('permission:catalog.program.create');
             Route::get('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'show'])->middleware('permission:catalog.program.view');
             Route::put('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'update'])->middleware('permission:catalog.program.update');
             Route::delete('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'destroy'])->middleware('permission:catalog.program.delete');
 
             // Paket
-            Route::get('paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'index'])->middleware('permission:catalog.paket.view');
             Route::get('paket/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'export'])->middleware('permission:catalog.paket.view');
+            Route::get('paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'index'])->middleware('permission:catalog.paket.view');
             Route::post('paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'store'])->middleware('permission:catalog.paket.create');
             Route::get('paket/{paket}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'show'])->middleware('permission:catalog.paket.view');
             Route::put('paket/{paket}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'update'])->middleware('permission:catalog.paket.update');
             Route::delete('paket/{paket}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'destroy'])->middleware('permission:catalog.paket.delete');
 
             // Paket Harga
+            Route::get('harga/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'export'])->middleware('permission:catalog.pricing.view');
             Route::get('harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup'])->middleware('permission:catalog.harga.lookup');
             Route::get('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index'])->middleware('permission:catalog.pricing.view');
-            Route::get('harga/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'export'])->middleware('permission:catalog.pricing.view');
             Route::post('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'store'])->middleware('permission:catalog.pricing.create');
             Route::get('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'show'])->middleware('permission:catalog.pricing.view');
             Route::put('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'update'])->middleware('permission:catalog.pricing.update');

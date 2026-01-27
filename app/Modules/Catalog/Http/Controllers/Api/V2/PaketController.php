@@ -145,7 +145,7 @@ class PaketController
             $query->chunk(100, function ($items) use ($handle) {
                 foreach ($items as $item) {
                     $sql = sprintf(
-                        "INSERT INTO paket (id, kode, nama, tipe, pertemuan_per_bulan, durasi_menit, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', %d, %d, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), tipe=VALUES(tipe), pertemuan_per_bulan=VALUES(pertemuan_per_bulan), durasi_menit=VALUES(durasi_menit), status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                        "INSERT INTO paket (id, kode, nama, tipe, pertemuan_per_bulan, durasi_menit, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', %d, %d, '%s', %s, %s) ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), tipe=VALUES(tipe), pertemuan_per_bulan=VALUES(pertemuan_per_bulan), durasi_menit=VALUES(durasi_menit), status=VALUES(status), updated_at=VALUES(updated_at);\n",
                         $item->id,
                         addslashes($item->kode),
                         addslashes($item->nama),
@@ -153,8 +153,8 @@ class PaketController
                         $item->pertemuan_per_bulan,
                         $item->durasi_menit,
                         $item->status,
-                        $item->created_at,
-                        $item->updated_at
+                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
                     );
                     fwrite($handle, $sql);
                 }

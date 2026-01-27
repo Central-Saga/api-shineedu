@@ -18,7 +18,7 @@ class KelasExport implements FromQuery, WithHeadings, WithMapping
 
     public function query()
     {
-        $query = Kelas::query()->with(['program', 'jenjang']);
+        $query = Kelas::query()->with(['program', 'jenjang'])->withCount('schedules as jumlah_sesi');
 
         if ($keyword = $this->request->get('q')) {
             $query->where(function ($q) use ($keyword) {

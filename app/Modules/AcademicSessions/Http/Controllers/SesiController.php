@@ -162,16 +162,17 @@ class SesiController
             $query->chunk(100, function ($items) use ($handle) {
                 foreach ($items as $item) {
                     $sql = sprintf(
-                        "INSERT INTO realisasi_jadwal_kerja (id, kelas_id, tanggal, jam_mulai_aktual, jam_selesai_aktual, guru_pengajar_id, status_sesi, created_at, updated_at) VALUES (%d, %d, '%s', '%s', '%s', %d, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE status_sesi=VALUES(status_sesi), updated_at=VALUES(updated_at);\n",
+                        "INSERT INTO realisasi_jadwal_kerja (id, kelas_id, tanggal, jam_mulai_aktual, jam_selesai_aktual, guru_pengajar_id, guru_pengganti_id, status_sesi, created_at, updated_at) VALUES (%d, %d, %s, '%s', '%s', %s, %s, '%s', %s, %s) ON DUPLICATE KEY UPDATE status_sesi=VALUES(status_sesi), updated_at=VALUES(updated_at);\n",
                         $item->id,
                         $item->kelas_id,
-                        $item->tanggal->format('Y-m-d'),
+                        $item->tanggal ? "'" . $item->tanggal->format('Y-m-d') . "'" : "NULL",
                         $item->jam_mulai_aktual,
                         $item->jam_selesai_aktual,
-                        $item->guru_pengajar_id,
+                        $item->guru_pengajar_id ?? "NULL",
+                        $item->guru_pengganti_id ?? "NULL",
                         $item->status_sesi,
-                        $item->created_at,
-                        $item->updated_at
+                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
                     );
                     fwrite($handle, $sql);
                 }

@@ -153,11 +153,11 @@ class KelasController extends Controller
                         $kelas->periode_selesai ? "'" . $kelas->periode_selesai->format('Y-m-d') . "'" : 'NULL',
                         addslashes((string)$kelas->ruangan_default),
                         $kelas->created_by ?? 'NULL',
-                        addslashes((string)$kelas->created_at),
-                        addslashes((string)$kelas->updated_at),
+                        $kelas->created_at ? "'" . $kelas->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                        $kelas->updated_at ? "'" . $kelas->updated_at->format('Y-m-d H:i:s') . "'" : "NULL",
                     ];
                     $sql = sprintf(
-                        "INSERT INTO kelas (id, kode_kelas, nama_kelas, program_id, jenjang_id, tipe_kelas, mode_private, kapasitas, status, periode_mulai, periode_selesai, ruangan_default, created_by, created_at, updated_at) VALUES (%d, '%s', '%s', %s, %s, '%s', %d, %s, '%s', %s, %s, '%s', %s, '%s', '%s') ON DUPLICATE KEY UPDATE nama_kelas=VALUES(nama_kelas), status=VALUES(status);\n",
+                        "INSERT INTO kelas (id, kode_kelas, nama_kelas, program_id, jenjang_id, tipe_kelas, mode_private, kapasitas, status, periode_mulai, periode_selesai, ruangan_default, created_by, created_at, updated_at) VALUES (%d, '%s', '%s', %s, %s, '%s', %d, %s, '%s', %s, %s, '%s', %s, %s, %s) ON DUPLICATE KEY UPDATE nama_kelas=VALUES(nama_kelas), status=VALUES(status);\n",
                         ...$vals
                     );
                     fwrite($handle, $sql);

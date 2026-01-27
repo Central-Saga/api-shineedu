@@ -21,7 +21,8 @@
             <td>{{ $index + 1 }}</td>
             <td>{{ $item->kode }}</td>
             <td>{{ $item->nama }}</td>
-            <td>{{ $item->jenjangs->pluck('nama')->implode(', ') ?: '-' }}</td>
+            <td>{{ $item->jenjangs instanceof \Illuminate\Support\Collection ?
+                $item->jenjangs->pluck('nama')->implode(', ') : '-' }}</td>
             <td>
                 <span class="status-badge" style="background-color: {{ strtolower($item->status) === 'aktif' ? '#dcfce7' : '#fee2e2' }};
                            color: {{ strtolower($item->status) === 'aktif' ? '#166534' : '#991b1b' }};">

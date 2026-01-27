@@ -35,8 +35,8 @@
                 </span>
             </td>
             <td>
-                {{ $k->periode_mulai ? date('d/m/Y', strtotime($k->periode_mulai)) : '?' }} -
-                {{ $k->periode_selesai ? date('d/m/Y', strtotime($k->periode_selesai)) : '?' }}
+                {{ $k->periode_mulai ? $k->periode_mulai->format('d/m/Y') : '-' }} -
+                {{ $k->periode_selesai ? $k->periode_selesai->format('d/m/Y') : '-' }}
             </td>
         </tr>
         @endforeach

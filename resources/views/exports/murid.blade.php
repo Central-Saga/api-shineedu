@@ -34,7 +34,7 @@
                     {{ $murid->status }}
                 </span>
             </td>
-            <td>{{ $murid->tanggal_lahir ? date('d/m/Y', strtotime($murid->tanggal_lahir)) : '-' }}</td>
+            <td>{{ $murid->tanggal_lahir ? $murid->tanggal_lahir->format('d/m/Y') : '-' }}</td>
         </tr>
         @endforeach
     </tbody>
