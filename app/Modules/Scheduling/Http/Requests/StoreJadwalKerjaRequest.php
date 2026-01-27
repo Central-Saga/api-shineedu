@@ -24,6 +24,7 @@ class StoreJadwalKerjaRequest extends FormRequest
             'status' => 'required|string|in:Aktif,Non Aktif',
             'ruangan_kelas' => 'nullable|string|max:255',
             'guru_pengajar_id' => 'required|exists:karyawan,id',
+            'kelas_id' => 'nullable|exists:kelas,id',
         ];
     }
 }

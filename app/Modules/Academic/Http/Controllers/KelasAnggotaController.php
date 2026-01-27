@@ -31,7 +31,7 @@ class KelasAnggotaController extends Controller
     {
         $kelas = Kelas::findOrFail($id);
 
-        $updatedKelas = $this->kelasService->addAnggota($kelas, $request->input('enrollment_ids'));
+        $updatedKelas = $this->kelasService->addAnggota($kelas, $request->validated());
 
         return ApiResponse::ok(new KelasResource($updatedKelas), 'Anggota berhasil ditambahkan');
     }

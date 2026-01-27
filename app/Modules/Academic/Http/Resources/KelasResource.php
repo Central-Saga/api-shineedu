@@ -12,6 +12,8 @@ class KelasResource extends JsonResource
             'id' => $this->id,
             'kode_kelas' => $this->kode_kelas,
             'nama_kelas' => $this->nama_kelas,
+            'program_id' => $this->program_id,
+            'jenjang_id' => $this->jenjang_id,
             'program' => $this->whenLoaded('program'),
             'jenjang' => $this->whenLoaded('jenjang'),
             'tipe_kelas' => $this->tipe_kelas,
@@ -25,6 +27,7 @@ class KelasResource extends JsonResource
             'created_by' => $this->whenLoaded('creator'),
             'enrollments_count' => $this->when(isset($this->enrollments_count), $this->enrollments_count),
             'enrollments' => $this->whenLoaded('enrollments'), // Will include pivot and enrollment details
+            'schedules' => \App\Modules\Scheduling\Http\Resources\JadwalKerjaResource::collection($this->whenLoaded('schedules')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

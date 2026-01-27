@@ -11,25 +11,37 @@ class SesiService
 {
     public function getSesiByKelas($kelasId, $filters = [])
     {
-        $query = Session::where('kelas_id', $kelasId)
-            ->with(['guruPengajar', 'jadwal']); // Eager load
+        $query = Session::query()
+            ->select('realisasi_jadwal_kerja.*')
+            ->join('jadwal_kerja', 'jadwal_kerja.id', '=', 'realisasi_jadwal_kerja.jadwal_kerja_id')
+            ->where('jadwal_kerja.kelas_id', $kelasId)
+            ->with(['guruPengajar.user', 'jadwal']); // Eager load
 
         if (!empty($filters['start_date'])) {
-            $query->whereDate('tanggal', '>=', $filters['start_date']);
+            $query->whereDate('realisasi_jadwal_kerja.tanggal', '>=', $filters['start_date']);
         }
         if (!empty($filters['end_date'])) {
-            $query->whereDate('tanggal', '<=', $filters['end_date']);
+            $query->whereDate('realisasi_jadwal_kerja.tanggal', '<=', $filters['end_date']);
         }
         if (!empty($filters['status_sesi'])) {
-            $query->where('status_sesi', $filters['status_sesi']);
+            $query->where('realisasi_jadwal_kerja.status_sesi', $filters['status_sesi']);
         }
 
-        return $query->orderBy('tanggal', 'asc')->paginate($filters['per_page'] ?? 15);
+        return $query->orderBy('realisasi_jadwal_kerja.tanggal', 'asc')->paginate($filters['per_page'] ?? 15);
     }
 
     public function findById($id)
     {
-        return Session::with(['kelas', 'guruPengajar', 'guruPengganti', 'jadwal', 'logbook', 'logbookMurid', 'absensi.enrollment.student'])->findOrFail($id);
+        return Session::with([
+            'kelas.program',
+            'kelas.jenjang',
+            'guruPengajar.user',
+            'guruPengganti.user',
+            'jadwal',
+            'logbook',
+            'logbookMurid.enrollment.murid',
+            'absensi.enrollment.murid'
+        ])->findOrFail($id);
     }
 
     public function update($id, array $data, $userId)
@@ -63,10 +75,15 @@ class SesiService
     {
         $session = Session::findOrFail($sessionId);
 
+        $kelasId = $session->kelas_id ?? $session->jadwal?->kelas_id;
+
+        if (!$kelasId) {
+            return 0; // Or throw error
+        }
+
         // Get active members of the class
-        // Use insertIgnore or firstOrCreate
         $activeEnrollments = DB::table('kelas_enrollment')
-            ->where('kelas_id', $session->kelas_id)
+            ->where('kelas_id', $kelasId)
             ->where('status_anggota', 'Aktif')
             ->pluck('enrollment_id');
 

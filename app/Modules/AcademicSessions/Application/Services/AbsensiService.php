@@ -45,9 +45,49 @@ class AbsensiService
                         'created_by' => $userId
                     ]
                 );
+
+                // If user wants to move to another session
+                if ($item['status'] === 'BATAL' && !empty($item['target_session_id'])) {
+                    $this->moveAttendance($session->id, $enrollmentId, $item['target_session_id'], $userId);
+                }
             }
         });
 
         return true;
+    }
+
+    public function moveAttendance($sourceSessionId, $enrollmentId, $targetSessionId, $userId)
+    {
+        return DB::transaction(function () use ($sourceSessionId, $enrollmentId, $targetSessionId, $userId) {
+            $sourceSession = Session::findOrFail($sourceSessionId);
+            $targetSession = Session::findOrFail($targetSessionId);
+
+            // 1. Mark source as BATAL (Rescheduled)
+            $sourceAttendance = SesiAbsensiMurid::where('realisasi_jadwal_kerja_id', $sourceSessionId)
+                ->where('enrollment_id', $enrollmentId)
+                ->first();
+
+            if ($sourceAttendance) {
+                $sourceAttendance->update([
+                    'status' => 'BATAL',
+                    'catatan' => "[Pindah ke sesi tanggal " . $targetSession->tanggal->format('d/m/Y') . "]"
+                ]);
+            }
+
+            // 2. Upsert in target session
+            $targetAttendance = SesiAbsensiMurid::updateOrCreate(
+                [
+                    'realisasi_jadwal_kerja_id' => $targetSessionId,
+                    'enrollment_id' => $enrollmentId
+                ],
+                [
+                    'status' => 'HADIR',
+                    'created_by' => $userId,
+                    'catatan' => "[Pindahan dari sesi tanggal " . $sourceSession->tanggal->format('d/m/Y') . "]"
+                ]
+            );
+
+            return $targetAttendance;
+        });
     }
 }

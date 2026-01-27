@@ -14,6 +14,7 @@ class JadwalKerja extends Model
     protected $table = 'jadwal_kerja';
 
     protected $fillable = [
+        'kelas_id',
         'kategori',
         'mata_pelajaran',
         'hari',
@@ -32,7 +33,12 @@ class JadwalKerja extends Model
 
     public function guru()
     {
-        return $this->belongsTo(Employee::class, 'guru_pengajar_id');
+        return $this->belongsTo(Employee::class, 'guru_pengajar_id'); // Note: previously migration said users? checking.
+    }
+
+    public function kelas()
+    {
+        return $this->belongsTo(\App\Modules\Academic\Domain\Models\Kelas::class, 'kelas_id');
     }
 
     public function realisasi()

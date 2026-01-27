@@ -51,6 +51,11 @@ class EnrollmentResource extends JsonResource
                     'name' => $this->creator->name,
                 ];
             }),
+            'biaya_pendaftaran_amount' => (float) $this->biaya_pendaftaran_amount,
+            'biaya_pendaftaran_status' => $this->biaya_pendaftaran_status,
+            'biaya_pendaftaran_due_date' => $this->biaya_pendaftaran_due_date,
+            'registration_fee_transaction_id' => $this->registration_fee_transaction_id,
+            'kelas' => \App\Modules\Academic\Http\Resources\KelasResource::collection($this->whenLoaded('kelas')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

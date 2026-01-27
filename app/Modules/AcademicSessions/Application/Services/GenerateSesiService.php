@@ -92,6 +92,14 @@ class GenerateSesiService
             }
         });
 
+        if ($createdCount === 0) {
+            return [
+                'success' => true,
+                'message' => 'Tidak ada sesi baru yang dibuat. Sesi untuk rentang tanggal ini mungkin sudah ada atau tidak ada Master Jadwal yang aktif.',
+                'count' => 0
+            ];
+        }
+
         return [
             'success' => true,
             'message' => "Berhasil generate $createdCount sesi dari tanggal $fromDate s/d $toDate.",

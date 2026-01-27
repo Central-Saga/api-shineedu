@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             UserSeeder::class,
             EmployeeSeeder::class,
+            KatalogSeeder::class,
+            RealisticBalineseSeeder::class,
         ]);
     }
 }

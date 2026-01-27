@@ -17,7 +17,7 @@ class SesiAbsensiController
     public function index($id): JsonResponse
     {
         $absensi = SesiAbsensiMurid::where('realisasi_jadwal_kerja_id', $id)
-            ->with(['enrollment.student', 'createdBy']) // Adjust relations if needed
+            ->with(['enrollment.murid', 'createdBy']) // Adjust relations if needed
             ->get();
 
         return ApiResponse::ok(
@@ -38,5 +38,22 @@ class SesiAbsensiController
         $this->absensiService->bulkUpdate($id, $request->input('items'), auth()->id());
 
         return ApiResponse::ok(null, 'Absensi berhasil diperbarui');
+    }
+
+    public function moveAttendance(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'enrollment_id' => 'required|exists:kelas_enrollment,enrollment_id',
+            'target_session_id' => 'required|exists:realisasi_jadwal_kerja,id'
+        ]);
+
+        $this->absensiService->moveAttendance(
+            $id,
+            $request->input('enrollment_id'),
+            $request->input('target_session_id'),
+            auth()->id()
+        );
+
+        return ApiResponse::ok(null, 'Murid berhasil dipindahkan ke sesi lain');
     }
 }

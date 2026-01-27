@@ -18,13 +18,9 @@ class UpdateEnrollmentRequest extends FormRequest
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
             'status' => ['nullable', 'string', 'in:Aktif,Pause,Selesai,Cancel'],
             'catatan' => ['nullable', 'string'],
-            // Generally we avoid changing pricing-related IDs (program, jenjang, paket) on update
-            // unless we want to trigger price recalculation logic which is complex.
-            // For now, I'll allow updating them but the Service `update` method currently just does a fill/update.
-            // If the user changes paket_id, the price `harga_final` currently WON'T update automatically based on my Service code.
-            // I should prob restrict these or update service.
-            // Given the prompt "Enrollment adalah kontrak", modifying the core contract usually requires a new enrollment or specific logic.
-            // I will keep validation open but note that implementation in service is simple update.
+            'biaya_pendaftaran_amount' => ['nullable', 'numeric', 'min:0'],
+            'biaya_pendaftaran_status' => ['nullable', 'string', 'in:UNPAID,PAID,WAIVED'],
+            'biaya_pendaftaran_due_date' => ['nullable', 'date'],
         ];
     }
 }

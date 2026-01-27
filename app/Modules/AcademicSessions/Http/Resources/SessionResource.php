@@ -12,7 +12,15 @@ class SessionResource extends JsonResource
         return [
             'id' => $this->id,
             'kelas_id' => $this->kelas_id,
-            'kelas_nama' => $this->whenLoaded('kelas', fn() => $this->kelas->nama),
+            'kelas' => $this->whenLoaded('kelas', function () {
+                return [
+                    'id' => $this->kelas->id,
+                    'nama_kelas' => $this->kelas->nama_kelas ?? $this->kelas->program->nama ?? 'Kelas', // Fallback
+                    'tipe_kelas' => $this->kelas->tipe_kelas,
+                    'program' => $this->kelas->program ? ['nama' => $this->kelas->program->nama] : null,
+                    'jenjang' => $this->kelas->jenjang ? ['nama' => $this->kelas->jenjang->nama] : null,
+                ];
+            }),
             'jadwal_kerja_id' => $this->jadwal_kerja_id,
             'tanggal' => $this->tanggal->format('Y-m-d'),
             'hari_indo' => $this->tanggal->isoFormat('dddd'),

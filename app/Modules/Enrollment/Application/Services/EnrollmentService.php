@@ -127,7 +127,8 @@ class EnrollmentService
                 'status' => 'Aktif',
                 'catatan' => $data['catatan'] ?? null,
                 'biaya_pendaftaran_amount' => $regFeeAmount,
-                'biaya_pendaftaran_status' => $regFeeStatus,
+                'biaya_pendaftaran_status' => $data['biaya_pendaftaran_status'] ?? $regFeeStatus,
+                'biaya_pendaftaran_due_date' => $data['biaya_pendaftaran_due_date'] ?? null,
                 'created_by' => auth()->id(),
             ]);
 
@@ -140,7 +141,7 @@ class EnrollmentService
      */
     public function show(Enrollment $enrollment): Enrollment
     {
-        return $enrollment->load(['murid', 'program', 'jenjang', 'paket', 'creator']);
+        return $enrollment->load(['murid', 'program', 'jenjang', 'paket', 'creator', 'kelas.schedules.guru.user']);
     }
 
     /**
@@ -162,6 +163,19 @@ class EnrollmentService
     public function delete(Enrollment $enrollment): void
     {
         $enrollment->delete();
+    }
+
+    /**
+     * Update Registration Fee Status.
+     */
+    public function updateRegistrationFeeStatus(Enrollment $enrollment, array $data): Enrollment
+    {
+        $enrollment->update([
+            'biaya_pendaftaran_status' => $data['status'],
+            'biaya_pendaftaran_due_date' => $data['due_date'] ?? $enrollment->biaya_pendaftaran_due_date,
+        ]);
+
+        return $enrollment;
     }
 
     protected function generateKodeEnrollment(): string

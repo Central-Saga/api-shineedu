@@ -24,6 +24,7 @@ class UpdateJadwalKerjaRequest extends FormRequest
             'status' => 'sometimes|required|string|in:Aktif,Non Aktif',
             'ruangan_kelas' => 'nullable|string|max:255',
             'guru_pengajar_id' => 'sometimes|required|exists:karyawan,id',
+            'kelas_id' => 'nullable|exists:kelas,id',
         ];
     }
 }

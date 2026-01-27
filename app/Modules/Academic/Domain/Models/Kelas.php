@@ -64,4 +64,9 @@ class Kelas extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(\App\Modules\Scheduling\Domain\Models\JadwalKerja::class, 'kelas_id');
+    }
 }
