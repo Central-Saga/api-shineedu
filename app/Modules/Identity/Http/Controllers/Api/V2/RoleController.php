@@ -160,6 +160,10 @@ class RoleController
             return $this->exportSql($request, $filename);
         }
 
+        if ($format === 'txt') {
+            return $this->exportTxt($request, $filename);
+        }
+
         if ($format === 'pdf') {
             $exporter = new \App\Exports\RolesExport($request);
             $roles = $exporter->query()->get();
@@ -174,11 +178,34 @@ class RoleController
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };
 
-        return Excel::download(new \App\Exports\RolesExport($request), $filename . '.' . $format, $ext);
+        return Excel::download(new \App\Exports\RolesExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
+    }
+
+    /**
+     * Helper to export TXT.
+     */
+    protected function exportTxt(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new \App\Exports\RolesExport($request);
+            $handle = fopen('php://output', 'w');
+
+            // Headings
+            fwrite($handle, implode("\t", $exporter->headings()) . "\n");
+
+            $exporter->query()->chunk(100, function ($roles) use ($handle, $exporter) {
+                foreach ($roles as $role) {
+                    fwrite($handle, implode("\t", $exporter->map($role)) . "\n");
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.txt', [
+            'Content-Type' => 'text/plain',
+        ]);
     }
 
     /**

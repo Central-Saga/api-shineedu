@@ -59,6 +59,7 @@ class AbsensiController
             return ApiResponse::fail('User is not linked to an employee record', 400);
         }
 
+        /** @var Absensi|null $absensi */
         $absensi = Absensi::where('karyawan_id', $employee->id)
             ->where('tanggal', now()->format('Y-m-d'))
             ->first();
@@ -127,6 +128,7 @@ class AbsensiController
         }
 
         // Check if already checked in today
+        /** @var Absensi|null $existing */
         $existing = Absensi::where('karyawan_id', $employee->id)
             ->where('tanggal', now()->format('Y-m-d'))
             ->first();
@@ -183,6 +185,7 @@ class AbsensiController
             return ApiResponse::fail('User is not linked to an employee record', 400);
         }
 
+        /** @var Absensi|null $absensi */
         $absensi = Absensi::where('karyawan_id', $employee->id)
             ->where('tanggal', now()->format('Y-m-d'))
             ->first();
@@ -228,6 +231,14 @@ class AbsensiController
         $format = $request->get('export', 'xlsx');
         $filename = 'absensi_' . date('Ymd_His');
 
+        if ($format === 'sql') {
+            return $this->exportSql($request, $filename);
+        }
+
+        if ($format === 'txt') {
+            return $this->exportTxt($request, $filename);
+        }
+
         if ($format === 'pdf') {
             $exporter = new AbsensiExport($request);
             $items = $exporter->query()->get();
@@ -242,10 +253,80 @@ class AbsensiController
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };
 
-        return Excel::download(new AbsensiExport($request), $filename . '.' . $format, $ext);
+        return Excel::download(new AbsensiExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
+    }
+
+    /**
+     * Helper to export TXT.
+     */
+    protected function exportTxt(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new AbsensiExport($request);
+            $handle = fopen('php://output', 'w');
+
+            // Headings
+            fwrite($handle, implode("\t", $exporter->headings()) . "\n");
+
+            $exporter->query()->chunk(100, function ($items) use ($handle, $exporter) {
+                foreach ($items as $item) {
+                    fwrite($handle, implode("\t", $exporter->map($item)) . "\n");
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.txt', [
+            'Content-Type' => 'text/plain',
+        ]);
+    }
+
+    /**
+     * Helper to export SQL.
+     */
+    protected function exportSql(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new AbsensiExport($request);
+            $query = $exporter->query();
+
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, "-- Shine Education Bali - Absensi Data Export\n");
+            fwrite($handle, "-- Generated at " . date('Y-m-d H:i:s') . "\n\n");
+            fwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
+            $query->chunk(100, function ($absensis) use ($handle) {
+                /** @var Absensi $absensi */
+                foreach ($absensis as $absensi) {
+                    $vals = [
+                        $absensi->id,
+                        $absensi->karyawan_id,
+                        addslashes((string)$absensi->tanggal),
+                        $absensi->jam_masuk ? "'" . addslashes((string)$absensi->jam_masuk) . "'" : 'NULL',
+                        $absensi->jam_pulang ? "'" . addslashes((string)$absensi->jam_pulang) . "'" : 'NULL',
+                        addslashes((string)$absensi->status_kehadiran),
+                        addslashes((string)$absensi->sumber_absen),
+                        $absensi->durasi ?? 'NULL',
+                        $absensi->latitude ?? 'NULL',
+                        $absensi->longitude ?? 'NULL',
+                        $absensi->created_at ? "'" . addslashes((string)$absensi->created_at) . "'" : 'NULL',
+                        $absensi->updated_at ? "'" . addslashes((string)$absensi->updated_at) . "'" : 'NULL',
+                    ];
+                    $sql = sprintf(
+                        "INSERT INTO absensi (id, karyawan_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, sumber_absen, durasi, latitude, longitude, created_at, updated_at) VALUES (%d, %d, '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s);\n",
+                        ...$vals
+                    );
+                    fwrite($handle, $sql);
+                }
+            });
+
+            fwrite($handle, "\nSET FOREIGN_KEY_CHECKS=1;\n");
+            fclose($handle);
+        }, $filename . '.sql', [
+            'Content-Type' => 'application/sql',
+        ]);
     }
 }

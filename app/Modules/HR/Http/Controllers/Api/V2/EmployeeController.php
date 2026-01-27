@@ -161,6 +161,10 @@ class EmployeeController
             return $this->exportSql($request, $filename);
         }
 
+        if ($format === 'txt') {
+            return $this->exportTxt($request, $filename);
+        }
+
         if ($format === 'pdf') {
             $exporter = new EmployeesExport($request);
             $employees = $exporter->query()->get();
@@ -175,11 +179,34 @@ class EmployeeController
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };
 
-        return Excel::download(new EmployeesExport($request), $filename . '.' . $format, $ext);
+        return Excel::download(new EmployeesExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
+    }
+
+    /**
+     * Helper to export TXT.
+     */
+    protected function exportTxt(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new EmployeesExport($request);
+            $handle = fopen('php://output', 'w');
+
+            // Headings
+            fwrite($handle, implode("\t", $exporter->headings()) . "\n");
+
+            $exporter->query()->chunk(100, function ($employees) use ($handle, $exporter) {
+                foreach ($employees as $employee) {
+                    fwrite($handle, implode("\t", $exporter->map($employee)) . "\n");
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.txt', [
+            'Content-Type' => 'text/plain',
+        ]);
     }
 
     /**

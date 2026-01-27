@@ -119,6 +119,7 @@ Route::prefix('v2')->group(function () {
 
         // Murid
         Route::get('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'index'])->middleware('permission:student.view');
+        Route::get('/murid/export', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'export'])->middleware('permission:student.view');
         Route::post('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'store'])->middleware('permission:student.create');
         Route::get('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'show'])->middleware('permission:student.view');
         Route::put('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'update'])->middleware('permission:student.update');
@@ -134,6 +135,7 @@ Route::prefix('v2')->group(function () {
             // Existing pattern seems to attach middleware to routes directly.
 
             Route::get('jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'index'])->middleware('permission:catalog.jenjang.view');
+            Route::get('jenjang/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'export'])->middleware('permission:catalog.jenjang.view');
             Route::post('jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'store'])->middleware('permission:catalog.jenjang.create');
             Route::get('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'show'])->middleware('permission:catalog.jenjang.view');
             Route::put('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'update'])->middleware('permission:catalog.jenjang.update');
@@ -141,6 +143,7 @@ Route::prefix('v2')->group(function () {
 
             // Program
             Route::get('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'index'])->middleware('permission:catalog.program.view');
+            Route::get('program/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'export'])->middleware('permission:catalog.program.view');
             Route::post('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'store'])->middleware('permission:catalog.program.create');
             Route::get('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'show'])->middleware('permission:catalog.program.view');
             Route::put('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'update'])->middleware('permission:catalog.program.update');
@@ -148,6 +151,7 @@ Route::prefix('v2')->group(function () {
 
             // Paket
             Route::get('paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'index'])->middleware('permission:catalog.paket.view');
+            Route::get('paket/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'export'])->middleware('permission:catalog.paket.view');
             Route::post('paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'store'])->middleware('permission:catalog.paket.create');
             Route::get('paket/{paket}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'show'])->middleware('permission:catalog.paket.view');
             Route::put('paket/{paket}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'update'])->middleware('permission:catalog.paket.update');
@@ -155,15 +159,17 @@ Route::prefix('v2')->group(function () {
 
             // Paket Harga
             Route::get('harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup'])->middleware('permission:catalog.harga.lookup');
-            Route::get('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index'])->middleware('permission:catalog.harga.view');
-            Route::post('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'store'])->middleware('permission:catalog.harga.create');
-            Route::get('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'show'])->middleware('permission:catalog.harga.view');
-            Route::put('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'update'])->middleware('permission:catalog.harga.update');
-            Route::delete('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'destroy'])->middleware('permission:catalog.harga.delete');
+            Route::get('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index'])->middleware('permission:catalog.pricing.view');
+            Route::get('harga/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'export'])->middleware('permission:catalog.pricing.view');
+            Route::post('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'store'])->middleware('permission:catalog.pricing.create');
+            Route::get('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'show'])->middleware('permission:catalog.pricing.view');
+            Route::put('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'update'])->middleware('permission:catalog.pricing.update');
+            Route::delete('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'destroy'])->middleware('permission:catalog.pricing.delete');
         });
 
         // Enrollments
         Route::get('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:enrollment.view');
+        Route::get('/enrollments/export', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'export'])->middleware('permission:enrollment.view');
         Route::post('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'store'])->middleware('permission:enrollment.create');
         Route::get('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'show'])->middleware('permission:enrollment.view');
         Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
@@ -172,6 +178,7 @@ Route::prefix('v2')->group(function () {
 
         // Kelas (Academic)
         Route::get('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'index'])->middleware('permission:kelas.view');
+        Route::get('/kelas/export', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'export'])->middleware('permission:kelas.view');
         Route::post('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'store'])->middleware('permission:kelas.create');
         Route::get('/kelas/{id}', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'show'])->middleware('permission:kelas.view');
         Route::put('/kelas/{id}', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'update'])->middleware('permission:kelas.update');
@@ -187,6 +194,8 @@ Route::prefix('v2')->group(function () {
         Route::post('/kelas/{kelasId}/jadwal', [\App\Modules\AcademicSessions\Http\Controllers\JadwalKelasController::class, 'store'])->middleware('permission:schedule.manage');
 
         // Sesi
+        Route::get('/sesi/export', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'export'])->middleware('permission:session.view');
+        Route::get('/kelas/{kelasId}/sesi/export', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'export'])->middleware('permission:session.view');
         Route::get('/kelas/{kelasId}/sesi', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'indexByKelas'])->middleware('permission:session.view');
         Route::post('/kelas/{kelasId}/sesi/generate', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'generate'])->middleware('permission:session.generate');
         Route::get('/kelas/{kelasId}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'indexByKelas'])->middleware('permission:session.logbook.manage');

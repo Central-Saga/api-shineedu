@@ -76,11 +76,18 @@ class CutiController
 
         return ApiResponse::ok(null, 'Data cuti berhasil dihapus');
     }
-
     public function export(Request $request)
     {
         $format = $request->get('export', 'xlsx');
         $filename = 'cuti_' . date('Ymd_His');
+
+        if ($format === 'sql') {
+            return $this->exportSql($request, $filename);
+        }
+
+        if ($format === 'txt') {
+            return $this->exportTxt($request, $filename);
+        }
 
         if ($format === 'pdf') {
             $exporter = new CutiExport($request);
@@ -96,11 +103,79 @@ class CutiController
             'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
             'csv' => \Maatwebsite\Excel\Excel::CSV,
             'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            'txt' => \Maatwebsite\Excel\Excel::TSV,
             default => \Maatwebsite\Excel\Excel::XLSX,
         };
 
-        return Excel::download(new CutiExport($request), $filename . '.' . $format, $ext);
+        return Excel::download(new CutiExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
+    }
+
+    /**
+     * Helper to export TXT.
+     */
+    protected function exportTxt(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new CutiExport($request);
+            $handle = fopen('php://output', 'w');
+
+            // Headings
+            fwrite($handle, implode("\t", $exporter->headings()) . "\n");
+
+            $exporter->query()->chunk(100, function ($items) use ($handle, $exporter) {
+                foreach ($items as $item) {
+                    fwrite($handle, implode("\t", $exporter->map($item)) . "\n");
+                }
+            });
+
+            fclose($handle);
+        }, $filename . '.txt', [
+            'Content-Type' => 'text/plain',
+        ]);
+    }
+
+    /**
+     * Helper to export SQL.
+     */
+    protected function exportSql(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new CutiExport($request);
+            $query = $exporter->query();
+
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, "-- Shine Education Bali - Cuti Data Export\n");
+            fwrite($handle, "-- Generated at " . date('Y-m-d H:i:s') . "\n\n");
+            fwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
+            $query->chunk(100, function ($cutis) use ($handle) {
+                foreach ($cutis as $cuti) {
+                    $vals = [
+                        $cuti->id,
+                        $cuti->karyawan_id,
+                        addslashes((string)$cuti->tanggal_mulai),
+                        addslashes((string)$cuti->tanggal_selesai),
+                        addslashes((string)$cuti->tipe_cuti),
+                        addslashes((string)$cuti->keterangan),
+                        addslashes((string)$cuti->status),
+                        $cuti->approved_by ?? 'NULL',
+                        $cuti->approved_at ? "'" . addslashes((string)$cuti->approved_at) . "'" : 'NULL',
+                        addslashes((string)$cuti->created_at),
+                        addslashes((string)$cuti->updated_at),
+                    ];
+                    $sql = sprintf(
+                        "INSERT INTO cuti (id, karyawan_id, tanggal_mulai, tanggal_selesai, tipe_cuti, keterangan, status, approved_by, approved_at, created_at, updated_at) VALUES (%d, %d, '%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s');\n",
+                        ...$vals
+                    );
+                    fwrite($handle, $sql);
+                }
+            });
+
+            fwrite($handle, "\nSET FOREIGN_KEY_CHECKS=1;\n");
+            fclose($handle);
+        }, $filename . '.sql', [
+            'Content-Type' => 'application/sql',
+        ]);
     }
 
     public function approve(Cuti $cuti): JsonResponse

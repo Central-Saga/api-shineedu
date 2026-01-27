@@ -10,6 +10,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class User extends Authenticatable
 {
@@ -55,7 +57,7 @@ class User extends Authenticatable
     /**
      * Relasi polymorphic dengan anggota (bisa berbagai tipe: Student, Teacher, dll)
      */
-    public function anggota()
+    public function anggota(): MorphTo
     {
         return $this->morphTo();
     }
@@ -63,7 +65,7 @@ class User extends Authenticatable
     /**
      * Relasi dengan data karyawan
      */
-    public function employee()
+    public function employee(): HasOne
     {
         return $this->hasOne(\App\Modules\HR\Domain\Models\Employee::class, 'user_id');
     }

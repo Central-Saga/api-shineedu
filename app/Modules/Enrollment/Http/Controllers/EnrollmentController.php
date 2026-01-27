@@ -10,6 +10,9 @@ use App\Modules\Enrollment\Http\Resources\EnrollmentResource;
 use App\Modules\Enrollment\Domain\Models\Enrollment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EnrollmentExport;
+use App\Shared\Http\Responses\ApiResponse;
 
 class EnrollmentController extends Controller
 {
@@ -97,5 +100,81 @@ class EnrollmentController extends Controller
             'message' => 'Registration fee status updated successfully',
             'data' => new EnrollmentResource($enrollment),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'enrollment_' . date('Ymd_His');
+
+        if ($format === 'sql') {
+            return $this->exportSql($request, $filename);
+        }
+
+        if ($format === 'txt') {
+            return $this->exportTxt($request, $filename);
+        }
+
+        if ($format === 'pdf') {
+            $exporter = new EnrollmentExport($request);
+            $items = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.enrollment', compact('items'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new EnrollmentExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
+    }
+
+    protected function exportTxt(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new EnrollmentExport($request);
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, implode("\t", $exporter->headings()) . "\n");
+            $exporter->query()->chunk(100, function ($items) use ($handle, $exporter) {
+                foreach ($items as $item) {
+                    fwrite($handle, implode("\t", $exporter->map($item)) . "\n");
+                }
+            });
+            fclose($handle);
+        }, $filename . '.txt', ['Content-Type' => 'text/plain']);
+    }
+
+    protected function exportSql(Request $request, string $filename)
+    {
+        return response()->streamDownload(function () use ($request) {
+            $exporter = new EnrollmentExport($request);
+            $query = $exporter->query();
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "-- Enrollment Data Export\n\n");
+            $query->chunk(100, function ($items) use ($handle) {
+                foreach ($items as $item) {
+                    $sql = sprintf(
+                        "INSERT INTO enrollments (id, murid_id, program_id, jenjang_id, paket_id, kelas_id, status, created_at, updated_at) VALUES (%d, %d, %d, %d, %d, %s, '%s', '%s', '%s') ON DUPLICATE KEY UPDATE status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                        $item->id,
+                        $item->murid_id,
+                        $item->program_id,
+                        $item->jenjang_id,
+                        $item->paket_id,
+                        $item->kelas_id ?? 'NULL',
+                        $item->status,
+                        $item->created_at,
+                        $item->updated_at
+                    );
+                    fwrite($handle, $sql);
+                }
+            });
+            fclose($handle);
+        }, $filename . '.sql', ['Content-Type' => 'application/sql']);
     }
 }
