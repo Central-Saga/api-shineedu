@@ -55,6 +55,14 @@ class Enrollment extends Model
         return $this->belongsTo(Murid::class, 'murid_id');
     }
 
+    /**
+     * Alias for murid relationship to prevent "undefined relationship student" error.
+     */
+    public function student()
+    {
+        return $this->murid();
+    }
+
     public function program()
     {
         return $this->belongsTo(Program::class, 'program_id');
@@ -80,5 +88,10 @@ class Enrollment extends Model
         return $this->belongsToMany(\App\Modules\Academic\Domain\Models\Kelas::class, 'kelas_enrollment', 'enrollment_id', 'kelas_id')
             ->withPivot('status_anggota', 'tanggal_masuk', 'tanggal_keluar')
             ->withTimestamps();
+    }
+
+    public function absensi()
+    {
+        return $this->hasMany(\App\Modules\AcademicSessions\Domain\Models\SesiAbsensiMurid::class, 'enrollment_id');
     }
 }

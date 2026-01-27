@@ -189,6 +189,7 @@ Route::prefix('v2')->group(function () {
         // Sesi
         Route::get('/kelas/{kelasId}/sesi', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'indexByKelas'])->middleware('permission:session.view');
         Route::post('/kelas/{kelasId}/sesi/generate', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'generate'])->middleware('permission:session.generate');
+        Route::get('/kelas/{kelasId}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'indexByKelas'])->middleware('permission:session.logbook.manage');
 
         Route::get('/sesi/{id}', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'show'])->middleware('permission:session.view');
         Route::put('/sesi/{id}', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'update'])->middleware('permission:session.update');
@@ -205,5 +206,7 @@ Route::prefix('v2')->group(function () {
 
         Route::get('/sesi/{id}/logbook-murid', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'showStudent'])->middleware('permission:session.logbook.manage');
         Route::put('/sesi/{id}/logbook-murid/bulk', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'bulkUpsertStudent'])->middleware('permission:session.logbook.manage');
+
+        Route::get('/murid/{muridId}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'indexByStudent'])->middleware('permission:session.logbook.manage');
     });
 });

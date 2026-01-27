@@ -93,6 +93,7 @@ class RealisasiJadwalKerjaController
                 RealisasiJadwalKerja::create([
                     'tanggal' => $date->toDateString(),
                     'jadwal_kerja_id' => $schedule->id,
+                    'kelas_id' => $schedule->kelas_id,
                     'status' => 'diajukan',
                     'ruangan_kelas' => $schedule->ruangan_kelas,
                     'guru_pengajar_id' => $schedule->guru_pengajar_id,
