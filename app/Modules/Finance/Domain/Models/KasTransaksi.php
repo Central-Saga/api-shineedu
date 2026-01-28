@@ -43,8 +43,19 @@ class KasTransaksi extends Model implements HasMedia
     {
         $this->addMediaCollection('payment_proof')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'])
-            ->maxFilesize(5 * 1024 * 1024) // 5MB
             ->singleFile(); // Only one proof per transaction
+    }
+
+    /**
+     * Register media conversions (optional)
+     */
+    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(200)
+            ->height(200)
+            ->sharpen(10)
+            ->nonQueued();
     }
 
     // Type constants
