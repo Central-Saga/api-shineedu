@@ -196,11 +196,27 @@ Route::prefix('v2')->group(function () {
                 ->middleware('permission:kas.view');
             Route::post('/transaksi', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'store'])
                 ->middleware('permission:kas.create');
+            Route::get('/transaksi/export', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'export'])
+                ->middleware('permission:kas.view');
 
             // Print routes
             Route::get('/transaksi/{kasTransaksi}/print-thermal', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'printThermal'])
                 ->middleware('permission:kas.view');
             Route::get('/transaksi/{kasTransaksi}/download-receipt', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'downloadReceipt'])
+                ->middleware('permission:kas.view');
+
+            // Shift Management
+            Route::get('/shift', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'index'])
+                ->middleware('permission:kas.view');
+            Route::get('/shift/current', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'current'])
+                ->middleware('permission:kas.view');
+            Route::post('/shift/open', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'open'])
+                ->middleware('permission:kas.create');
+            Route::post('/shift/{id}/close', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'close'])
+                ->middleware('permission:kas.update');
+            Route::get('/shift/{id}/summary', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'summary'])
+                ->middleware('permission:kas.view');
+            Route::get('/shift/{id}/print', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'print'])
                 ->middleware('permission:kas.view');
         });
 
