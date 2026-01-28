@@ -94,6 +94,11 @@ class KasTransaksi extends Model implements HasMedia
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function paketTopup()
+    {
+        return $this->belongsTo(\App\Modules\Enrollment\Domain\Models\PaketMurid::class, 'reference_id');
+    }
+
     // Scopes
 
     public function scopeIncome($query)

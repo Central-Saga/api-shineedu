@@ -15,12 +15,29 @@ class KasTransaksiPrintController extends Controller
      */
     public function printThermal(KasTransaksi $kasTransaksi)
     {
-        // Load relationships
-        $kasTransaksi->load([
-            'enrollment.murid',
-            'enrollment.program',
-            'enrollment.jenjang',
-            'createdBy',
+        // Load createdBy relationship
+        $kasTransaksi->load('createdBy');
+
+        // Load reference-specific relationships based on reference_type
+        if ($kasTransaksi->reference_type === 'paket_topup' && $kasTransaksi->reference_id) {
+            // Load paket topup with enrollment details
+            $kasTransaksi->load([
+                'paketTopup',
+                'paketTopup.enrollment',
+                'paketTopup.enrollment.murid',
+                'paketTopup.enrollment.program',
+                'paketTopup.enrollment.jenjang'
+            ]);
+        }
+
+        // Debug: Log what we have
+        \Log::info('Print Transaction', [
+            'id' => $kasTransaksi->id,
+            'reference_type' => $kasTransaksi->reference_type,
+            'reference_id' => $kasTransaksi->reference_id,
+            'has_paket_topup' => $kasTransaksi->paketTopup ? 'yes' : 'no',
+            'has_enrollment' => $kasTransaksi->paketTopup?->enrollment ? 'yes' : 'no',
+            'pihak' => $kasTransaksi->pihak,
         ]);
 
         // Generate thermal receipt HTML (58mm width)
@@ -40,13 +57,20 @@ class KasTransaksiPrintController extends Controller
      */
     public function downloadReceipt(KasTransaksi $kasTransaksi)
     {
-        // Load relationships
-        $kasTransaksi->load([
-            'enrollment.murid',
-            'enrollment.program',
-            'enrollment.jenjang',
-            'createdBy',
-        ]);
+        // Load createdBy relationship
+        $kasTransaksi->load('createdBy');
+
+        // Load reference-specific relationships based on reference_type
+        if ($kasTransaksi->reference_type === 'paket_topup' && $kasTransaksi->reference_id) {
+            // Load paket topup with enrollment details
+            $kasTransaksi->load([
+                'paketTopup',
+                'paketTopup.enrollment',
+                'paketTopup.enrollment.murid',
+                'paketTopup.enrollment.program',
+                'paketTopup.enrollment.jenjang'
+            ]);
+        }
 
         $pdf = \PDF::loadView('finance.receipt-pdf', [
             'transaction' => $kasTransaksi,
