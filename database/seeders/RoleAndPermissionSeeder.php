@@ -48,6 +48,7 @@ class RoleAndPermissionSeeder extends Seeder
             'enrollment.create',
             'enrollment.update',
             'enrollment.delete',
+            'paket_murid',    // NEW: saldo pertemuan / meeting balance
 
             // Finance & Ops
             'invoices',       // invoice & pembayaran
@@ -83,6 +84,7 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Extra permissions specific to routes
         Permission::firstOrCreate(['name' => 'session.generate', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'paket_murid.adjust', 'guard_name' => 'web']); // Admin-only: manual balance adjustment
 
         // Roles
         $superadmin = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'web']);

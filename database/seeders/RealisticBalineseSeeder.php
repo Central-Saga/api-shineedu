@@ -88,12 +88,13 @@ class RealisticBalineseSeeder extends Seeder
         DB::table('murid')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        DB::transaction(function () use ($balineseNames, $addresses, $schools, $jenjangs, $programs, $pakets) {
+
+        DB::transaction(function () use ($balineseNames, $addresses, $schools, $jenjangs) {
             foreach ($balineseNames as $index => $data) {
                 $jenjang = $jenjangs->random();
 
-                // 1. Create Murid
-                $murid = Murid::updateOrCreate(
+                // 1. Create Murid ONLY
+                Murid::updateOrCreate(
                     ['kode_murid' => 'M' . str_pad($index + 1, 4, '0', STR_PAD_LEFT)],
                     [
                         'nama_lengkap' => $data['nama'],
@@ -111,46 +112,9 @@ class RealisticBalineseSeeder extends Seeder
                         'status' => 'Aktif',
                     ]
                 );
-
-                // 2. Create Enrollment ONLY
-                $numEnrollments = rand(1, 2);
-                for ($i = 0; $i < $numEnrollments; $i++) {
-                    $filteredPrograms = $programs->filter(function ($p) use ($jenjang) {
-                        return str_contains($p->nama, $jenjang->nama);
-                    });
-                    $program = $filteredPrograms->isEmpty() ? $programs->random() : $filteredPrograms->random();
-                    $paket = $pakets->random();
-
-                    $paketHarga = PaketHarga::where([
-                        'program_id' => $program->id,
-                        'jenjang_id' => $jenjang->id,
-                        'paket_id' => $paket->id,
-                    ])->first();
-
-                    $hargaFinal = $paketHarga ? $paketHarga->harga : 500000;
-
-                    $enrollment = Enrollment::updateOrCreate(
-                        [
-                            'murid_id' => $murid->id,
-                            'program_id' => $program->id,
-                            'jenjang_id' => $jenjang->id,
-                        ],
-                        [
-                            'kode_enrollment' => 'E' . Carbon::now()->format('ymd') . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT),
-                            'paket_id' => $paket->id,
-                            'jumlah_siswa' => 1,
-                            'harga_final' => $hargaFinal,
-                            'tanggal_mulai' => Carbon::now()->startOfMonth(),
-                            'status' => 'Aktif',
-                            'biaya_pendaftaran_amount' => 200000,
-                            'biaya_pendaftaran_status' => rand(0, 1) ? 'PAID' : 'UNPAID',
-                            'biaya_pendaftaran_due_date' => Carbon::now()->addDays(7),
-                        ]
-                    );
-                }
             }
         });
 
-        $this->command->info('Seed Berhasil: 20 Murid & Pendaftaran dibuat. Kelas & Jadwal kosong.');
+        $this->command->info('Seed Berhasil: 20 Murid dibuat. Enrollment, Kelas & Jadwal kosong.');
     }
 }
