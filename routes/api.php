@@ -180,6 +180,16 @@ Route::prefix('v2')->group(function () {
         Route::put('/enrollments/{enrollment}/registration-fee-status', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'updateRegistrationFeeStatus'])->middleware('permission:enrollment.update');
         Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
 
+        // Paket Murid (Meetings & Credit)
+        Route::get('/enrollments/{enrollment}/paket-murid', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'index'])
+            ->middleware('permission:enrollment.view');
+        Route::post('/enrollments/{enrollment}/paket-murid', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'store'])
+            ->middleware('permission:paket_murid.create');
+        Route::get('/paket-murid/{paketMurid}/ledger', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'getLedger'])
+            ->middleware('permission:paket_murid.view');
+        Route::post('/paket-murid/{paketMurid}/adjust', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'adjust'])
+            ->middleware('permission:paket_murid.adjust');
+
         // Kelas (Academic)
         Route::get('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'index'])->middleware('permission:kelas.view');
         Route::get('/kelas/export', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'export'])->middleware('permission:kelas.view');
