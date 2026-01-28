@@ -49,4 +49,21 @@ class Murid extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(\App\Modules\Enrollment\Domain\Models\Enrollment::class, 'murid_id');
+    }
+
+    public function absensi()
+    {
+        return $this->hasManyThrough(
+            \App\Modules\AcademicSessions\Domain\Models\SesiAbsensiMurid::class,
+            \App\Modules\Enrollment\Domain\Models\Enrollment::class,
+            'murid_id',
+            'enrollment_id',
+            'id',
+            'id'
+        );
+    }
 }

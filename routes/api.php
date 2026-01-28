@@ -185,6 +185,8 @@ Route::prefix('v2')->group(function () {
             ->middleware('permission:enrollment.view');
         Route::post('/enrollments/{enrollment}/paket-murid', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'store'])
             ->middleware('permission:paket_murid.create');
+        Route::get('/paket-murid/ledger/all', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'getLedger'])
+            ->middleware('permission:paket_murid.view');
         Route::get('/paket-murid/{paketMurid}/ledger', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'getLedger'])
             ->middleware('permission:paket_murid.view');
         Route::post('/paket-murid/{paketMurid}/adjust', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'adjust'])

@@ -12,6 +12,7 @@ class PaketMuridResource extends JsonResource
         return [
             'id' => $this->id,
             'enrollment_id' => $this->enrollment_id,
+            'paket_id' => $this->paket_id,
             'paket' => new PaketResource($this->whenLoaded('paket')),
             'status' => $this->status,
             'tanggal_mulai' => $this->tanggal_mulai ? $this->tanggal_mulai->format('Y-m-d') : null,

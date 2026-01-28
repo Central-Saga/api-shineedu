@@ -134,16 +134,14 @@ class AbsensiService
     private function applyCreditLogic(?string $oldStatus, string $newStatus, SesiAbsensiMurid $absensi)
     {
         try {
-            // Case 1: Status changed to HADIR (from non-HADIR or new)
-            if ($newStatus === 'HADIR' && $oldStatus !== 'HADIR') {
+            // Case 1: Status IS HADIR. The service handles idempotency (won't deduct twice).
+            if ($newStatus === 'HADIR') {
                 $this->saldoService->deductCreditForAttendance($absensi);
-                Log::info("Credit deducted for attendance {$absensi->id}, enrollment {$absensi->enrollment_id}");
             }
 
-            // Case 2: Status changed from HADIR to something else
+            // Case 2: Status changed FROM HADIR to something else
             if ($oldStatus === 'HADIR' && $newStatus !== 'HADIR') {
                 $this->saldoService->refundCreditForAttendance($absensi);
-                Log::info("Credit refunded for attendance {$absensi->id}, enrollment {$absensi->enrollment_id}");
             }
         } catch (\Exception $e) {
             // Log error but don't block attendance update

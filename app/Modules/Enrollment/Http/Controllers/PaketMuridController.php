@@ -59,15 +59,41 @@ class PaketMuridController extends Controller
         return response()->json(['data' => $saldoData]);
     }
 
-    /**
-     * Get ledger history for a package
-     */
-    public function getLedger(Request $request, PaketMurid $paketMurid)
+    public function getLedger(Request $request, ?PaketMurid $paketMurid = null)
     {
         $perPage = $request->input('per_page', 20);
 
+        // Determine if we should aggregate
+        $isAggregated = $request->boolean('all') || ($request->has('enrollment_id') && $request->has('paket_id'));
+
+        $enrollmentId = $request->input('enrollment_id');
+        $paketId = $request->input('paket_id');
+
+        // If we have a specific PaketMurid and were told to aggregate,
+        // use its enrollment and paket type as defaults.
+        if ($paketMurid && $isAggregated) {
+            $enrollmentId = $enrollmentId ?: $paketMurid->enrollment_id;
+            $paketId = $paketId ?: $paketMurid->paket_id;
+        }
+
+        if ($isAggregated && $enrollmentId && $paketId) {
+            $ledger = PaketMuridLedger::whereHas('paketMurid', function ($q) use ($enrollmentId, $paketId) {
+                $q->where('enrollment_id', $enrollmentId)
+                    ->where('paket_id', $paketId);
+            })
+                ->with(['paketMurid.paket', 'createdBy'])
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+
+            return PaketMuridLedgerResource::collection($ledger);
+        }
+
+        if (!$paketMurid) {
+            return response()->json(['message' => 'Paket Murid not found'], 404);
+        }
+
         $ledger = $paketMurid->ledger()
-            ->with('createdBy')
+            ->with(['paketMurid.paket', 'createdBy'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
