@@ -53,6 +53,7 @@ class RoleAndPermissionSeeder extends Seeder
             // Finance & Ops
             'invoices',       // invoice & pembayaran
             'payments',
+            'kas',            // NEW: transaksi kas (uang masuk/keluar)
             'reports',
             'documents',      // dokumen & upload umum
             'notifications',
@@ -82,9 +83,7 @@ class RoleAndPermissionSeeder extends Seeder
             }
         }
 
-        // Extra permissions specific to routes
-        Permission::firstOrCreate(['name' => 'session.generate', 'guard_name' => 'web']);
-        Permission::firstOrCreate(['name' => 'paket_murid.adjust', 'guard_name' => 'web']); // Admin-only: manual balance adjustment
+        // No extra permissions needed - all follow standard CRUD pattern
 
         // Roles
         $superadmin = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'web']);
@@ -116,7 +115,7 @@ class RoleAndPermissionSeeder extends Seeder
             'logbook.manage',
             // Sesi Permissions
             'session.view',
-            'session.generate',
+            'session.create',
             'session.update',
             'session.attendance.manage',
             'session.logbook.manage',
