@@ -196,6 +196,12 @@ Route::prefix('v2')->group(function () {
                 ->middleware('permission:kas.view');
             Route::post('/transaksi', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'store'])
                 ->middleware('permission:kas.create');
+
+            // Print routes
+            Route::get('/transaksi/{kasTransaksi}/print-thermal', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'printThermal'])
+                ->middleware('permission:kas.view');
+            Route::get('/transaksi/{kasTransaksi}/download-receipt', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'downloadReceipt'])
+                ->middleware('permission:kas.view');
         });
 
         // Kelas (Academic)
