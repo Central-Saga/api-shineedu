@@ -40,6 +40,7 @@ class PayPackageTopupRequest extends FormRequest
             'catatan' => ['nullable', 'string', 'max:1000'],
             'external_ref' => ['nullable', 'string', 'max:100'],
             'idempotency_key' => ['nullable', 'string', 'max:80'],
+            'bukti_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB
         ];
     }
 

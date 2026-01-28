@@ -57,7 +57,14 @@ class KasTransaksiController extends Controller
      */
     public function store(StoreKasTransaksiRequest $request)
     {
-        $transaction = $this->kasTransaksiService->createTransaction($request->validated());
+        $data = $request->validated();
+
+        // Add the uploaded file if present
+        if ($request->hasFile('bukti_file')) {
+            $data['bukti_file'] = $request->file('bukti_file');
+        }
+
+        $transaction = $this->kasTransaksiService->createTransaction($data);
 
         return new KasTransaksiResource($transaction);
     }
@@ -70,7 +77,14 @@ class KasTransaksiController extends Controller
     public function payRegistrationFee(PayRegistrationFeeRequest $request, Enrollment $enrollment)
     {
         try {
-            $result = $this->paketTopupService->payRegistrationFee($enrollment, $request->validated());
+            $data = $request->validated();
+
+            // Add the uploaded file if present
+            if ($request->hasFile('bukti_file')) {
+                $data['bukti_file'] = $request->file('bukti_file');
+            }
+
+            $result = $this->paketTopupService->payRegistrationFee($enrollment, $data);
 
             $status = $result['is_duplicate'] ? 200 : 201;
 
@@ -104,7 +118,14 @@ class KasTransaksiController extends Controller
     public function payPackageTopup(PayPackageTopupRequest $request, Enrollment $enrollment)
     {
         try {
-            $result = $this->paketTopupService->payPackageTopup($enrollment, $request->validated());
+            $data = $request->validated();
+
+            // Add the uploaded file if present
+            if ($request->hasFile('bukti_file')) {
+                $data['bukti_file'] = $request->file('bukti_file');
+            }
+
+            $result = $this->paketTopupService->payPackageTopup($enrollment, $data);
 
             $status = $result['is_duplicate'] ? 200 : 201;
 
