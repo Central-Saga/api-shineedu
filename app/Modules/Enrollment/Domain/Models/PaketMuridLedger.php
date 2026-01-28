@@ -44,6 +44,7 @@ class PaketMuridLedger extends Model
     const REF_ADMIN_ADJUST = 'admin_adjust';
     const REF_PURCHASE = 'purchase';
     const REF_ATTENDANCE_ROLLBACK = 'attendance_rollback';
+    const REF_PAYMENT = 'payment'; // Link to kas_transaksi
 
     // Relationships
 
@@ -70,6 +71,7 @@ class PaketMuridLedger extends Model
         // Map reference types to models
         $modelMap = [
             self::REF_ATTENDANCE => \App\Modules\AcademicSessions\Domain\Models\SesiAbsensiMurid::class,
+            self::REF_PAYMENT => \App\Modules\Finance\Domain\Models\KasTransaksi::class,
         ];
 
         $modelClass = $modelMap[$this->reference_type] ?? null;
