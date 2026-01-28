@@ -18,6 +18,7 @@ class PaketMuridLedgerResource extends JsonResource
             'reference_id' => $this->reference_id,
             'reason' => $this->reason,
             'created_by' => new UserResource($this->whenLoaded('createdBy')),
+            'paket_murid' => new PaketMuridResource($this->whenLoaded('paketMurid')),
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

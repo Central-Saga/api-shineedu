@@ -9,6 +9,27 @@ use Illuminate\Validation\ValidationException;
 
 class SesiService
 {
+    public function __construct(
+        protected \App\Modules\Enrollment\Application\Services\SaldoPertemuanService $saldoService
+    ) {}
+
+    public function triggerCreditDeductionForSession(Session $session)
+    {
+        $session->load('absensi');
+        foreach ($session->absensi as $absensi) {
+            if ($absensi->status === 'HADIR') {
+                $this->saldoService->deductCreditForAttendance($absensi);
+            }
+        }
+    }
+
+    public function triggerCreditRefundForSession(Session $session)
+    {
+        $session->load('absensi');
+        foreach ($session->absensi as $absensi) {
+            $this->saldoService->refundCreditForAttendance($absensi);
+        }
+    }
     public function getSesiByKelas($kelasId, $filters = [])
     {
         $query = Session::query()
@@ -57,11 +78,14 @@ class SesiService
                 $session->dibatalkan_pada = now();
                 $session->dibatalkan_oleh = $userId;
                 $session->alasan_batal = $data['alasan_batal'] ?? $session->alasan_batal;
+
+                $this->triggerCreditRefundForSession($session);
             }
 
             // Handle Completion Rules
             if (isset($data['status_sesi']) && $data['status_sesi'] === 'SELESAI') {
                 $this->validateCompletion($session);
+                $this->triggerCreditDeductionForSession($session);
             }
 
             $session->fill($data);
