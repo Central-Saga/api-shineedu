@@ -205,7 +205,7 @@ class KasTransaksiController extends Controller
         }
 
         // PDF export
-        $pdf = \PDF::loadView('finance.transaksi-export', [
+        $pdf = \PDF::loadView('exports.transaksi', [
             'transactions' => $transactions->items(),
             'filters' => $filters,
         ]);
