@@ -26,6 +26,7 @@ class KasTransaksi extends Model implements HasMedia
         'reference_id',
         'external_ref',
         'idempotency_key',
+        'shift_id', // Link to shift
         'created_by',
     ];
 
@@ -97,6 +98,11 @@ class KasTransaksi extends Model implements HasMedia
     public function paketTopup()
     {
         return $this->belongsTo(\App\Modules\Enrollment\Domain\Models\PaketMurid::class, 'reference_id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(KasShift::class, 'shift_id');
     }
 
     // Scopes

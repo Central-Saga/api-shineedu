@@ -168,11 +168,50 @@ class KasTransaksiController extends Controller
     {
         $result = $this->paketTopupService->getSaldoAndTransactions($enrollment);
 
+
         return response()->json([
             'data' => [
                 'saldo' => $result['saldo'],
                 'transaksi_terakhir' => KasTransaksiResource::collection($result['transaksi_terakhir']),
             ],
         ]);
+    }
+
+    /**
+     * Export transactions to PDF or Excel
+     *
+     * GET /api/v2/kas/transaksi/export
+     */
+    public function export(Request $request)
+    {
+        $format = $request->input('format', 'pdf');
+
+        $filters = $request->only([
+            'q',
+            'type',
+            'kategori',
+            'tanggal_from',
+            'tanggal_to',
+        ]);
+
+        // Get all transactions with filters (no pagination)
+        $transactions = $this->kasTransaksiService->getList(array_merge($filters, [
+            'per_page' => 9999,
+        ]));
+
+        if ($format === 'excel') {
+            // TODO: Implement Excel export
+            return response()->json(['message' => 'Excel export belum tersedia'], 501);
+        }
+
+        // PDF export
+        $pdf = \PDF::loadView('finance.transaksi-export', [
+            'transactions' => $transactions->items(),
+            'filters' => $filters,
+        ]);
+
+        $filename = 'transaksi-kas-' . now()->format('Y-m-d-His') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

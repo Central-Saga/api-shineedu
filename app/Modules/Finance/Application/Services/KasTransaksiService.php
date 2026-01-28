@@ -25,6 +25,16 @@ class KasTransaksiService
         }
 
         return DB::transaction(function () use ($data) {
+            // Get current active shift
+            $currentShift = \App\Modules\Finance\Domain\Models\KasShift::open()
+                ->latest('opened_at')
+                ->first();
+
+            \Log::info('Creating transaction', [
+                'current_shift' => $currentShift?->id,
+                'shift_status' => $currentShift?->status,
+            ]);
+
             $transaction = KasTransaksi::create([
                 'tanggal' => $data['tanggal'] ?? now(),
                 'type' => $data['type'],
@@ -37,7 +47,13 @@ class KasTransaksiService
                 'reference_id' => $data['reference_id'] ?? null,
                 'external_ref' => $data['external_ref'] ?? null,
                 'idempotency_key' => $data['idempotency_key'] ?? null,
+                'shift_id' => $currentShift?->id, // Auto-link to active shift
                 'created_by' => auth()->id(),
+            ]);
+
+            \Log::info('Transaction created', [
+                'transaction_id' => $transaction->id,
+                'shift_id' => $transaction->shift_id,
             ]);
 
             // Handle file upload if present
