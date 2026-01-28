@@ -72,6 +72,12 @@ class PaketTopupService
                 'created_by' => auth()->id(),
             ]);
 
+            // Handle file upload if present
+            if (!empty($data['bukti_file'])) {
+                $transaction->addMedia($data['bukti_file'])
+                    ->toMediaCollection('payment_proof');
+            }
+
             // Update enrollment status
             $enrollment->update([
                 'biaya_pendaftaran_status' => 'PAID',
@@ -170,6 +176,12 @@ class PaketTopupService
                 'idempotency_key' => $data['idempotency_key'] ?? null,
                 'created_by' => auth()->id(),
             ]);
+
+            // Handle file upload if present
+            if (!empty($data['bukti_file'])) {
+                $transaction->addMedia($data['bukti_file'])
+                    ->toMediaCollection('payment_proof');
+            }
 
             // Create TOPUP ledger entry
             // The unique constraint (reference_type, reference_id, type) prevents double topup

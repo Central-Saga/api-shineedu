@@ -5,10 +5,12 @@ namespace App\Modules\Finance\Domain\Models;
 use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class KasTransaksi extends Model
+class KasTransaksi extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $table = 'kas_transaksi';
 
@@ -33,6 +35,17 @@ class KasTransaksi extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Register media collections for payment proof
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('payment_proof')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'])
+            ->maxFilesize(5 * 1024 * 1024) // 5MB
+            ->singleFile(); // Only one proof per transaction
+    }
 
     // Type constants
     const TYPE_IN = 'IN';

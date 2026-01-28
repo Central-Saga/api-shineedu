@@ -25,7 +25,7 @@ class KasTransaksiService
         }
 
         return DB::transaction(function () use ($data) {
-            return KasTransaksi::create([
+            $transaction = KasTransaksi::create([
                 'tanggal' => $data['tanggal'] ?? now(),
                 'type' => $data['type'],
                 'amount' => $data['amount'],
@@ -39,6 +39,14 @@ class KasTransaksiService
                 'idempotency_key' => $data['idempotency_key'] ?? null,
                 'created_by' => auth()->id(),
             ]);
+
+            // Handle file upload if present
+            if (!empty($data['bukti_file'])) {
+                $transaction->addMedia($data['bukti_file'])
+                    ->toMediaCollection('payment_proof');
+            }
+
+            return $transaction;
         });
     }
 
