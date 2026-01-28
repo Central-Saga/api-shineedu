@@ -14,8 +14,18 @@ Route::get('/user', function (Request $request) {
 
 // API V2 Routes
 Route::prefix('v2')->group(function () {
-    // Public routes
+    // Public routes (no auth)
     Route::post('/auth/login', [AuthController::class, 'login']);
+
+    // Public catalog (read-only for landing form)
+    Route::prefix('public')->group(function () {
+        Route::get('catalog/jenjang', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'index']);
+        Route::get('catalog/program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'index']);
+        Route::get('catalog/paket', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'index']);
+        Route::get('catalog/harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index']);
+        Route::get('catalog/harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup']);
+        Route::post('landing-register', [\App\Modules\Enrollment\Http\Controllers\LandingRegisterController::class, 'store']);
+    });
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {

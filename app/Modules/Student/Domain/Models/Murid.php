@@ -3,6 +3,7 @@
 namespace App\Modules\Student\Domain\Models;
 
 use App\Modules\Catalog\Domain\Models\Jenjang;
+use App\Modules\Identity\Domain\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ class Murid extends Model
     protected $table = 'murid';
 
     protected $fillable = [
+        'user_id',
         'kode_murid',
         'nama_lengkap',
         'jenis_kelamin',
@@ -41,5 +43,10 @@ class Murid extends Model
     public function jenjang(): BelongsTo
     {
         return $this->belongsTo(Jenjang::class, 'jenjang_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
