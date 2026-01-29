@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             // EmployeeSeeder::class,
             KatalogSeeder::class,
+            JobVacancySeeder::class,
             // RealisticBalineseSeeder::class,
         ]);
     }
