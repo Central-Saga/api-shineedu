@@ -66,10 +66,10 @@ class UserSeeder extends Seeder
 
         // 3) Optional: generate extra dummy users (random)
         // Contoh: 10 student aktif + 2 student non aktif
-        User::factory()->count(10)->aktif()->withRole('Student')->create();
-        User::factory()->count(2)->nonAktif()->withRole('Student')->create();
+        // User::factory()->count(10)->aktif()->withRole('Student')->create();
+        // User::factory()->count(2)->nonAktif()->withRole('Student')->create();
 
         // Contoh: 3 teacher dummy
-        User::factory()->count(3)->aktif()->withRole('Teacher')->create();
+        // User::factory()->count(3)->aktif()->withRole('Teacher')->create();
     }
 }
