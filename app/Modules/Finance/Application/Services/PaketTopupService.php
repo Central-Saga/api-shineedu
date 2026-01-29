@@ -21,6 +21,7 @@ class PaketTopupService
 
     /**
      * Pay registration fee for an enrollment
+     * This also tops up the initial package (pendaftaran + paket pertama)
      *
      * @param Enrollment $enrollment
      * @param array $data
@@ -56,19 +57,48 @@ class PaketTopupService
         }
 
         return DB::transaction(function () use ($enrollment, $data) {
-            // Create kas transaksi
+            // Get current active shift
+            $currentShift = \App\Modules\Finance\Domain\Models\KasShift::open()
+                ->latest('opened_at')
+                ->first();
+
+            // Prepare payment details breakdown
+            $registrationFee = $enrollment->biaya_pendaftaran_amount ?? 0;
+            $packagePrice = $enrollment->harga_final ?? 0;
+            $paket = $enrollment->paket;
+
+            $paymentDetails = [
+                'items' => [
+                    [
+                        'description' => 'Biaya Pendaftaran',
+                        'amount' => $registrationFee,
+                    ],
+                    [
+                        'description' => 'Paket ' . ($paket->nama ?? 'N/A'),
+                        'amount' => $packagePrice,
+                        'quantity' => $paket->pertemuan_per_bulan ?? 0,
+                        'unit' => 'pertemuan',
+                    ],
+                ],
+                'total' => $data['amount'],
+            ];
+
+            // Create kas transaksi for registration fee
             $transaction = KasTransaksi::create([
+                'receipt_number' => KasTransaksi::generateReceiptNumber(),
                 'tanggal' => $data['tanggal'] ?? now(),
                 'type' => KasTransaksi::TYPE_IN,
                 'amount' => $data['amount'],
                 'metode' => $data['metode'],
                 'kategori' => KasTransaksi::KATEGORI_BIAYA_PENDAFTARAN,
-                'keterangan' => $data['keterangan'] ?? 'Pembayaran biaya pendaftaran',
+                'keterangan' => $data['keterangan'] ?? 'Pembayaran biaya pendaftaran + paket pertama',
+                'payment_details' => $paymentDetails,
                 'pihak' => $enrollment->murid->nama_lengkap ?? null,
                 'reference_type' => KasTransaksi::REF_ENROLLMENT_FEE,
                 'reference_id' => $enrollment->id,
                 'external_ref' => $data['external_ref'] ?? null,
                 'idempotency_key' => $data['idempotency_key'] ?? null,
+                'shift_id' => $currentShift?->id, // Link to active shift
                 'created_by' => auth()->id(),
             ]);
 
@@ -84,6 +114,33 @@ class PaketTopupService
                 'registration_fee_transaction_id' => $transaction->id,
             ]);
 
+            // IMPORTANT: Also topup the initial paket_murid with pertemuan
+            $paketMurid = PaketMurid::where('enrollment_id', $enrollment->id)
+                ->first();
+
+            if ($paketMurid) {
+                $paket = $paketMurid->paket;
+                $topupQty = $paket?->pertemuan_per_bulan ?? 4;
+
+                // Create initial TOPUP ledger entry
+                PaketMuridLedger::create([
+                    'paket_murid_id' => $paketMurid->id,
+                    'tanggal' => now(),
+                    'type' => PaketMuridLedger::TYPE_TOPUP,
+                    'qty' => $topupQty,
+                    'reference_type' => PaketMuridLedger::REF_PAYMENT,
+                    'reference_id' => $transaction->id,
+                    'reason' => 'Saldo awal dari pembayaran pendaftaran + ' . ($paket?->nama ?? 'paket'),
+                    'created_by' => auth()->id(),
+                ]);
+
+                Log::info("Initial package topup created", [
+                    'enrollment_id' => $enrollment->id,
+                    'paket_murid_id' => $paketMurid->id,
+                    'topup_qty' => $topupQty,
+                ]);
+            }
+
             Log::info("Registration fee paid", [
                 'enrollment_id' => $enrollment->id,
                 'transaction_id' => $transaction->id,
@@ -93,6 +150,7 @@ class PaketTopupService
             return [
                 'transaction' => $transaction,
                 'enrollment' => $enrollment->fresh(),
+                'paket_murid' => $paketMurid?->fresh(),
                 'is_duplicate' => false,
             ];
         });
@@ -132,6 +190,11 @@ class PaketTopupService
         }
 
         return DB::transaction(function () use ($enrollment, $data) {
+            // Get current active shift
+            $currentShift = \App\Modules\Finance\Domain\Models\KasShift::open()
+                ->latest('opened_at')
+                ->first();
+
             // Determine paket_murid
             $paketMurid = null;
             $paket = null;
@@ -161,19 +224,35 @@ class PaketTopupService
             // Determine topup qty
             $topupQty = $data['topup_qty'] ?? $paket?->pertemuan_per_bulan ?? 4;
 
+            // Prepare payment details
+            $paymentDetails = [
+                'items' => [
+                    [
+                        'description' => 'Paket ' . ($paket?->nama ?? 'N/A'),
+                        'amount' => $data['amount'],
+                        'quantity' => $topupQty,
+                        'unit' => 'pertemuan',
+                    ],
+                ],
+                'total' => $data['amount'],
+            ];
+
             // Create kas transaksi
             $transaction = KasTransaksi::create([
+                'receipt_number' => KasTransaksi::generateReceiptNumber(),
                 'tanggal' => $data['tanggal'] ?? now(),
                 'type' => KasTransaksi::TYPE_IN,
                 'amount' => $data['amount'],
                 'metode' => $data['metode'],
                 'kategori' => KasTransaksi::KATEGORI_PEMBAYARAN_PAKET,
                 'keterangan' => $data['keterangan'] ?? 'Pembayaran paket ' . ($paket?->nama ?? 'N/A'),
+                'payment_details' => $paymentDetails,
                 'pihak' => $enrollment->murid?->nama_lengkap ?? null,
                 'reference_type' => KasTransaksi::REF_PAKET_TOPUP,
                 'reference_id' => $paketMurid->id,
                 'external_ref' => $data['external_ref'] ?? null,
                 'idempotency_key' => $data['idempotency_key'] ?? null,
+                'shift_id' => $currentShift?->id, // Link to active shift
                 'created_by' => auth()->id(),
             ]);
 

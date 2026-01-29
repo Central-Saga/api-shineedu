@@ -15,12 +15,14 @@ class KasTransaksi extends Model implements HasMedia
     protected $table = 'kas_transaksi';
 
     protected $fillable = [
+        'receipt_number',
         'tanggal',
         'type',
         'amount',
         'metode',
         'kategori',
         'keterangan',
+        'payment_details',
         'pihak',
         'reference_type',
         'reference_id',
@@ -33,6 +35,7 @@ class KasTransaksi extends Model implements HasMedia
     protected $casts = [
         'tanggal' => 'datetime',
         'amount' => 'decimal:2',
+        'payment_details' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -142,5 +145,26 @@ class KasTransaksi extends Model implements HasMedia
             return null;
         }
         return static::where('idempotency_key', $key)->first();
+    }
+
+    /**
+     * Generate unique receipt number
+     * Format: KWT-YYMM-XXXXX (e.g., KWT-2601-A3F2K)
+     */
+    public static function generateReceiptNumber(): string
+    {
+        $prefix = 'KWT';
+        $yearMonth = now()->format('ym'); // e.g., 2601 for Jan 2026
+
+        do {
+            // Generate random 5-character alphanumeric string (uppercase)
+            $random = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 5));
+            $receiptNumber = "{$prefix}-{$yearMonth}-{$random}";
+
+            // Check if exists
+            $exists = static::where('receipt_number', $receiptNumber)->exists();
+        } while ($exists);
+
+        return $receiptNumber;
     }
 }

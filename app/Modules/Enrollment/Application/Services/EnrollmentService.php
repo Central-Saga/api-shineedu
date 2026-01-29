@@ -136,27 +136,17 @@ class EnrollmentService
                 'created_by' => auth()->id(),
             ]);
 
-            // 4. Automatically Create Initial Paket Murid & Ledger (Saldo Pertemuan)
+            // 4. Create Initial Paket Murid (with saldo 0 - saldo will be added after payment)
             $paket = Paket::find($paketId);
             if ($paket && $paket->pertemuan_per_bulan > 0) {
-                $paketMurid = PaketMurid::create([
+                PaketMurid::create([
                     'enrollment_id' => $enrollment->id,
                     'paket_id' => $paketId,
                     'status' => 'AKTIF',
                     'tanggal_mulai' => $tanggalMulai,
                     'created_by' => auth()->id(),
                 ]);
-
-                PaketMuridLedger::create([
-                    'paket_murid_id' => $paketMurid->id,
-                    'tanggal' => Carbon::now(),
-                    'type' => PaketMuridLedger::TYPE_TOPUP,
-                    'qty' => $paket->pertemuan_per_bulan,
-                    'reference_type' => PaketMuridLedger::REF_PURCHASE,
-                    'reference_id' => $enrollment->id,
-                    'reason' => 'Saldo awal pendaftaran ' . $paket->nama,
-                    'created_by' => auth()->id(),
-                ]);
+                // NOTE: Saldo pertemuan akan di-topup setelah pembayaran pertama (pendaftaran + paket)
             }
 
             return $enrollment;
