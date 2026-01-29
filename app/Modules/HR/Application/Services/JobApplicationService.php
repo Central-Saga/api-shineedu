@@ -44,10 +44,15 @@ class JobApplicationService
             $trackingCode = 'JA-' . strtoupper(Str::random(8));
         }
 
-        $application = JobApplication::create(array_merge($data, [
-            'status' => 'pending',
-            'tracking_code' => $trackingCode,
-        ]));
+        $fillable = [
+            'job_vacancy_id', 'first_name', 'last_name', 'email', 'phone',
+            'experience', 'education', 'address', 'status', 'tracking_code',
+        ];
+        $payload = collect($data)->only($fillable)->all();
+        $payload['status'] = 'pending';
+        $payload['tracking_code'] = $trackingCode;
+
+        $application = JobApplication::create($payload);
 
         if (! empty($data['resume']) && $data['resume'] instanceof \Illuminate\Http\UploadedFile) {
             $application->addMedia($data['resume'])->toMediaCollection('resume');

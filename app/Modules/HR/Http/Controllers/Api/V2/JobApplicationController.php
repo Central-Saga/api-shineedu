@@ -34,7 +34,15 @@ class JobApplicationController
         $data['job_vacancy_id'] = $data['position_id'] ?? $data['job_vacancy_id'] ?? null;
         unset($data['position_id']);
 
-        $application = $this->service->create($data);
+        try {
+            $application = $this->service->create($data);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ApiResponse::serverError(
+                'Gagal menyimpan lamaran. Silakan cek data dan coba lagi.'
+            );
+        }
 
         return ApiResponse::created(
             new JobApplicationResource($application),
