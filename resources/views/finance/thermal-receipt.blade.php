@@ -189,7 +189,7 @@
     <div class="section">
         <div class="row">
             <span class="label">No. Kwitansi:</span>
-            <span class="value">#{{ $transaction->id }}</span>
+            <span class="value">{{ $transaction->receipt_number ?? '#' . $transaction->id }}</span>
         </div>
         <div class="row">
             <span class="label">Tanggal:</span>
@@ -255,6 +255,28 @@
             <span class="value">{{ $transaction->metode }}</span>
         </div>
     </div>
+
+    @if($transaction->payment_details && isset($transaction->payment_details['items']))
+    <div class="divider"></div>
+    <div class="section">
+        <div class="row-full">
+            <span class="label">Rincian Pembayaran:</span>
+        </div>
+        @foreach($transaction->payment_details['items'] as $item)
+        <div class="row" style="margin-top: 3px; font-size: 9px;">
+            <span style="max-width: 55%;">
+                {{ $item['description'] ?? '-' }}
+                @if(isset($item['quantity']) && $item['quantity'] > 0)
+                <span style="font-size: 8px; color: #666;">({{ $item['quantity'] }} {{ $item['unit'] ?? 'item'
+                    }})</span>
+                @endif
+            </span>
+            <span class="value">Rp {{ number_format($item['amount'] ?? 0, 0, ',', '.') }}</span>
+        </div>
+        @endforeach
+        <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+    </div>
+    @endif
 
     @if($transaction->keterangan)
     <div class="divider"></div>
