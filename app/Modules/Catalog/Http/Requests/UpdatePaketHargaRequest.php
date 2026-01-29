@@ -12,7 +12,7 @@ class UpdatePaketHargaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('catalog.harga.update');
+        return $this->user()->can('catalog.pricing.update');
     }
 
     public function rules(): array

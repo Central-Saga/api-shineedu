@@ -12,7 +12,7 @@ class StorePaketHargaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('catalog.harga.create');
+        return $this->user()->can('catalog.pricing.create');
     }
 
     public function rules(): array
