@@ -94,4 +94,9 @@ class Enrollment extends Model
     {
         return $this->hasMany(\App\Modules\AcademicSessions\Domain\Models\SesiAbsensiMurid::class, 'enrollment_id');
     }
+
+    public function paketMurid()
+    {
+        return $this->hasMany(PaketMurid::class, 'enrollment_id');
+    }
 }

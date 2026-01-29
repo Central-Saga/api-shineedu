@@ -34,6 +34,18 @@ class PaketController
             $query->where('tipe', $tipe);
         }
 
+        if ($request->filled('program_id') || $request->filled('jenjang_id')) {
+            $query->whereHas('hargas', function ($q) use ($request) {
+                if ($request->filled('program_id')) {
+                    $q->where('program_id', $request->input('program_id'));
+                }
+                if ($request->filled('jenjang_id')) {
+                    $q->where('jenjang_id', $request->input('jenjang_id'));
+                }
+                $q->where('status', 'Aktif');
+            });
+        }
+
         // Sort
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');

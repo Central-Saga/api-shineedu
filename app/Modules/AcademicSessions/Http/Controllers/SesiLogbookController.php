@@ -7,6 +7,7 @@ use App\Modules\AcademicSessions\Domain\Models\SesiLogbook;
 use App\Modules\AcademicSessions\Domain\Models\SesiLogbookMurid;
 use App\Modules\AcademicSessions\Http\Resources\LogbookMuridResource;
 use App\Modules\AcademicSessions\Http\Resources\LogbookResource;
+use App\Modules\AcademicSessions\Http\Resources\SessionResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -101,16 +102,20 @@ class SesiLogbookController
 
     public function indexByKelas($kelasId): JsonResponse
     {
-        $logbooks = SesiLogbook::whereHas('session', function ($q) use ($kelasId) {
-            $q->where('kelas_id', $kelasId);
+        $sessions = \App\Modules\AcademicSessions\Domain\Models\Session::where(function ($q) use ($kelasId) {
+            $q->where('realisasi_jadwal_kerja.kelas_id', $kelasId)
+                ->orWhereHas('jadwal', function ($q2) use ($kelasId) {
+                    $q2->where('kelas_id', $kelasId);
+                });
         })
-            ->with('session')
-            ->latest()
+            ->whereIn('status_sesi', ['SELESAI', 'BERJALAN', 'TERJADWAL'])
+            ->with(['logbook', 'logbookMurid', 'jadwal'])
+            ->orderBy('tanggal', 'desc')
             ->get();
 
         return ApiResponse::ok(
-            LogbookResource::collection($logbooks),
-            'Daftar logbook sesi kelas berhasil diambil'
+            SessionResource::collection($sessions),
+            'Daftar sesi untuk ringkasan logbook berhasil diambil'
         );
     }
 }

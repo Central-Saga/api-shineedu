@@ -153,7 +153,7 @@ Route::prefix('v2')->group(function () {
 
             // Paket Harga
             Route::get('harga/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'export'])->middleware('permission:catalog.pricing.view');
-            Route::get('harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup'])->middleware('permission:catalog.harga.lookup');
+            Route::get('harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup'])->middleware('permission:catalog.pricing.view');
             Route::get('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index'])->middleware('permission:catalog.pricing.view');
             Route::post('harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'store'])->middleware('permission:catalog.pricing.create');
             Route::get('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'show'])->middleware('permission:catalog.pricing.view');
@@ -169,6 +169,56 @@ Route::prefix('v2')->group(function () {
         Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
         Route::put('/enrollments/{enrollment}/registration-fee-status', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'updateRegistrationFeeStatus'])->middleware('permission:enrollment.update');
         Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
+
+        // Paket Murid (Meetings & Credit)
+        Route::get('/enrollments/{enrollment}/paket-murid', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'index'])
+            ->middleware('permission:enrollment.view');
+        Route::post('/enrollments/{enrollment}/paket-murid', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'store'])
+            ->middleware('permission:paket_murid.create');
+        Route::get('/paket-murid/ledger/all', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'getLedger'])
+            ->middleware('permission:paket_murid.view');
+        Route::get('/paket-murid/{paketMurid}/ledger', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'getLedger'])
+            ->middleware('permission:paket_murid.view');
+        Route::post('/paket-murid/{paketMurid}/adjust', [\App\Modules\Enrollment\Http\Controllers\PaketMuridController::class, 'adjust'])
+            ->middleware('permission:paket_murid.update');
+
+        // Enrollment Payment Actions (linked to Kas Transaksi)
+        Route::post('/enrollments/{enrollment}/pay-registration-fee', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'payRegistrationFee'])
+            ->middleware('permission:enrollment.update');
+        Route::post('/enrollments/{enrollment}/pay-package-topup', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'payPackageTopup'])
+            ->middleware('permission:paket_murid.create');
+        Route::get('/enrollments/{enrollment}/saldo-dan-transaksi', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'getSaldoAndTransactions'])
+            ->middleware('permission:enrollment.view');
+
+        // Kas Transaksi (Cash Transactions)
+        Route::prefix('kas')->group(function () {
+            Route::get('/transaksi', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'index'])
+                ->middleware('permission:kas.view');
+            Route::post('/transaksi', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'store'])
+                ->middleware('permission:kas.create');
+            Route::get('/transaksi/export', [\App\Modules\Finance\Http\Controllers\KasTransaksiController::class, 'export'])
+                ->middleware('permission:kas.view');
+
+            // Print routes
+            Route::get('/transaksi/{kasTransaksi}/print-thermal', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'printThermal'])
+                ->middleware('permission:kas.view');
+            Route::get('/transaksi/{kasTransaksi}/download-receipt', [\App\Modules\Finance\Http\Controllers\KasTransaksiPrintController::class, 'downloadReceipt'])
+                ->middleware('permission:kas.view');
+
+            // Shift Management
+            Route::get('/shift', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'index'])
+                ->middleware('permission:kas.view');
+            Route::get('/shift/current', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'current'])
+                ->middleware('permission:kas.view');
+            Route::post('/shift/open', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'open'])
+                ->middleware('permission:kas.create');
+            Route::post('/shift/{id}/close', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'close'])
+                ->middleware('permission:kas.update');
+            Route::get('/shift/{id}/summary', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'summary'])
+                ->middleware('permission:kas.view');
+            Route::get('/shift/{id}/print', [\App\Modules\Finance\Http\Controllers\KasShiftController::class, 'print'])
+                ->middleware('permission:kas.view');
+        });
 
         // Kelas (Academic)
         Route::get('/kelas', [\App\Modules\Academic\Http\Controllers\KelasController::class, 'index'])->middleware('permission:kelas.view');
@@ -191,7 +241,7 @@ Route::prefix('v2')->group(function () {
         Route::get('/sesi/export', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'export'])->middleware('permission:session.view');
         Route::get('/kelas/{kelasId}/sesi/export', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'export'])->middleware('permission:session.view');
         Route::get('/kelas/{kelasId}/sesi', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'indexByKelas'])->middleware('permission:session.view');
-        Route::post('/kelas/{kelasId}/sesi/generate', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'generate'])->middleware('permission:session.generate');
+        Route::post('/kelas/{kelasId}/sesi/generate', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'generate'])->middleware('permission:session.create');
         Route::get('/kelas/{kelasId}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'indexByKelas'])->middleware('permission:session.logbook.manage');
 
         Route::get('/sesi/{id}', [\App\Modules\AcademicSessions\Http\Controllers\SesiController::class, 'show'])->middleware('permission:session.view');

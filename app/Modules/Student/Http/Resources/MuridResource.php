@@ -45,6 +45,27 @@ class MuridResource extends JsonResource
             'kebutuhan_khusus' => $this->kebutuhan_khusus,
 
             'status' => $this->status,
+            'enrollments' => \App\Modules\Enrollment\Http\Resources\EnrollmentResource::collection($this->whenLoaded('enrollments')),
+            'absensi_summary' => $this->whenLoaded('absensi', function () {
+                return [
+                    'total' => $this->absensi->count(),
+                    'hadir' => $this->absensi->where('status', 'HADIR')->count(),
+                    'izin' => $this->absensi->where('status', 'IZIN')->count(),
+                    'sakit' => $this->absensi->where('status', 'SAKIT')->count(),
+                    'alpha' => $this->absensi->where('status', 'ALPHA')->count(),
+                ];
+            }),
+            'absensi_history' => $this->whenLoaded('absensi', function () {
+                return $this->absensi->map(function ($a) {
+                    return [
+                        'id' => $a->id,
+                        'status' => $a->status,
+                        'catatan' => $a->catatan,
+                        'tanggal' => $a->session ? $a->session->tanggal->format('Y-m-d') : null,
+                        'jam' => $a->session ? $a->session->jam_mulai_plan : null,
+                    ];
+                })->sortByDesc('tanggal')->values();
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

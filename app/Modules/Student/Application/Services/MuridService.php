@@ -64,7 +64,12 @@ class MuridService
      */
     public function show(Murid $murid): Murid
     {
-        return $murid->load('jenjang');
+        return $murid->load([
+            'jenjang',
+            'enrollments.program',
+            'enrollments.paket',
+            'absensi.session'
+        ]);
     }
 
     /**

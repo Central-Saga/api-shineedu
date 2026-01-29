@@ -41,4 +41,9 @@ class Paket extends Model
     {
         return $query->where('status', 'Aktif');
     }
+
+    public function hargas()
+    {
+        return $this->hasMany(PaketHarga::class, 'paket_id');
+    }
 }

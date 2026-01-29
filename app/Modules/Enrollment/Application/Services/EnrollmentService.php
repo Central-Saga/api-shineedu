@@ -3,11 +3,15 @@
 namespace App\Modules\Enrollment\Application\Services;
 
 use App\Modules\Catalog\Application\Services\PricingService;
+use App\Modules\Catalog\Domain\Models\Paket;
 use App\Modules\Enrollment\Domain\Models\Enrollment;
+use App\Modules\Enrollment\Domain\Models\PaketMurid;
+use App\Modules\Enrollment\Domain\Models\PaketMuridLedger;
 use App\Modules\Student\Application\Services\MuridService;
 use App\Modules\Student\Domain\Models\Murid;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Exception;
 
 class EnrollmentService
@@ -131,6 +135,19 @@ class EnrollmentService
                 'biaya_pendaftaran_due_date' => $data['biaya_pendaftaran_due_date'] ?? null,
                 'created_by' => auth()->id(),
             ]);
+
+            // 4. Create Initial Paket Murid (with saldo 0 - saldo will be added after payment)
+            $paket = Paket::find($paketId);
+            if ($paket && $paket->pertemuan_per_bulan > 0) {
+                PaketMurid::create([
+                    'enrollment_id' => $enrollment->id,
+                    'paket_id' => $paketId,
+                    'status' => 'AKTIF',
+                    'tanggal_mulai' => $tanggalMulai,
+                    'created_by' => auth()->id(),
+                ]);
+                // NOTE: Saldo pertemuan akan di-topup setelah pembayaran pertama (pendaftaran + paket)
+            }
 
             return $enrollment;
         });
