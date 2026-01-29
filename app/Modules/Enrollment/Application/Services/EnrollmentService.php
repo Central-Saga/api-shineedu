@@ -133,7 +133,7 @@ class EnrollmentService
                 'biaya_pendaftaran_amount' => $regFeeAmount,
                 'biaya_pendaftaran_status' => $data['biaya_pendaftaran_status'] ?? $regFeeStatus,
                 'biaya_pendaftaran_due_date' => $data['biaya_pendaftaran_due_date'] ?? null,
-                'created_by' => auth()->id(),
+                'created_by' => $data['created_by'] ?? auth()->id(),
             ]);
 
             // 4. Create Initial Paket Murid (with saldo 0 - saldo will be added after payment)
