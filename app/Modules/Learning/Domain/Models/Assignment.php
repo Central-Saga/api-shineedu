@@ -8,10 +8,12 @@ use App\Modules\Scheduling\Domain\Models\RealisasiJadwalKerja;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Assignment extends Model
+class Assignment extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $table = 'assignment';
 
@@ -23,7 +25,6 @@ class Assignment extends Model
         'instructions',
         'attachment_type',
         'attachment_url',
-        'attachment_path',
         'due_at',
         'status',
         'assigned_by',
@@ -123,5 +124,14 @@ class Assignment extends Model
     public function close(): void
     {
         $this->update(['status' => self::STATUS_CLOSED]);
+    }
+
+    // Media Collections
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments')
+            ->useDisk('public')
+            ->singleFile();
     }
 }

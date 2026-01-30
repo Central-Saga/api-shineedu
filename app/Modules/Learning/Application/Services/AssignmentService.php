@@ -64,25 +64,26 @@ class AssignmentService
      */
     public function create(array $data): Assignment
     {
-        // Handle file upload if present
-        $attachmentPath = null;
-        if (!empty($data['attachment_file'])) {
-            $attachmentPath = $data['attachment_file']->store('assignments/attachments', 'public');
-        }
-
-        return Assignment::create([
+        $assignment = Assignment::create([
             'enrollment_id' => $data['enrollment_id'],
             'realisasi_jadwal_kerja_id' => $data['realisasi_jadwal_kerja_id'] ?? null,
             'materi_modul_id' => $data['materi_modul_id'] ?? null,
             'title' => $data['title'],
             'instructions' => $data['instructions'] ?? null,
             'attachment_type' => $data['attachment_type'] ?? 'NONE',
-            'attachment_url' => $data['attachment_url'] ?? null,
-            'attachment_path' => $attachmentPath,
+            'attachment_url' => ($data['attachment_type'] ?? 'NONE') === 'URL' ? ($data['attachment_url'] ?? null) : null,
             'due_at' => $data['due_at'] ?? null,
             'status' => Assignment::STATUS_ASSIGNED,
             'assigned_by' => $data['assigned_by'] ?? auth()->id(),
         ]);
+
+        // Handle file upload using Spatie Media Library
+        if (!empty($data['attachment_file']) && ($data['attachment_type'] ?? 'NONE') === 'FILE') {
+            $assignment->addMedia($data['attachment_file'])
+                ->toMediaCollection('attachments');
+        }
+
+        return $assignment;
     }
 
     /**
@@ -105,13 +106,39 @@ class AssignmentService
      */
     public function update(Assignment $assignment, array $data): Assignment
     {
-        $assignment->update([
+        $updateData = [
             'title' => $data['title'] ?? $assignment->title,
             'instructions' => $data['instructions'] ?? $assignment->instructions,
             'due_at' => $data['due_at'] ?? $assignment->due_at,
             'status' => $data['status'] ?? $assignment->status,
             'materi_modul_id' => $data['materi_modul_id'] ?? $assignment->materi_modul_id,
-        ]);
+        ];
+
+        // Handle attachment updates
+        if (isset($data['attachment_type'])) {
+            $updateData['attachment_type'] = $data['attachment_type'];
+
+            // If changing to NONE, clear attachments
+            if ($data['attachment_type'] === 'NONE') {
+                $assignment->clearMediaCollection('attachments');
+                $updateData['attachment_url'] = null;
+            }
+            // If type is URL, update URL and clear media
+            elseif ($data['attachment_type'] === 'URL') {
+                $assignment->clearMediaCollection('attachments');
+                $updateData['attachment_url'] = $data['attachment_url'] ?? null;
+            }
+            // If type is FILE and new file uploaded
+            elseif ($data['attachment_type'] === 'FILE' && !empty($data['attachment_file'])) {
+                // Clear old media and add new one
+                $assignment->clearMediaCollection('attachments');
+                $assignment->addMedia($data['attachment_file'])
+                    ->toMediaCollection('attachments');
+                $updateData['attachment_url'] = null;
+            }
+        }
+
+        $assignment->update($updateData);
 
         return $assignment;
     }

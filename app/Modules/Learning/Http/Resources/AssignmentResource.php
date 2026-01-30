@@ -35,9 +35,7 @@ class AssignmentResource extends JsonResource
             'title' => $this->title,
             'instructions' => $this->instructions,
             'attachment_type' => $this->attachment_type,
-            'attachment_url' => $this->attachment_url,
-            'attachment_path' => $this->attachment_path,
-            'attachment_file_url' => $this->attachment_path ? asset('storage/' . $this->attachment_path) : null,
+            'attachment_url' => $this->getAttachmentUrl(),
             'due_at' => $this->due_at?->toIso8601String(),
             'is_overdue' => $this->isOverdue(),
             'status' => $this->status,
@@ -56,5 +54,24 @@ class AssignmentResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
+    }
+
+    /**
+     * Get attachment URL based on type.
+     * For FILE type: return Spatie Media URL
+     * For URL type: return direct URL
+     */
+    private function getAttachmentUrl(): ?string
+    {
+        if ($this->attachment_type === 'FILE') {
+            $media = $this->getFirstMedia('attachments');
+            return $media ? $media->getUrl() : null;
+        }
+
+        if ($this->attachment_type === 'URL') {
+            return $this->attachment_url;
+        }
+
+        return null;
     }
 }
