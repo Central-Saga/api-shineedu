@@ -71,9 +71,9 @@ class SesiMateriAssignmentController
     public function assignMateri(Request $request, int $sesiId): JsonResponse
     {
         $validated = $request->validate([
-            'materi_modul_id' => 'required|exists:materi_modul,id',
+            'materi_modul_id' => 'required|exists:materi_modul_item,id',
             'enrollment_ids' => 'required|array|min:1',
-            'enrollment_ids.*' => 'required|exists:kelas_enrollment,id',
+            'enrollment_ids.*' => 'required|exists:enrollments,id',
         ]);
 
         DB::beginTransaction();
@@ -101,7 +101,7 @@ class SesiMateriAssignmentController
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            return ApiResponse::error('Gagal assign materi: ' . $e->getMessage(), 500);
+            return ApiResponse::serverError('Gagal assign materi: ' . $e->getMessage());
         }
     }
 
@@ -112,7 +112,7 @@ class SesiMateriAssignmentController
     {
         $validated = $request->validate([
             'enrollment_ids' => 'sometimes|array',
-            'enrollment_ids.*' => 'required|exists:kelas_enrollment,id',
+            'enrollment_ids.*' => 'required|exists:enrollments,id',
         ]);
 
         $query = SesiMuridMateri::where('realisasi_jadwal_kerja_id', $sesiId)
@@ -138,7 +138,7 @@ class SesiMateriAssignmentController
         $validated = $request->validate([
             'assignment_id' => 'required|exists:assignment,id',
             'enrollment_ids' => 'required|array|min:1',
-            'enrollment_ids.*' => 'required|exists:kelas_enrollment,id',
+            'enrollment_ids.*' => 'required|exists:enrollments,id',
         ]);
 
         DB::beginTransaction();
@@ -166,7 +166,7 @@ class SesiMateriAssignmentController
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            return ApiResponse::error('Gagal assign tugas: ' . $e->getMessage(), 500);
+            return ApiResponse::serverError('Gagal assign tugas: ' . $e->getMessage());
         }
     }
 
@@ -177,7 +177,7 @@ class SesiMateriAssignmentController
     {
         $validated = $request->validate([
             'enrollment_ids' => 'sometimes|array',
-            'enrollment_ids.*' => 'required|exists:kelas_enrollment,id',
+            'enrollment_ids.*' => 'required|exists:enrollments,id',
         ]);
 
         $query = SesiMuridAssignment::where('realisasi_jadwal_kerja_id', $sesiId)

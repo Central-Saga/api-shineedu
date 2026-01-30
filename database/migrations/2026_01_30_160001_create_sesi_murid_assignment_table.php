@@ -16,9 +16,8 @@ return new class extends Migration
             $table->foreignId('realisasi_jadwal_kerja_id')
                 ->constrained('realisasi_jadwal_kerja')
                 ->cascadeOnDelete();
-            $table->unsignedBigInteger('enrollment_id'); // References kelas_enrollment.id (pivot table)
-            $table->foreign('enrollment_id')
-                ->references('id')->on('kelas_enrollment')
+            $table->foreignId('enrollment_id')
+                ->constrained('enrollments')
                 ->cascadeOnDelete();
             $table->foreignId('assignment_id')
                 ->constrained('assignment')
