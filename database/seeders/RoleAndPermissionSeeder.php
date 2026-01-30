@@ -74,6 +74,9 @@ class RoleAndPermissionSeeder extends Seeder
 
             // Landing (gallery for landing page)
             'landing.gallery',
+
+            // Blog (content for landing blog)
+            'blog',
         ];
 
         // Pola CRUD umum per modul
