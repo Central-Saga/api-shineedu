@@ -31,8 +31,9 @@ class SesiAbsensiController
         $request->validate([
             'items' => 'required|array',
             'items.*.enrollment_id' => 'required|exists:enrollments,id',
-            'items.*.status' => 'required|in:HADIR,IZIN,SAKIT,ALPHA,BATAL',
-            'items.*.catatan' => 'nullable|string'
+            'items.*.status' => 'required|in:HADIR,TIDAK_HADIR,PINDAH_JADWAL',
+            'items.*.catatan' => 'nullable|string',
+            'items.*.target_session_id' => 'required_if:items.*.status,PINDAH_JADWAL|exists:realisasi_jadwal_kerja,id'
         ]);
 
         $this->absensiService->bulkUpdate($id, $request->input('items'), auth()->id());

@@ -17,7 +17,7 @@ class SesiAbsensiMurid extends Model
     protected $fillable = [
         'realisasi_jadwal_kerja_id',
         'enrollment_id',
-        'status', // HADIR, IZIN, SAKIT, ALPHA, BATAL
+        'status', // HADIR, TIDAK_HADIR, PINDAH_JADWAL
         'catatan',
         'created_by',
     ];
