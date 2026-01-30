@@ -299,5 +299,18 @@ Route::prefix('v2')->group(function () {
         Route::get('/assignments/{id}/submissions', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'index'])->middleware('permission:assignment.view');
         Route::post('/assignments/{id}/submissions', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'store'])->middleware('permission:assignment.create');
         Route::put('/assignments/submissions/{submissionId}/review', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'review'])->middleware('permission:assignment.manage');
+
+        // Sesi Materi & Assignment Management
+        Route::get('/sesi/{sesiId}/materi-assignments', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'index'])->middleware('permission:session.view');
+        Route::post('/sesi/{sesiId}/assign-materi', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignMateri'])->middleware('permission:session.update');
+        Route::delete('/sesi/{sesiId}/materi/{materiId}', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'unassignMateri'])->middleware('permission:session.update');
+        Route::post('/sesi/{sesiId}/assign-assignment', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignAssignment'])->middleware('permission:session.update');
+        Route::delete('/sesi/{sesiId}/assignment/{assignmentId}', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'unassignAssignment'])->middleware('permission:session.update');
+
+        // Student Portal
+        Route::get('/murid/my-materi', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getMyMateri']);
+        Route::get('/murid/my-assignments', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getMyAssignments']);
+        Route::post('/murid/materi/{materiAssignmentId}/mark-accessed', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'markMateriAccessed']);
+        Route::get('/murid/progress', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getProgress']);
     });
 });
