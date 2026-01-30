@@ -64,12 +64,21 @@ class AssignmentService
      */
     public function create(array $data): Assignment
     {
+        // Handle file upload if present
+        $attachmentPath = null;
+        if (!empty($data['attachment_file'])) {
+            $attachmentPath = $data['attachment_file']->store('assignments/attachments', 'public');
+        }
+
         return Assignment::create([
             'enrollment_id' => $data['enrollment_id'],
             'realisasi_jadwal_kerja_id' => $data['realisasi_jadwal_kerja_id'] ?? null,
             'materi_modul_id' => $data['materi_modul_id'] ?? null,
             'title' => $data['title'],
             'instructions' => $data['instructions'] ?? null,
+            'attachment_type' => $data['attachment_type'] ?? 'NONE',
+            'attachment_url' => $data['attachment_url'] ?? null,
+            'attachment_path' => $attachmentPath,
             'due_at' => $data['due_at'] ?? null,
             'status' => Assignment::STATUS_ASSIGNED,
             'assigned_by' => $data['assigned_by'] ?? auth()->id(),

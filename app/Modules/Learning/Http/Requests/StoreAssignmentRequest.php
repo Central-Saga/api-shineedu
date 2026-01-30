@@ -20,6 +20,15 @@ class StoreAssignmentRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
             'due_at' => ['nullable', 'date'],
+            'attachment_type' => ['nullable', 'in:NONE,FILE,URL'],
+            'attachment_url' => ['nullable', 'required_if:attachment_type,URL', 'url'],
+            'attachment_file' => [
+                'nullable',
+                'required_if:attachment_type,FILE',
+                'file',
+                'max:51200', // 50MB
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,zip'
+            ],
         ];
     }
 
