@@ -26,6 +26,9 @@ Route::prefix('v2')->group(function () {
         Route::get('catalog/harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup']);
         Route::post('landing-register', [\App\Modules\Enrollment\Http\Controllers\LandingRegisterController::class, 'store']);
         Route::get('gallery', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryPublicController::class, 'index']);
+        Route::get('job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'index']);
+        Route::post('job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store']);
+        Route::post('job-applications/track', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'track']);
     });
 
     // Protected routes
@@ -103,6 +106,22 @@ Route::prefix('v2')->group(function () {
         Route::post('/cuti/{cuti}/approve', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'approve'])->middleware('permission:cuti.manage');
         Route::post('/cuti/{cuti}/reject', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'reject'])->middleware('permission:cuti.manage');
         Route::post('/cuti/{cuti}/cancel', [\App\Modules\HR\Http\Controllers\Api\V2\CutiController::class, 'cancel']);
+
+        // Job Applications (Lamaran Kerja)
+        Route::get('/job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'index'])->middleware('permission:job_application.view');
+        Route::post('/job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store'])->middleware('permission:job_application.create');
+        Route::get('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'show'])->middleware('permission:job_application.view');
+        Route::put('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'update'])->middleware('permission:job_application.update');
+        Route::patch('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'update'])->middleware('permission:job_application.update');
+        Route::delete('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'destroy'])->middleware('permission:job_application.delete');
+
+        // Job Vacancies (Lowongan Kerja)
+        Route::get('/job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'list'])->middleware('permission:job_vacancy.view');
+        Route::post('/job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'store'])->middleware('permission:job_vacancy.create');
+        Route::get('/job-vacancies/{job_vacancy}', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'show'])->middleware('permission:job_vacancy.view');
+        Route::put('/job-vacancies/{job_vacancy}', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'update'])->middleware('permission:job_vacancy.update');
+        Route::patch('/job-vacancies/{job_vacancy}', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'update'])->middleware('permission:job_vacancy.update');
+        Route::delete('/job-vacancies/{job_vacancy}', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'destroy'])->middleware('permission:job_vacancy.delete');
 
         // Absensi
         Route::get('/absensi/today', [\App\Modules\HR\Http\Controllers\Api\V2\AbsensiController::class, 'todayStatus'])->middleware('permission:absensi.create');

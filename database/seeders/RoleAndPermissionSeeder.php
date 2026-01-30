@@ -64,6 +64,8 @@ class RoleAndPermissionSeeder extends Seeder
             'employees',      // karyawan
             'vacancies',      // lowongan
             'applications',   // lamaran
+            'job_application', // lamaran kerja (job applications)
+            'job_vacancy',     // lowongan kerja (job vacancies)
             'cuti',           // cuti/izin/sakit
             'absensi',        // kehadiran manual/mesin
             'pengaturan_cuti', // setting kuota cuti
