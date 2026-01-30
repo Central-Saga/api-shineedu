@@ -51,6 +51,11 @@ class Session extends Model
         return $this->belongsTo(JadwalKerja::class, 'jadwal_kerja_id');
     }
 
+    public function jadwalKerja()
+    {
+        return $this->belongsTo(JadwalKerja::class, 'jadwal_kerja_id');
+    }
+
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'kelas_id');

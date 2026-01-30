@@ -50,9 +50,7 @@ class MuridResource extends JsonResource
                 return [
                     'total' => $this->absensi->count(),
                     'hadir' => $this->absensi->where('status', 'HADIR')->count(),
-                    'izin' => $this->absensi->where('status', 'IZIN')->count(),
-                    'sakit' => $this->absensi->where('status', 'SAKIT')->count(),
-                    'alpha' => $this->absensi->where('status', 'ALPHA')->count(),
+                    'tidak_hadir' => $this->absensi->where('status', 'TIDAK_HADIR')->count(),
                 ];
             }),
             'absensi_history' => $this->whenLoaded('absensi', function () {

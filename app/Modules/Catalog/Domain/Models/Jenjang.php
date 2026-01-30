@@ -24,6 +24,12 @@ class Jenjang extends Model
         'deleted_at' => 'datetime',
     ];
 
+    // Relationships
+    public function programs()
+    {
+        return $this->belongsToMany(Program::class, 'program_jenjang', 'jenjang_id', 'program_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'Aktif');

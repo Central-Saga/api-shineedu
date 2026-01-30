@@ -299,5 +299,46 @@ Route::prefix('v2')->group(function () {
         Route::put('/sesi/{id}/logbook-murid/bulk', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'bulkUpsertStudent'])->middleware('permission:session.logbook.manage');
 
         Route::get('/murid/{muridId}/logbook', [\App\Modules\AcademicSessions\Http\Controllers\SesiLogbookController::class, 'indexByStudent'])->middleware('permission:session.logbook.manage');
+
+        // Materi Modul (Learning Materials)
+        Route::get('/materi-modul', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'index'])->middleware('permission:materials.view');
+        Route::post('/materi-modul', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'store'])->middleware('permission:materials.create');
+        Route::get('/materi-modul/{id}', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'show'])->middleware('permission:materials.view');
+        Route::put('/materi-modul/{id}', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'update'])->middleware('permission:materials.update');
+        Route::delete('/materi-modul/{id}', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'destroy'])->middleware('permission:materials.delete');
+
+        // Materi Modul Items
+        Route::get('/materi-modul/{id}/items', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'index'])->middleware('permission:materials.view');
+        Route::post('/materi-modul/{id}/items', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'store'])->middleware('permission:materials.create');
+        Route::put('/materi-modul/items/{itemId}', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'update'])->middleware('permission:materials.update');
+        Route::delete('/materi-modul/items/{itemId}', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'destroy'])->middleware('permission:materials.delete');
+        Route::post('/materi-modul/{id}/reorder', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'reorder'])->middleware('permission:materials.update');
+        Route::post('/materi-modul/items/{itemId}/toggle-status', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'toggleStatus'])->middleware('permission:materials.update');
+        Route::get('/materi-modul/items/{itemId}/download', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'download'])->middleware('permission:materials.view');
+
+        // Assignments (Tugas)
+        Route::get('/assignments', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'index'])->middleware('permission:assignment.view');
+        Route::post('/assignments', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'store'])->middleware('permission:assignment.create');
+        Route::get('/assignments/{id}', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'show'])->middleware('permission:assignment.view');
+        Route::put('/assignments/{id}', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'update'])->middleware('permission:assignment.update');
+        Route::post('/assignments/{id}/close', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'close'])->middleware('permission:assignment.manage');
+
+        // Assignment Submissions
+        Route::get('/assignments/{id}/submissions', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'index'])->middleware('permission:assignment.view');
+        Route::post('/assignments/{id}/submissions', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'store'])->middleware('permission:assignment.create');
+        Route::put('/assignments/submissions/{submissionId}/review', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'review'])->middleware('permission:assignment.manage');
+
+        // Sesi Materi & Assignment Management
+        Route::get('/sesi/{sesiId}/materi-assignments', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'index']); // TODO: Add back ->middleware('permission:session.view')
+        Route::post('/sesi/{sesiId}/assign-materi', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignMateri'])->middleware('permission:session.update');
+        Route::delete('/sesi/{sesiId}/materi/{materiId}', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'unassignMateri'])->middleware('permission:session.update');
+        Route::post('/sesi/{sesiId}/assign-assignment', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignAssignment'])->middleware('permission:session.update');
+        Route::delete('/sesi/{sesiId}/assignment/{assignmentId}', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'unassignAssignment'])->middleware('permission:session.update');
+
+        // Student Portal
+        Route::get('/murid/my-materi', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getMyMateri']);
+        Route::get('/murid/my-assignments', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getMyAssignments']);
+        Route::post('/murid/materi/{materiAssignmentId}/mark-accessed', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'markMateriAccessed']);
+        Route::get('/murid/progress', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getProgress']);
     });
 });

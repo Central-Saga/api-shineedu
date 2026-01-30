@@ -49,6 +49,7 @@ class RoleAndPermissionSeeder extends Seeder
             'enrollment.update',
             'enrollment.delete',
             'paket_murid',    // NEW: saldo pertemuan / meeting balance
+            'assignment',     // NEW: tugas murid
 
             // Finance & Ops
             'invoices',       // invoice & pembayaran
@@ -126,9 +127,16 @@ class RoleAndPermissionSeeder extends Seeder
             'session.logbook.manage',
 
             'materials.view',
+            'materials.create',
+            'materials.update',
             'materials.manage',
             'assessments.view',
             'assessments.manage',
+            // Assignment Permissions
+            'assignment.view',
+            'assignment.create',
+            'assignment.update',
+            'assignment.manage',
             'enrollment.view',
             'kelas.view', // Guru liat kelas
             'catalog.view',
@@ -139,7 +147,7 @@ class RoleAndPermissionSeeder extends Seeder
             'cuti.delete',
         ]);
 
-        // Student: mostly view
+        // Student: mostly view + submit assignments
         $student->syncPermissions([
             'scheduling.view',
             'attendance.view',
@@ -149,6 +157,9 @@ class RoleAndPermissionSeeder extends Seeder
             'enrollment.view',
             'kelas.view', // Murid liat kelasnya
             'catalog.view',
+            // Assignment Permissions (view own + submit)
+            'assignment.view',
+            'assignment.create', // untuk submit
         ]);
     }
 }

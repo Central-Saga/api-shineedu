@@ -20,6 +20,21 @@ class PaketHargaExport implements FromQuery, WithHeadings, WithMapping
     {
         $query = PaketHarga::query()->with(['program', 'jenjang', 'paket']);
 
+        // Search by related names (program, jenjang, paket)
+        if ($q = $this->request->get('q')) {
+            $query->where(function ($query) use ($q) {
+                $query->whereHas('program', function ($q2) use ($q) {
+                    $q2->where('nama', 'like', "%{$q}%");
+                })
+                    ->orWhereHas('jenjang', function ($q2) use ($q) {
+                        $q2->where('nama', 'like', "%{$q}%");
+                    })
+                    ->orWhereHas('paket', function ($q2) use ($q) {
+                        $q2->where('nama', 'like', "%{$q}%");
+                    });
+            });
+        }
+
         if ($programId = $this->request->get('program_id')) {
             if ($programId !== '__all__') {
                 $query->where('program_id', $programId);

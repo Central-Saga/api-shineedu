@@ -28,14 +28,25 @@ class SesiAbsensiController
 
     public function bulkUpdate(Request $request, $id): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'items' => 'required|array',
             'items.*.enrollment_id' => 'required|exists:enrollments,id',
-            'items.*.status' => 'required|in:HADIR,IZIN,SAKIT,ALPHA,BATAL',
-            'items.*.catatan' => 'nullable|string'
+            'items.*.status' => 'required|in:HADIR,TIDAK_HADIR,PINDAH_JADWAL',
+            'items.*.catatan' => 'nullable|string',
+            'items.*.target_session_id' => 'nullable|exists:realisasi_jadwal_kerja,id'
         ]);
 
-        $this->absensiService->bulkUpdate($id, $request->input('items'), auth()->id());
+        // Additional validation: target_session_id required if status is PINDAH_JADWAL
+        foreach ($validated['items'] as $index => $item) {
+            if ($item['status'] === 'PINDAH_JADWAL' && empty($item['target_session_id'])) {
+                return ApiResponse::validation(
+                    ['target_session_id' => ["Sesi tujuan wajib dipilih untuk murid yang pindah jadwal (item #{$index})"]],
+                    'Validation Error'
+                );
+            }
+        }
+
+        $this->absensiService->bulkUpdate($id, $validated['items'], auth()->id());
 
         return ApiResponse::ok(null, 'Absensi berhasil diperbarui');
     }
