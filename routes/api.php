@@ -25,6 +25,7 @@ Route::prefix('v2')->group(function () {
         Route::get('catalog/harga', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'index']);
         Route::get('catalog/harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup']);
         Route::post('landing-register', [\App\Modules\Enrollment\Http\Controllers\LandingRegisterController::class, 'store']);
+        Route::get('gallery', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryPublicController::class, 'index']);
         Route::get('job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'index']);
         Route::post('job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store']);
         Route::post('job-applications/track', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'track']);
@@ -189,6 +190,14 @@ Route::prefix('v2')->group(function () {
             Route::put('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'update'])->middleware('permission:catalog.pricing.update');
             Route::delete('harga/{harga}', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'destroy'])->middleware('permission:catalog.pricing.delete');
         });
+
+        // Landing Gallery (admin CRUD)
+        Route::get('/landing-gallery', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'index'])->middleware('permission:landing.gallery.view');
+        Route::post('/landing-gallery', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'store'])->middleware('permission:landing.gallery.manage');
+        Route::get('/landing-gallery/{landingGalleryItem}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'show'])->middleware('permission:landing.gallery.view');
+        Route::put('/landing-gallery/{landingGalleryItem}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'update'])->middleware('permission:landing.gallery.manage');
+        Route::patch('/landing-gallery/{landingGalleryItem}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'update'])->middleware('permission:landing.gallery.manage');
+        Route::delete('/landing-gallery/{landingGalleryItem}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryController::class, 'destroy'])->middleware('permission:landing.gallery.manage');
 
         // Enrollments
         Route::get('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:enrollment.view');

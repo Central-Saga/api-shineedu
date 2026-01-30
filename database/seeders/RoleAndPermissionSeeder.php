@@ -71,6 +71,9 @@ class RoleAndPermissionSeeder extends Seeder
             'pengaturan_cuti', // setting kuota cuti
             'rekap_bulanan',
             'gaji',
+
+            // Landing (gallery for landing page)
+            'landing.gallery',
         ];
 
         // Pola CRUD umum per modul
