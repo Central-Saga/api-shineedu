@@ -37,7 +37,7 @@ class StudentPortalController
         $materiAssignments = SesiMuridMateri::where('enrollment_id', $enrollment->enrollment_id)
             ->with([
                 'materi.items',
-                'sesi.kelas',
+                'sesi.jadwalKerja.kelas',
             ])
             ->orderBy('assigned_at', 'desc')
             ->get()
@@ -52,7 +52,7 @@ class StudentPortalController
                     'accessed_at' => $assignment->accessed_at,
                     'is_accessed' => $assignment->accessed_at !== null,
                     'sesi_date' => $assignment->sesi->tanggal ?? null,
-                    'kelas_name' => $assignment->sesi->kelas->nama_kelas ?? null,
+                    'kelas_name' => $assignment->sesi->jadwalKerja->kelas->nama_kelas ?? null,
                 ];
             });
 
@@ -88,7 +88,7 @@ class StudentPortalController
         $assignmentAssignments = SesiMuridAssignment::where('enrollment_id', $enrollment->enrollment_id)
             ->with([
                 'assignment',
-                'sesi.kelas',
+                'sesi.jadwalKerja.kelas',
             ])
             ->orderBy('assigned_at', 'desc')
             ->get()
@@ -106,7 +106,7 @@ class StudentPortalController
                     'due_date' => $assignment->assignment->due_date ?? null,
                     'assigned_at' => $assignment->assigned_at,
                     'sesi_date' => $assignment->sesi->tanggal ?? null,
-                    'kelas_name' => $assignment->sesi->kelas->nama_kelas ?? null,
+                    'kelas_name' => $assignment->sesi->jadwalKerja->kelas->nama_kelas ?? null,
                     'submission' => $submission ? [
                         'id' => $submission->id,
                         'status' => $submission->status,

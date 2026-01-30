@@ -56,9 +56,11 @@ class SesiService
         return Session::with([
             'kelas.program',
             'kelas.jenjang',
+            'kelas.enrollments.murid',
             'guruPengajar.user',
             'guruPengganti.user',
             'jadwal',
+            'jadwalKerja.kelas.enrollments.murid',
             'logbook',
             'logbookMurid.enrollment.murid',
             'absensi.enrollment.murid'

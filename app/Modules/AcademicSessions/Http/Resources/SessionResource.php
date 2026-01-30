@@ -19,9 +19,42 @@ class SessionResource extends JsonResource
                     'tipe_kelas' => $this->kelas->tipe_kelas,
                     'program' => $this->kelas->program ? ['nama' => $this->kelas->program->nama] : null,
                     'jenjang' => $this->kelas->jenjang ? ['nama' => $this->kelas->jenjang->nama] : null,
+                    'enrollments' => $this->kelas->whenLoaded('enrollments', function () {
+                        return $this->kelas->enrollments->map(fn($e) => [
+                            'id' => $e->id,
+                            'murid_id' => $e->murid_id,
+                            'murid' => $e->murid ? [
+                                'id' => $e->murid->id,
+                                'nama_lengkap' => $e->murid->nama_lengkap,
+                            ] : null,
+                        ]);
+                    }),
                 ];
             }),
             'jadwal_kerja_id' => $this->jadwal_kerja_id,
+            'jadwalKerja' => $this->when($this->relationLoaded('jadwalKerja') && $this->jadwalKerja, function () {
+                $jadwalKerja = $this->jadwalKerja;
+                return [
+                    'id' => $jadwalKerja->id,
+                    'kelas' => $this->when($jadwalKerja->relationLoaded('kelas') && $jadwalKerja->kelas, function () use ($jadwalKerja) {
+                        $kelas = $jadwalKerja->kelas;
+                        return [
+                            'id' => $kelas->id,
+                            'nama_kelas' => $kelas->nama_kelas,
+                            'enrollments' => $this->when($kelas->relationLoaded('enrollments'), function () use ($kelas) {
+                                return $kelas->enrollments->map(fn($e) => [
+                                    'id' => $e->id,
+                                    'murid_id' => $e->murid_id,
+                                    'murid' => $e->murid ? [
+                                        'id' => $e->murid->id,
+                                        'nama_lengkap' => $e->murid->nama_lengkap,
+                                    ] : null,
+                                ]);
+                            }),
+                        ];
+                    }),
+                ];
+            }),
             'tanggal' => $this->tanggal->format('Y-m-d'),
             'hari_indo' => $this->tanggal->isoFormat('dddd'),
             'jam_mulai_plan' => $this->jadwal ? $this->jadwal->jam_mulai : null,

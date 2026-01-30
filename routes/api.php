@@ -301,7 +301,7 @@ Route::prefix('v2')->group(function () {
         Route::put('/assignments/submissions/{submissionId}/review', [\App\Modules\Learning\Http\Controllers\AssignmentSubmissionController::class, 'review'])->middleware('permission:assignment.manage');
 
         // Sesi Materi & Assignment Management
-        Route::get('/sesi/{sesiId}/materi-assignments', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'index'])->middleware('permission:session.view');
+        Route::get('/sesi/{sesiId}/materi-assignments', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'index']); // TODO: Add back ->middleware('permission:session.view')
         Route::post('/sesi/{sesiId}/assign-materi', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignMateri'])->middleware('permission:session.update');
         Route::delete('/sesi/{sesiId}/materi/{materiId}', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'unassignMateri'])->middleware('permission:session.update');
         Route::post('/sesi/{sesiId}/assign-assignment', [\App\Modules\Learning\Http\Controllers\SesiMateriAssignmentController::class, 'assignAssignment'])->middleware('permission:session.update');

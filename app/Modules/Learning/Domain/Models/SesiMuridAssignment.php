@@ -2,8 +2,8 @@
 
 namespace App\Modules\Learning\Domain\Models;
 
-use App\Modules\Academic\Domain\Models\KelasEnrollment;
-use App\Modules\Academic\Domain\Models\RealisasiJadwalKerja;
+use App\Modules\Enrollment\Domain\Models\Enrollment;
+use App\Modules\Scheduling\Domain\Models\RealisasiJadwalKerja;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -33,7 +33,7 @@ class SesiMuridAssignment extends Model
 
     public function enrollment(): BelongsTo
     {
-        return $this->belongsTo(KelasEnrollment::class, 'enrollment_id');
+        return $this->belongsTo(Enrollment::class, 'enrollment_id');
     }
 
     public function assignment(): BelongsTo

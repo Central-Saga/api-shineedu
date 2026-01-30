@@ -2,7 +2,7 @@
 
 namespace App\Modules\Learning\Http\Controllers;
 
-use App\Modules\Academic\Domain\Models\RealisasiJadwalKerja;
+use App\Modules\Scheduling\Domain\Models\RealisasiJadwalKerja;
 use App\Modules\Learning\Domain\Models\SesiMuridMateri;
 use App\Modules\Learning\Domain\Models\SesiMuridAssignment;
 use App\Shared\Http\Responses\ApiResponse;
@@ -18,7 +18,7 @@ class SesiMateriAssignmentController
     public function index(int $sesiId): JsonResponse
     {
         $sesi = RealisasiJadwalKerja::with([
-            'kelas.enrollments.murid',
+            'jadwalKerja.kelas.enrollments.murid',
         ])->findOrFail($sesiId);
 
         // Get assigned materi
