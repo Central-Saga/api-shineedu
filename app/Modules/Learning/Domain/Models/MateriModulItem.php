@@ -23,6 +23,7 @@ class MateriModulItem extends Model
     ];
 
     protected $casts = [
+        'type' => 'string',
         'order_no' => 'integer',
         'is_active' => 'boolean',
         'created_at' => 'datetime',

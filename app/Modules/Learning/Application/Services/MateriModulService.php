@@ -119,8 +119,8 @@ class MateriModulService
         $maxOrder = $modul->items()->max('order_no') ?? 0;
 
         return $modul->items()->create([
-            'type' => $data['type'],
-            'title' => $data['title'],
+            'type' => (string) $data['type'],
+            'title' => (string) $data['title'],
             'content' => $data['content'] ?? null,
             'url' => $data['url'] ?? null,
             'file_path' => $data['file_path'] ?? null,

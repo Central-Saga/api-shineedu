@@ -134,4 +134,24 @@ class MateriModulItemController extends Controller
             'Status updated successfully'
         );
     }
+
+    /**
+     * Download item file.
+     */
+    public function download(int $itemId)
+    {
+        $item = MateriModulItem::findOrFail($itemId);
+
+        if ($item->type !== 'FILE' || !$item->file_path) {
+            abort(404, 'File not found');
+        }
+
+        $path = storage_path('app/public/' . $item->file_path);
+
+        if (!file_exists($path)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->download($path);
+    }
 }

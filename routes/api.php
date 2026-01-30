@@ -286,6 +286,7 @@ Route::prefix('v2')->group(function () {
         Route::delete('/materi-modul/items/{itemId}', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'destroy'])->middleware('permission:materials.delete');
         Route::post('/materi-modul/{id}/reorder', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'reorder'])->middleware('permission:materials.update');
         Route::post('/materi-modul/items/{itemId}/toggle-status', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'toggleStatus'])->middleware('permission:materials.update');
+        Route::get('/materi-modul/items/{itemId}/download', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'download'])->middleware('permission:materials.view');
 
         // Assignments (Tugas)
         Route::get('/assignments', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'index'])->middleware('permission:assignment.view');
