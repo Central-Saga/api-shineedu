@@ -72,8 +72,9 @@ class RoleAndPermissionSeeder extends Seeder
             'rekap_bulanan',
             'gaji',
 
-            // Landing (gallery for landing page)
+            // Landing (gallery & blog for landing page)
             'landing.gallery',
+            'landing.blog',
         ];
 
         // Pola CRUD umum per modul

@@ -56,7 +56,7 @@ return new class extends Migration
             // Indexes for performance
             $table->index('tanggal', 'idx_tanggal');
             $table->index(['type', 'kategori'], 'idx_type_kategori');
-            $table->index(['reference_type', 'reference_id'], 'idx_reference');
+            $table->index(['reference_type', 'reference_id'], 'idx_kas_transaksi_reference');
         });
     }
 

@@ -41,7 +41,7 @@ return new class extends Migration
 
             // Indexes for performance
             $table->index('paket_murid_id', 'idx_paket_murid_id');
-            $table->index(['reference_type', 'reference_id'], 'idx_reference');
+            $table->index(['reference_type', 'reference_id'], 'idx_paket_murid_ledger_reference');
 
             // CRITICAL: Prevent double-deduction for same attendance
             // Only one USE entry per attendance record

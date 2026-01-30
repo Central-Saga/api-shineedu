@@ -12,11 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // SQLite does not support UPDATE ... JOIN; use subquery (works on MySQL too).
         DB::statement("
-            UPDATE realisasi_jadwal_kerja rjk
-            JOIN jadwal_kerja jk ON jk.id = rjk.jadwal_kerja_id
-            SET rjk.kelas_id = jk.kelas_id
-            WHERE rjk.kelas_id IS NULL
+            UPDATE realisasi_jadwal_kerja
+            SET kelas_id = (
+                SELECT jk.kelas_id
+                FROM jadwal_kerja jk
+                WHERE jk.id = realisasi_jadwal_kerja.jadwal_kerja_id
+            )
+            WHERE kelas_id IS NULL
         ");
     }
 
