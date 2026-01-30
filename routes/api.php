@@ -280,11 +280,12 @@ Route::prefix('v2')->group(function () {
         Route::delete('/materi-modul/{id}', [\App\Modules\Learning\Http\Controllers\MateriModulController::class, 'destroy'])->middleware('permission:materials.delete');
 
         // Materi Modul Items
+        Route::get('/materi-modul/{id}/items', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'index'])->middleware('permission:materials.view');
         Route::post('/materi-modul/{id}/items', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'store'])->middleware('permission:materials.create');
         Route::put('/materi-modul/items/{itemId}', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'update'])->middleware('permission:materials.update');
         Route::delete('/materi-modul/items/{itemId}', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'destroy'])->middleware('permission:materials.delete');
         Route::post('/materi-modul/{id}/reorder', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'reorder'])->middleware('permission:materials.update');
-        Route::patch('/materi-modul/items/{itemId}/toggle-status', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'toggleStatus'])->middleware('permission:materials.update');
+        Route::post('/materi-modul/items/{itemId}/toggle-status', [\App\Modules\Learning\Http\Controllers\MateriModulItemController::class, 'toggleStatus'])->middleware('permission:materials.update');
 
         // Assignments (Tugas)
         Route::get('/assignments', [\App\Modules\Learning\Http\Controllers\AssignmentController::class, 'index'])->middleware('permission:assignment.view');

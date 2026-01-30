@@ -22,6 +22,20 @@ class MateriModulItemController extends Controller
     }
 
     /**
+     * Get all items for a materi modul.
+     */
+    public function index(int $id): JsonResponse
+    {
+        $modul = MateriModul::findOrFail($id);
+        $items = $modul->items()->orderBy('order_no')->get();
+
+        return ApiResponse::ok(
+            MateriModulItemResource::collection($items),
+            'Items retrieved successfully'
+        );
+    }
+
+    /**
      * Add item to materi modul.
      */
     public function store(StoreMateriModulItemRequest $request, int $id): JsonResponse
