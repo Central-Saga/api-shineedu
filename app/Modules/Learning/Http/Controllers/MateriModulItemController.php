@@ -51,12 +51,15 @@ class MateriModulItemController extends Controller
         $item = MateriModulItem::findOrFail($itemId);
 
         $validated = $request->validate([
-            'type' => ['sometimes', 'string', 'in:VIDEO,PDF,LINK,TEXT,QUIZ,FILE'],
+            'type' => ['sometimes', 'string', 'in:FILE,URL'],
             'title' => ['sometimes', 'string', 'max:255'],
-            'content' => ['nullable', 'string'],
             'url' => ['nullable', 'url'],
-            'file_path' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'max:102400'],
+            'file' => [
+                'nullable',
+                'file',
+                'max:51200', // 50MB max
+                'mimes:doc,docx,xls,xlsx,pdf,ppt,pptx,jpg,jpeg,png,gif,zip'
+            ],
             'order_no' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -100,5 +103,21 @@ class MateriModulItemController extends Controller
         $this->service->reorderItems($modul, $validated['item_ids']);
 
         return ApiResponse::ok(null, 'Items reordered successfully');
+    }
+
+    /**
+     * Toggle item status (active/inactive).
+     */
+    public function toggleStatus(int $itemId): JsonResponse
+    {
+        $item = MateriModulItem::findOrFail($itemId);
+
+        $item->is_active = !$item->is_active;
+        $item->save();
+
+        return ApiResponse::ok(
+            new MateriModulItemResource($item),
+            'Status updated successfully'
+        );
     }
 }

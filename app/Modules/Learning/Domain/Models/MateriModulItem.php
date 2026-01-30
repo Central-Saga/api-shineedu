@@ -30,22 +30,14 @@ class MateriModulItem extends Model
     ];
 
     // Constants for type enum
-    public const TYPE_VIDEO = 'VIDEO';
-    public const TYPE_PDF = 'PDF';
-    public const TYPE_LINK = 'LINK';
-    public const TYPE_TEXT = 'TEXT';
-    public const TYPE_QUIZ = 'QUIZ';
     public const TYPE_FILE = 'FILE';
+    public const TYPE_URL = 'URL';
 
     public static function getTypes(): array
     {
         return [
-            self::TYPE_VIDEO,
-            self::TYPE_PDF,
-            self::TYPE_LINK,
-            self::TYPE_TEXT,
-            self::TYPE_QUIZ,
             self::TYPE_FILE,
+            self::TYPE_URL,
         ];
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('materi_modul_item', function (Blueprint $table) {
             $table->id();
             $table->foreignId('materi_modul_id')->constrained('materi_modul')->cascadeOnDelete();
-            $table->enum('type', ['VIDEO', 'PDF', 'LINK', 'TEXT', 'QUIZ', 'FILE']);
+            $table->enum('type', ['FILE', 'URL']);
             $table->string('title');
             $table->text('content')->nullable();
             $table->string('url')->nullable();

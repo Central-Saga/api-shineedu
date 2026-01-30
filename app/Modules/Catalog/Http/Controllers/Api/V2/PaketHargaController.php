@@ -23,8 +23,20 @@ class PaketHargaController
     {
         $query = PaketHarga::query()->with(['program', 'jenjang', 'paket']);
 
-        // Search not typically applied to pricing table generally effectively, maybe by related names?
-        // Let's stick strictly to filters for structured data
+        // Search by related names (program, jenjang, paket)
+        if ($q = $request->input('q')) {
+            $query->where(function ($query) use ($q) {
+                $query->whereHas('program', function ($q2) use ($q) {
+                    $q2->where('nama', 'like', "%{$q}%");
+                })
+                    ->orWhereHas('jenjang', function ($q2) use ($q) {
+                        $q2->where('nama', 'like', "%{$q}%");
+                    })
+                    ->orWhereHas('paket', function ($q2) use ($q) {
+                        $q2->where('nama', 'like', "%{$q}%");
+                    });
+            });
+        }
 
         // Filters
         if ($pid = $request->input('program_id')) {
