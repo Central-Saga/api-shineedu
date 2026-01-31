@@ -78,7 +78,12 @@ $mapping = [
 'fontSize' => 'font-size',
 'color' => 'color',
 'fontWeight' => 'font-weight',
-'textAlign' => 'text-align'
+'textAlign' => 'text-align',
+'backgroundColor' => 'background-color',
+'padding' => 'padding',
+'border' => 'border',
+'borderRadius' => 'border-radius',
+'letterSpacing' => 'letter-spacing',
 ];
 
 foreach($mapping as $key => $cssProp) {
@@ -88,7 +93,7 @@ $value = $coords[$key];
 if (is_numeric($value)) {
 if ($key === 'fontSize') {
 $value .= 'pt';
-} else if (in_array($key, ['top', 'left', 'width', 'height'])) {
+} else if (in_array($key, ['top', 'left', 'width', 'height', 'padding', 'borderRadius', 'letterSpacing'])) {
 $value .= 'px';
 }
 }
@@ -110,7 +115,9 @@ return implode('; ', $styles);
             @if(isset($mapping['cover']))
             @foreach($mapping['cover'] as $field => $coords)
             <div class="absolute-text" style="{{ $parseStyle($coords) }}">
-                @if($field === 'student_name')
+                @if(isset($coords['text']))
+                {{ $coords['text'] }}
+                @elseif($field === 'student_name')
                 {{ $student->nama_lengkap }}
                 @elseif($field === 'program_name')
                 {{ $enrollment->program->nama ?? 'Program' }}
@@ -135,7 +142,9 @@ return implode('; ', $styles);
             @if(isset($mapping['result']))
             @foreach($mapping['result'] as $field => $coords)
             <div class="absolute-text" style="{{ $parseStyle($coords) }}">
-                @if(str_starts_with($field, 'score_'))
+                @if(isset($coords['text']))
+                {{ $coords['text'] }}
+                @elseif(str_starts_with($field, 'score_'))
                 @php $key = str_replace('score_', '', $field); @endphp
                 {{ $grade->scores[$key] ?? '-' }}
                 @elseif($field === 'average_score')

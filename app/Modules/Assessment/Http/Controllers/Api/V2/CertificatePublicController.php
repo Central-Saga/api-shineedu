@@ -13,6 +13,7 @@ class CertificatePublicController extends Controller
      */
     public function download($no)
     {
+        /** @var AssessmentGrade $grade */
         $grade = AssessmentGrade::where('certificate_no', $no)->firstOrFail();
 
         $media = $grade->getFirstMedia('certificate_pdf');
