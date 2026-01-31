@@ -60,7 +60,9 @@
 
         .absolute-text {
             position: absolute;
-            white-space: nowrap;
+            z-index: 100;
+            display: block;
+            /* background: rgba(255,0,0,0.1); Debugging background */
         }
     </style>
 </head>
@@ -72,6 +74,7 @@ $mapping = [
 'top' => 'top',
 'left' => 'left',
 'width' => 'width',
+'height' => 'height',
 'fontSize' => 'font-size',
 'color' => 'color',
 'fontWeight' => 'font-weight',
@@ -79,7 +82,7 @@ $mapping = [
 ];
 
 foreach($mapping as $key => $cssProp) {
-if (isset($coords[$key])) {
+if (isset($coords[$key]) && $coords[$key] !== null) {
 $value = $coords[$key];
 // Append units if numeric
 if (is_numeric($value)) {
@@ -139,6 +142,12 @@ return implode('; ', $styles);
                 {{ $grade->average_score }}
                 @elseif($field === 'total_score')
                 {{ $grade->total_score }}
+                @elseif($field === 'student_name')
+                {{ $student->nama_lengkap }}
+                @elseif($field === 'certificate_no')
+                {{ $grade->certificate_no }}
+                @elseif($field === 'date')
+                {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F Y') }}
                 @elseif($field === 'predicate')
                 {{ $grade->predicate }}
                 @elseif($field === 'level')
