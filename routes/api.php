@@ -31,6 +31,10 @@ Route::prefix('v2')->group(function () {
         Route::get('job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'index']);
         Route::post('job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store']);
         Route::post('job-applications/track', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'track']);
+
+        // Certificates
+        Route::get('certificates/{no}/download', [\App\Modules\Assessment\Http\Controllers\Api\V2\CertificatePublicController::class, 'download'])
+            ->where('no', '.*');
     });
 
     // Protected routes
