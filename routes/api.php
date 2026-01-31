@@ -360,5 +360,22 @@ Route::prefix('v2')->group(function () {
         Route::get('/murid/my-assignments', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getMyAssignments']);
         Route::post('/murid/materi/{materiAssignmentId}/mark-accessed', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'markMateriAccessed']);
         Route::get('/murid/progress', [\App\Modules\Learning\Http\Controllers\StudentPortalController::class, 'getProgress']);
+        // Assessment & Certificate (Secured)
+        Route::prefix('assessment')->middleware(['permission:assessment.view|assessment.manage'])->group(function () {
+            // Templates (Manage only)
+            Route::middleware('permission:assessment.manage')->group(function () {
+                Route::post('/templates', [\App\Modules\Assessment\Http\Controllers\Api\V2\CertificateTemplateController::class, 'store']);
+                Route::delete('/templates/{template}', [\App\Modules\Assessment\Http\Controllers\Api\V2\CertificateTemplateController::class, 'destroy']);
+            });
+            Route::get('/templates', [\App\Modules\Assessment\Http\Controllers\Api\V2\CertificateTemplateController::class, 'index']);
+            Route::get('/templates/{template}', [\App\Modules\Assessment\Http\Controllers\Api\V2\CertificateTemplateController::class, 'show']);
+
+            // Grades & Generation
+            Route::middleware('permission:assessment.manage')->group(function () {
+                Route::post('/grades', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'store']);
+                Route::post('/grades/{grade}/generate', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'generate']);
+            });
+            Route::get('/grades/{grade}', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'show']);
+        });
     });
 });
