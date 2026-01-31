@@ -11,12 +11,18 @@
             size: A4 landscape;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
+            width: 297mm;
+            height: 210mm;
             font-family: 'Arial', sans-serif;
-            /* Or custom font */
             -webkit-print-color-adjust: exact;
+            background-color: #f0f0f0;
         }
 
         .page {
@@ -25,6 +31,7 @@
             height: 210mm;
             page-break-after: always;
             overflow: hidden;
+            background-color: #fff;
         }
 
         .page:last-child {
@@ -37,8 +44,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            object-fit: cover;
+            z-index: 1;
+            object-fit: fill;
+            /* Use fill to ensure it covers the exact A4 bounds */
         }
 
         .content-layer {
@@ -52,23 +60,53 @@
 
         .absolute-text {
             position: absolute;
-            /* transform: translate(-50%, -50%); Centering logic if needed, usually just top/left */
+            white-space: nowrap;
         }
     </style>
 </head>
+
+@php
+$parseStyle = function($coords) {
+$styles = [];
+$mapping = [
+'top' => 'top',
+'left' => 'left',
+'width' => 'width',
+'fontSize' => 'font-size',
+'color' => 'color',
+'fontWeight' => 'font-weight',
+'textAlign' => 'text-align'
+];
+
+foreach($mapping as $key => $cssProp) {
+if (isset($coords[$key])) {
+$value = $coords[$key];
+// Append units if numeric
+if (is_numeric($value)) {
+if ($key === 'fontSize') {
+$value .= 'pt';
+} else if (in_array($key, ['top', 'left', 'width', 'height'])) {
+$value .= 'px';
+}
+}
+$styles[] = "$cssProp: $value";
+}
+}
+return implode('; ', $styles);
+};
+@endphp
 
 <body>
 
     <!-- Page 1: Cover -->
     <div class="page">
+        @if($coverUrl)
         <img src="{{ $coverUrl }}" class="bg-image">
+        @endif
         <div class="content-layer">
-            <!-- Dynamic Content based on Mapping -->
             @if(isset($mapping['cover']))
             @foreach($mapping['cover'] as $field => $coords)
-            <div class="absolute-text"
-                style="top: {{ $coords['top'] ?? '0' }}; left: {{ $coords['left'] ?? '0' }}; font-size: {{ $coords['fontSize'] ?? '12pt' }}; color: {{ $coords['color'] ?? '#000' }}; font-weight: {{ $coords['fontWeight'] ?? 'normal' }}; width: {{ $coords['width'] ?? 'auto' }}; text-align: {{ $coords['textAlign'] ?? 'left' }};">
-
+            <div class="absolute-text" style="{{ $parseStyle($coords) }}">
                 @if($field === 'student_name')
                 {{ $student->nama_lengkap }}
                 @elseif($field === 'program_name')
@@ -80,7 +118,6 @@
                 @else
                 {{ $field }}
                 @endif
-
             </div>
             @endforeach
             @endif
@@ -92,12 +129,9 @@
     <div class="page">
         <img src="{{ $resultUrl }}" class="bg-image">
         <div class="content-layer">
-            <!-- Scores and Details -->
             @if(isset($mapping['result']))
             @foreach($mapping['result'] as $field => $coords)
-            <div class="absolute-text"
-                style="top: {{ $coords['top'] ?? '0' }}; left: {{ $coords['left'] ?? '0' }}; font-size: {{ $coords['fontSize'] ?? '12pt' }}; color: {{ $coords['color'] ?? '#000' }}; font-weight: {{ $coords['fontWeight'] ?? 'normal' }}; width: {{ $coords['width'] ?? 'auto' }}; text-align: {{ $coords['textAlign'] ?? 'left' }};">
-
+            <div class="absolute-text" style="{{ $parseStyle($coords) }}">
                 @if(str_starts_with($field, 'score_'))
                 @php $key = str_replace('score_', '', $field); @endphp
                 {{ $grade->scores[$key] ?? '-' }}
@@ -110,7 +144,6 @@
                 @elseif($field === 'level')
                 {{ $grade->certificate_level }}
                 @endif
-
             </div>
             @endforeach
             @endif

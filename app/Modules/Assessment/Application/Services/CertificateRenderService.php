@@ -14,8 +14,23 @@ class CertificateRenderService
     {
         // 1. Prepare Data
         $template = $grade->certificateTemplate;
-        $coverUrl = $template->getFirstMediaUrl('cover_image'); // Local path or URL
-        $resultUrl = $template->getFirstMediaUrl('result_image');
+
+        $coverMedia = $template->getFirstMedia('cover_image');
+        $resultMedia = $template->getFirstMedia('result_image');
+
+        $coverBase64 = null;
+        if ($coverMedia && file_exists($coverMedia->getPath())) {
+            $type = pathinfo($coverMedia->getPath(), PATHINFO_EXTENSION);
+            $data = file_get_contents($coverMedia->getPath());
+            $coverBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+
+        $resultBase64 = null;
+        if ($resultMedia && file_exists($resultMedia->getPath())) {
+            $type = pathinfo($resultMedia->getPath(), PATHINFO_EXTENSION);
+            $data = file_get_contents($resultMedia->getPath());
+            $resultBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
 
         // Use mapping from DB or fallback
         $mapping = $template->data_mapping ?? [];
@@ -26,8 +41,8 @@ class CertificateRenderService
             'enrollment' => $grade->enrollment,
             'student' => $grade->enrollment->student,
             'template' => $template,
-            'coverUrl' => $coverUrl,
-            'resultUrl' => $resultUrl,
+            'coverUrl' => $coverBase64,
+            'resultUrl' => $resultBase64,
             'mapping' => $mapping,
         ])->render();
 
