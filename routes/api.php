@@ -26,8 +26,8 @@ Route::prefix('v2')->group(function () {
         Route::get('catalog/harga/lookup', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketHargaController::class, 'lookup']);
         Route::post('landing-register', [\App\Modules\Enrollment\Http\Controllers\LandingRegisterController::class, 'store']);
         Route::get('gallery', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingGalleryPublicController::class, 'index']);
-        Route::get('blogs', [\App\Modules\Blog\Http\Controllers\Api\V2\BlogPublicController::class, 'index']);
-        Route::get('blogs/{blog}', [\App\Modules\Blog\Http\Controllers\Api\V2\BlogPublicController::class, 'show']);
+        Route::get('blogs', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogPublicController::class, 'index']);
+        Route::get('blogs/{id}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogPublicController::class, 'show']);
         Route::get('job-vacancies', [\App\Modules\HR\Http\Controllers\Api\V2\JobVacancyController::class, 'index']);
         Route::post('job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store']);
         Route::post('job-applications/track', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'track']);
@@ -210,6 +210,14 @@ Route::prefix('v2')->group(function () {
         Route::delete('/blogs/{blog}', [\App\Modules\Blog\Http\Controllers\Api\V2\BlogController::class, 'destroy'])->middleware('permission:blog.manage');
         Route::post('/blogs/{blog}/assets', [\App\Modules\Blog\Http\Controllers\Api\V2\BlogController::class, 'storeAsset'])->middleware('permission:blog.manage');
         Route::delete('/blogs/{blog}/assets/{blogAsset}', [\App\Modules\Blog\Http\Controllers\Api\V2\BlogController::class, 'destroyAsset'])->middleware('permission:blog.manage');
+
+        // Landing Blog (CRUD)
+        Route::get('/landing-blog', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'index'])->middleware('permission:landing.blog.view');
+        Route::post('/landing-blog', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'store'])->middleware('permission:landing.blog.create');
+        Route::get('/landing-blog/{blogPost}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'show'])->middleware('permission:landing.blog.view');
+        Route::put('/landing-blog/{blogPost}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'update'])->middleware('permission:landing.blog.update');
+        Route::patch('/landing-blog/{blogPost}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'update'])->middleware('permission:landing.blog.update');
+        Route::delete('/landing-blog/{blogPost}', [\App\Modules\Landing\Http\Controllers\Api\V2\LandingBlogController::class, 'destroy'])->middleware('permission:landing.blog.delete');
 
         // Enrollments
         Route::get('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:enrollment.view');
