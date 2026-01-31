@@ -116,54 +116,67 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Teacher: fokus ke jadwal, absensi, logbook, materi, assessments (view/manage terbatas)
         $teacher->syncPermissions([
+            // Dashboard / General
             'scheduling.view',
             'scheduling.manage',
-            'schedule.manage', // FIX
-            'attendance.view',
-            'attendance.manage',
-            'logbook.view',
-            'logbook.manage',
-            // Sesi Permissions
+            'schedule.manage',
+
+            // Academic Session & Attendance
             'session.view',
             'session.create',
             'session.update',
             'session.attendance.manage',
             'session.logbook.manage',
 
+            // Materials & Assignments
             'materials.view',
             'materials.create',
             'materials.update',
             'materials.manage',
-            'assessments.view',
-            'assessments.manage',
-            // Assignment Permissions
             'assignment.view',
             'assignment.create',
             'assignment.update',
             'assignment.manage',
+            'assessments.view',
+            'assessments.manage',
+
+            // Student Data
+            'student.view',
+            'paket_murid.view', // view saldo murid
+            'users.view',
+
+            // Operations
             'enrollment.view',
-            'kelas.view', // Guru liat kelas
+            'kelas.view',
             'catalog.view',
-            'users.view', // kalau guru boleh lihat profil murid tertentu, nanti bisa refine policy
+
+            // HR Self-Service
             'cuti.view',
             'cuti.create',
-            'cuti.update',
-            'cuti.delete',
+            'cuti.update', // maybe view only depending on flow
+            'absensi.view', // view own attendance history
+            'absensi.create', // perform attendance (check-in/out)
         ]);
 
         // Student: mostly view + submit assignments
         $student->syncPermissions([
+            // View Schedule & Sessions
             'scheduling.view',
-            'attendance.view',
-            'logbook.view',
+            'session.view',
+
+            // Content
             'materials.view',
-            'assessments.view',
-            'enrollment.view',
-            'kelas.view', // Murid liat kelasnya
-            'catalog.view',
-            // Assignment Permissions (view own + submit)
             'assignment.view',
-            'assignment.create', // untuk submit
+            'assignment.create', // submit assignment
+            'assessments.view',
+
+            // Academic Data
+            'enrollment.view',
+            'kelas.view',
+            'paket_murid.view', // view own packet balance
+
+            // View Catalog
+            'catalog.view',
         ]);
     }
 }

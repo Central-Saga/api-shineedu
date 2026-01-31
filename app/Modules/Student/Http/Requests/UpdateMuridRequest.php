@@ -43,6 +43,7 @@ class UpdateMuridRequest extends FormRequest
             'kebutuhan_khusus' => ['nullable', 'string'],
 
             'status' => ['nullable', 'in:Aktif,Non Aktif'],
+            'password' => ['nullable', 'string', 'min:8'],
         ];
     }
 }

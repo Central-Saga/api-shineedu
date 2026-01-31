@@ -17,13 +17,41 @@ class AuthController
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        $identifier = $request->input('email');
+        $password = $request->input('password');
 
-        if (!Auth::attempt($credentials)) {
-            return ApiResponse::unauthorized('Email atau password tidak valid.');
+        $user = null;
+
+        // 1. Try Login by Email
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            if (Auth::attempt(['email' => $identifier, 'password' => $password])) {
+                $user = Auth::user();
+            }
+        } else {
+            // 2. Try Login by Employee Code
+            $employee = \App\Modules\HR\Domain\Models\Employee::where('kode_karyawan', $identifier)->first();
+            if ($employee && $employee->user) {
+                if (\Illuminate\Support\Facades\Hash::check($password, $employee->user->password)) {
+                    $user = $employee->user;
+                    Auth::login($user);
+                }
+            }
+
+            // 3. Try Login by Student Code
+            if (!$user) {
+                $student = \App\Modules\Student\Domain\Models\Murid::where('kode_murid', $identifier)->first();
+                if ($student && $student->user) {
+                    if (\Illuminate\Support\Facades\Hash::check($password, $student->user->password)) {
+                        $user = $student->user;
+                        Auth::login($user);
+                    }
+                }
+            }
         }
 
-        $user = Auth::user();
+        if (!$user) {
+            return ApiResponse::unauthorized('Email, Kode Murid, Kode Karyawan atau password tidak valid.');
+        }
 
         // Check if user is active
         if ($user->status !== UserStatus::AKTIF) {

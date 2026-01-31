@@ -92,22 +92,40 @@ class RealisticBalineseSeeder extends Seeder
         DB::transaction(function () use ($balineseNames, $addresses, $schools, $jenjangs) {
             foreach ($balineseNames as $index => $data) {
                 $jenjang = $jenjangs->random();
+                $email = strtolower(str_replace(' ', '.', $data['nama'])) . '@gmail.com';
 
-                // 1. Create Murid ONLY
+                // 1. Create User
+                $user = User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => $data['nama'],
+                        'password' => bcrypt('password'), // Accessor might hash it, but explicit here is safe
+                        'status' => \App\Modules\Identity\Domain\Enums\UserStatus::AKTIF,
+                        'email_verified_at' => now(),
+                    ]
+                );
+
+                if (!$user->hasRole('Student')) {
+                    $user->assignRole('Student');
+                }
+
+                // 2. Create Murid linked to User
                 Murid::updateOrCreate(
                     ['kode_murid' => 'M' . str_pad($index + 1, 4, '0', STR_PAD_LEFT)],
                     [
+                        'user_id' => $user->id,
                         'nama_lengkap' => $data['nama'],
                         'jenis_kelamin' => $data['jk'],
                         'tanggal_lahir' => Carbon::now()->subYears(rand(7, 17))->subDays(rand(1, 365)),
                         'no_hp' => '081' . rand(100000000, 999999999),
-                        'email' => strtolower(str_replace(' ', '.', $data['nama'])) . '@gmail.com',
+                        'email' => $email,
                         'alamat' => $addresses[array_rand($addresses)],
                         'jenjang_id' => $jenjang->id,
                         'sekolah_asal' => $schools[array_rand($schools)],
                         'kelas_sekolah' => rand(1, 6),
                         'nama_wali' => ($data['jk'] == 'L' ? 'I ' : 'Ni ') . 'Wayan Orang Tua',
                         'no_hp_wali' => '081' . rand(100000000, 999999999),
+                        'email_wali' => 'wali.' . $email, // distinct email for guardian
                         'hubungan_wali' => 'Orang Tua',
                         'status' => 'Aktif',
                     ]
