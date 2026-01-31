@@ -46,6 +46,7 @@ class CertificateRenderService
             ->noSandbox()
             ->margins(0, 0, 0, 0)
             ->showBackground()
+            ->landscape()
             ->format('A4')
             ->save($tempPath);
 

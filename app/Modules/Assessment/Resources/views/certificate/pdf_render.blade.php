@@ -8,8 +8,7 @@
     <style>
         @page {
             margin: 0;
-            size: A4 portrait;
-            /* Check if template is portrait or landscape */
+            size: A4 landscape;
         }
 
         body {
@@ -22,8 +21,8 @@
 
         .page {
             position: relative;
-            width: 210mm;
-            height: 297mm;
+            width: 297mm;
+            height: 210mm;
             page-break-after: always;
             overflow: hidden;
         }
@@ -76,9 +75,8 @@
                 {{ $enrollment->program->nama ?? 'Program' }}
                 @elseif($field === 'date')
                 {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F Y') }}
-                @elseif($field === 'certificate_code')
-                {{ $grade->id }}/SHINE/{{ date('Y') }}
-                <!-- Example Code -->
+                @elseif($field === 'certificate_no')
+                {{ $grade->certificate_no }}
                 @else
                 {{ $field }}
                 @endif
@@ -98,16 +96,15 @@
             @if(isset($mapping['result']))
             @foreach($mapping['result'] as $field => $coords)
             <div class="absolute-text"
-                style="top: {{ $coords['top'] ?? '0' }}; left: {{ $coords['left'] ?? '0' }}; font-size: {{ $coords['fontSize'] ?? '12pt' }}; color: {{ $coords['color'] ?? '#000' }};">
+                style="top: {{ $coords['top'] ?? '0' }}; left: {{ $coords['left'] ?? '0' }}; font-size: {{ $coords['fontSize'] ?? '12pt' }}; color: {{ $coords['color'] ?? '#000' }}; font-weight: {{ $coords['fontWeight'] ?? 'normal' }}; width: {{ $coords['width'] ?? 'auto' }}; text-align: {{ $coords['textAlign'] ?? 'left' }};">
 
-                @if($field === 'scores_table')
-                <!-- Special handling for scores table if needed, or loop scores individually -->
-                <!-- Ideally, mapping has specific keys like 'score_grammar', 'score_speaking' -->
-                @elseif(str_starts_with($field, 'score_'))
+                @if(str_starts_with($field, 'score_'))
                 @php $key = str_replace('score_', '', $field); @endphp
                 {{ $grade->scores[$key] ?? '-' }}
-                @elseif($field === 'final_score')
-                {{ $grade->final_score }}
+                @elseif($field === 'average_score')
+                {{ $grade->average_score }}
+                @elseif($field === 'total_score')
+                {{ $grade->total_score }}
                 @elseif($field === 'predicate')
                 {{ $grade->predicate }}
                 @elseif($field === 'level')
