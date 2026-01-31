@@ -26,6 +26,21 @@ class CertificateTemplate extends Model implements HasMedia
         'is_active' => 'boolean',
     ];
 
+    protected $appends = [
+        'cover_image',
+        'result_image',
+    ];
+
+    public function getCoverImageAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('cover_image');
+    }
+
+    public function getResultImageAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('result_image');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('cover_image')
