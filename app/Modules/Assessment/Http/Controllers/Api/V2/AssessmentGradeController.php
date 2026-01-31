@@ -21,6 +21,47 @@ class AssessmentGradeController extends Controller
     ) {}
 
     /**
+     * List Assessment Grades
+     */
+    public function index(Request $request)
+    {
+        $query = AssessmentGrade::query()
+            ->with(['enrollment.student', 'enrollment.program', 'certificateTemplate', 'teacher.user']);
+
+        // Search (Student name or certificate number)
+        if ($request->has('q') && !empty($request->q)) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->whereHas('enrollment.student', function ($sq) use ($q) {
+                    $sq->where('nama_lengkap', 'like', "%$q%");
+                })->orWhere('certificate_no', 'like', "%$q%");
+            });
+        }
+
+        // Filter by type
+        if ($request->has('type') && !empty($request->type)) {
+            $query->whereHas('certificateTemplate', function ($sq) use ($request) {
+                $sq->where('type', $request->type);
+            });
+        }
+
+        // Filter by generated status
+        if ($request->has('generated_status') && !empty($request->generated_status)) {
+            if ($request->generated_status === 'generated') {
+                $query->whereNotNull('generated_at');
+            } else {
+                $query->whereNull('generated_at');
+            }
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $sortDir = $request->input('sort_dir', 'desc');
+        $grades = $query->orderBy('created_at', $sortDir)->paginate($perPage);
+
+        return ApiResponse::ok($grades);
+    }
+
+    /**
      * Store or Update Assessment Grade
      */
     public function store(StoreAssessmentGradeRequest $request)

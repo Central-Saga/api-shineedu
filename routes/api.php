@@ -375,6 +375,7 @@ Route::prefix('v2')->group(function () {
                 Route::post('/grades', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'store']);
                 Route::post('/grades/{grade}/generate', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'generate']);
             });
+            Route::get('/grades', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'index']);
             Route::get('/grades/{grade}', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'show']);
         });
     });
