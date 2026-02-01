@@ -302,18 +302,21 @@ return implode('; ', $styles);
                     Berdasarkan hasil akademik, siswa dinyatakan lulus dengan predikat<br>
                     90-100 = A (Sangat Baik), 80-89 = B (Baik), 70-79 = C (Cukup), 60-69 = D (Kurang)
                 </div>
-            </div>
 
-            {{-- Default Signature --}}
-            <div class="signature-section">
-                <div style="margin-bottom: 80px;">
-                    <div>Denpasar, {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F Y') }}
+                {{-- Dynamic Signature (Flows after text) --}}
+                <div style="margin-top: 50px; text-align: right;">
+                    <div style="display: inline-block; text-align: center; width: 250px; margin-right: 50px;">
+                        <div style="margin-bottom: 80px;">
+                            <div>Tabanan, {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F
+                                Y') }}</div>
+                            <div class="director-text">Teacher</div>
+                        </div>
+
+                        <div class="director-name">{{ $grade->teacher->user->name ?? '.........................' }}
+                        </div>
+                        <div style="border-top: 2px solid black; width: 100%; margin: 5px auto 0;"></div>
                     </div>
-                    <div class="director-text">Director</div>
                 </div>
-
-                <div class="director-name">Sri Indrawati, S.S, M.Pd</div>
-                <div style="border-top: 2px solid black; width: 80%; margin: 5px auto 0;"></div>
             </div>
             @endif
         </div>
