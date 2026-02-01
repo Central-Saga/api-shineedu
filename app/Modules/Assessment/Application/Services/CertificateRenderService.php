@@ -35,6 +35,15 @@ class CertificateRenderService
         // Use mapping from DB or fallback
         $mapping = $template->data_mapping ?? [];
 
+        // Load Shine Logo
+        $logoPath = public_path('images/shine-logo.png');
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+            $data = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+
         // 2. Render HTML
         $html = view('assessment::certificate.pdf_render', [
             'grade' => $grade,
@@ -43,6 +52,7 @@ class CertificateRenderService
             'template' => $template,
             'coverUrl' => $coverBase64,
             'resultUrl' => $resultBase64,
+            'logoUrl' => $logoBase64,
             'mapping' => $mapping,
         ])->render();
 

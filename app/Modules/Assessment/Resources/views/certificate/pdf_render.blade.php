@@ -111,6 +111,7 @@ return implode('; ', $styles);
         @if($coverUrl)
         <img src="{{ $coverUrl }}" class="bg-image">
         @endif
+
         <div class="content-layer">
             @if(isset($mapping['cover']))
             @foreach($mapping['cover'] as $field => $coords)
@@ -130,6 +131,47 @@ return implode('; ', $styles);
                 @endif
             </div>
             @endforeach
+            @endif
+
+            {{-- Default Cover Layout if NO custom mapping --}}
+            @if(!isset($mapping['cover']) || empty($mapping['cover']))
+            <div style="text-align: center; margin-top: 50px;">
+                {{-- Logo --}}
+                @if($logoUrl)
+                <img src="{{ $logoUrl }}" style="width: 120px; height: auto; margin-bottom: 20px;">
+                @else
+                {{-- Fallback if logo not loaded --}}
+                <div style="width: 120px; height: 120px; background: red; margin: 0 auto 20px;">Logo</div>
+                @endif
+
+                <div style="font-size: 14pt; margin-bottom: 5px;">LEMBAGA KURSUS DAN PELATIHAN (LKP)</div>
+                <div style="font-size: 28pt; font-weight: bold; color: red; margin-bottom: 5px;">SHINE EDUCATION BALI
+                </div>
+                <div style="font-size: 12pt; margin-bottom: 80px;">NPSN: K997966/IJIN OPERASIONAL:
+                    421.9/0019/DPMPTSP/2022</div>
+
+                <div style="font-size: 14pt; margin-bottom: 20px;">Di Berikan Kepada:</div>
+
+                <div style="font-size: 24pt; font-weight: bold; text-transform: uppercase; margin-bottom: 20px;">
+                    {{ $student->nama_lengkap }}
+                </div>
+
+                <div style="font-size: 14pt; width: 60%; margin: 0 auto; line-height: 1.5;">
+                    Telah menyelesaikan Kursus Aplikasi Komputer program<br>
+                    <span style="font-weight: bold;">{{ $enrollment->program->nama ?? 'Program' }}</span>, dinyatakan
+                    <span style="font-weight: bold;">LULUS</span>
+                </div>
+
+                {{-- Footer/Signature Section --}}
+                <div style="position: absolute; bottom: 100px; right: 100px; text-align: center;">
+                    <div style="margin-bottom: 80px;">
+                        Tabanan, {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F Y') }}<br>
+                        Pimpinan LKP Shine Education Bali
+                    </div>
+
+                    <div style="font-weight: bold; font-size: 12pt;">Ni Putu Sri Indrawati, S.Pd</div>
+                </div>
+            </div>
             @endif
         </div>
     </div>
