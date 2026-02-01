@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobVacancy extends Model
 {
+    use \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
+
     protected $table = 'job_vacancies';
 
     protected $fillable = [

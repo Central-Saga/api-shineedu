@@ -10,7 +10,14 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class JobApplication extends Model implements HasMedia
 {
-    use InteractsWithMedia, SoftDeletes;
+    use InteractsWithMedia, SoftDeletes, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $table = 'job_applications';
 

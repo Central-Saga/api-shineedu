@@ -70,6 +70,10 @@ Route::prefix('v2')->group(function () {
         Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->middleware('permission:users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
 
+        // Activity Logs
+        Route::get('/activity-logs', [\App\Modules\Identity\Http\Controllers\Api\V2\ActivityLogController::class, 'index'])->middleware('permission:activity_logs.view');
+        Route::get('/activity-logs/{id}', [\App\Modules\Identity\Http\Controllers\Api\V2\ActivityLogController::class, 'show'])->middleware('permission:activity_logs.view');
+
         // Employees
         Route::get('/employees', [EmployeeController::class, 'index']);
         Route::get('/employees/export', [EmployeeController::class, 'export'])->middleware('permission:employees.view');

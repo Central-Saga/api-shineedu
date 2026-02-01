@@ -16,7 +16,15 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasApiTokens, SoftDeletes;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, SoftDeletes, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogIfAttributesChangedOnly(['remember_token', 'password']);
+    }
 
     /**
      * The attributes that are mass assignable.

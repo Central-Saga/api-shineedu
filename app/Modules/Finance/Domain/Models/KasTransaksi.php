@@ -10,7 +10,14 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class KasTransaksi extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $table = 'kas_transaksi';
 

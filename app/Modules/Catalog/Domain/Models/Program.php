@@ -8,7 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Program extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $table = 'program';
 

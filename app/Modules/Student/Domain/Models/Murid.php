@@ -11,7 +11,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Murid extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $table = 'murid';
 

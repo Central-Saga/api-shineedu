@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class MateriModulItem extends Model
 {
-    use HasFactory;
+    use HasFactory, \Spatie\Activitylog\Traits\LogsActivity;
+
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $table = 'materi_modul_item';
 
