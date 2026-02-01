@@ -104,7 +104,7 @@ class AssessmentGradeController extends Controller
 
     public function show(AssessmentGrade $grade)
     {
-        $grade->load(['enrollment.student', 'certificateTemplate', 'teacher']);
+        $grade->load(['enrollment.student', 'enrollment.program', 'certificateTemplate', 'teacher']);
         return ApiResponse::ok($grade);
     }
 

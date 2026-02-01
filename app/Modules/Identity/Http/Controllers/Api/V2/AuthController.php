@@ -67,6 +67,7 @@ class AuthController
 
         // Log Activity
         activity('auth')
+            ->event('login')
             ->causedBy($user)
             ->withProperties(['ip' => $request->ip(), 'user_agent' => $request->userAgent()])
             ->log('Logged In');
@@ -97,6 +98,7 @@ class AuthController
     {
         // Log Activity
         activity('auth')
+            ->event('logout')
             ->causedBy($request->user())
             ->withProperties(['ip' => $request->ip(), 'user_agent' => $request->userAgent()])
             ->log('Logged Out');
