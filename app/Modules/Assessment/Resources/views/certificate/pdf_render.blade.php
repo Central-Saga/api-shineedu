@@ -113,7 +113,21 @@ return implode('; ', $styles);
         @endif
 
         <div class="content-layer">
-            @if(isset($mapping['cover']))
+            @php
+            // Detect if user has custom text mapped.
+            $hasCustomText = false;
+            if(isset($mapping['cover']) && !empty($mapping['cover'])) {
+            foreach($mapping['cover'] as $coords) {
+            if(isset($coords['text']) && !empty($coords['text'])) {
+            $hasCustomText = true;
+            break;
+            }
+            }
+            }
+            @endphp
+
+            @if($hasCustomText)
+            {{-- Render User's Custom Mapping (Absolute Positioning) --}}
             @foreach($mapping['cover'] as $field => $coords)
             <div class="absolute-text" style="{{ $parseStyle($coords) }}">
                 @if(isset($coords['text']))
@@ -131,16 +145,13 @@ return implode('; ', $styles);
                 @endif
             </div>
             @endforeach
-            @endif
-
-            {{-- Default Cover Layout if NO custom mapping --}}
-            @if(!isset($mapping['cover']) || empty($mapping['cover']))
+            @else
+            {{-- Render Official Shine Education Layout (Default) --}}
             <div style="text-align: center; margin-top: 50px;">
                 {{-- Logo --}}
                 @if($logoUrl)
                 <img src="{{ $logoUrl }}" style="width: 120px; height: auto; margin-bottom: 20px;">
                 @else
-                {{-- Fallback if logo not loaded --}}
                 <div style="width: 120px; height: 120px; background: red; margin: 0 auto 20px;">Logo</div>
                 @endif
 
@@ -169,7 +180,8 @@ return implode('; ', $styles);
                         Pimpinan LKP Shine Education Bali
                     </div>
 
-                    <div style="font-weight: bold; font-size: 12pt;">Ni Putu Sri Indrawati, S.Pd</div>
+                    <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">Ni Putu Sri Indrawati,
+                        S.Pd</div>
                 </div>
             </div>
             @endif
