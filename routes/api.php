@@ -42,6 +42,9 @@ Route::prefix('v2')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 
+        // Dashboard Stats
+        Route::get('/dashboard/stats', [\App\Modules\Dashboard\Http\Controllers\Api\V1\DashboardController::class, 'stats']);
+
         // Permissions
         Route::get('/permissions', [PermissionController::class, 'index'])->middleware('permission:permissions.view');
 
