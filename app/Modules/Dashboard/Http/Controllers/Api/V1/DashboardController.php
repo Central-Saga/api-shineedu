@@ -70,6 +70,21 @@ class DashboardController extends Controller
                 ];
             });
 
+        // 7. Chart Data (Monthly Income - Last 6 Months)
+        $chartData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $income = KasTransaksi::where('type', 'IN')
+                ->whereMonth('tanggal', $date->month)
+                ->whereYear('tanggal', $date->year)
+                ->sum('amount');
+
+            $chartData[] = [
+                'name' => $date->format('M'), // e.g. Jan, Feb
+                'total' => (int) $income,
+            ];
+        }
+
         return ApiResponse::ok([
             'stats' => [
                 'total_murid' => $totalMurid,
@@ -79,7 +94,8 @@ class DashboardController extends Controller
                 'estimasi_omset' => $estimasiOmset
             ],
             'recent_activities' => $activities,
-            'latest_enrollments' => $latestEnrollments
+            'latest_enrollments' => $latestEnrollments,
+            'chart_data' => $chartData
         ], 'Dashboard stats retrieved successfully');
     }
 }
