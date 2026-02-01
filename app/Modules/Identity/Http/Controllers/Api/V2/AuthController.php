@@ -65,6 +65,12 @@ class AuthController
         // Create token with 1 day expiration
         $token = $user->createToken('auth-token', ['*'], now()->addDay());
 
+        // Log Activity
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties(['ip' => $request->ip(), 'user_agent' => $request->userAgent()])
+            ->log('Logged In');
+
         return ApiResponse::ok([
             'user' => new UserResource($user),
             'token' => $token->plainTextToken,
@@ -89,6 +95,12 @@ class AuthController
      */
     public function logout(Request $request): JsonResponse
     {
+        // Log Activity
+        activity('auth')
+            ->causedBy($request->user())
+            ->withProperties(['ip' => $request->ip(), 'user_agent' => $request->userAgent()])
+            ->log('Logged Out');
+
         $request->user()->currentAccessToken()->delete();
 
         return ApiResponse::ok(null, 'Logout berhasil');
