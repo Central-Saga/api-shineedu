@@ -147,34 +147,34 @@ return implode('; ', $styles);
             @endforeach
             @else
             {{-- Render Official Shine Education Layout (Default) --}}
-            <div style="text-align: center; margin-top: 50px;">
+            <div style="text-align: center; margin-top: 80px; width: 85%; margin-left: auto; margin-right: auto;">
                 {{-- Logo --}}
                 @if($logoUrl)
-                <img src="{{ $logoUrl }}" style="width: 120px; height: auto; margin-bottom: 20px;">
+                <img src="{{ $logoUrl }}" style="width: 100px; height: auto; margin-bottom: 10px;">
                 @else
-                <div style="width: 120px; height: 120px; background: red; margin: 0 auto 20px;">Logo</div>
+                <div style="width: 100px; height: 100px; background: red; margin: 0 auto 10px;">Logo</div>
                 @endif
 
                 <div style="font-size: 14pt; margin-bottom: 5px;">LEMBAGA KURSUS DAN PELATIHAN (LKP)</div>
                 <div style="font-size: 28pt; font-weight: bold; color: red; margin-bottom: 5px;">SHINE EDUCATION BALI
                 </div>
-                <div style="font-size: 12pt; margin-bottom: 80px;">NPSN: K997966/IJIN OPERASIONAL:
+                <div style="font-size: 11pt; margin-bottom: 60px;">NPSN: K997966/IJIN OPERASIONAL:
                     421.9/0019/DPMPTSP/2022</div>
 
-                <div style="font-size: 14pt; margin-bottom: 20px;">Di Berikan Kepada:</div>
+                <div style="font-size: 14pt; margin-bottom: 10px;">Di Berikan Kepada:</div>
 
                 <div style="font-size: 24pt; font-weight: bold; text-transform: uppercase; margin-bottom: 20px;">
                     {{ $student->nama_lengkap }}
                 </div>
 
-                <div style="font-size: 14pt; width: 60%; margin: 0 auto; line-height: 1.5;">
+                <div style="font-size: 14pt; width: 80%; margin: 0 auto; line-height: 1.5;">
                     Telah menyelesaikan Kursus Aplikasi Komputer program<br>
                     <span style="font-weight: bold;">{{ $enrollment->program->nama ?? 'Program' }}</span>, dinyatakan
                     <span style="font-weight: bold;">LULUS</span>
                 </div>
 
                 {{-- Footer/Signature Section --}}
-                <div style="position: absolute; bottom: 100px; right: 100px; text-align: center;">
+                <div style="position: absolute; bottom: 130px; right: 130px; text-align: center;">
                     <div style="margin-bottom: 80px;">
                         Tabanan, {{ $grade->generated_at ? $grade->generated_at->format('d F Y') : date('d F Y') }}<br>
                         Pimpinan LKP Shine Education Bali
