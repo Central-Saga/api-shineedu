@@ -10,6 +10,8 @@ use Spatie\Activitylog\Models\Activity;
 use Illuminate\Http\JsonResponse;
 use App\Shared\Http\Responses\ApiResponse;
 
+use App\Modules\Finance\Domain\Models\KasTransaksi;
+
 class DashboardController extends Controller
 {
     public function stats(): JsonResponse
@@ -33,7 +35,13 @@ class DashboardController extends Controller
         // Assuming 'Aktif' status in Enrollment means class is ongoing
         $kelasAktif = Enrollment::where('status', 'Aktif')->count();
 
-        // 4. Activity Logs (Latest 5)
+        // 4. Calculate Estimasi Omset (Total Income This Month)
+        $estimasiOmset = KasTransaksi::where('type', 'IN')
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('amount');
+
+        // 5. Activity Logs (Latest 5)
         $activities = Activity::with('causer')
             ->latest()
             ->take(5)
@@ -47,7 +55,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 5. Latest Enrollments (Summary Table)
+        // 6. Latest Enrollments (Summary Table)
         $latestEnrollments = Enrollment::with(['murid', 'program'])
             ->latest()
             ->take(5)
@@ -68,7 +76,7 @@ class DashboardController extends Controller
                 'new_murid_this_month' => $newMuridThisMonth,
                 'total_guru' => $totalGuru,
                 'kelas_aktif' => $kelasAktif,
-                'estimasi_omset' => 0
+                'estimasi_omset' => $estimasiOmset
             ],
             'recent_activities' => $activities,
             'latest_enrollments' => $latestEnrollments
