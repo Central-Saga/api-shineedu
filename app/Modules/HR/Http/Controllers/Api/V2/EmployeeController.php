@@ -123,21 +123,24 @@ class EmployeeController
 
             // 2. Auto-Generate Kode Karyawan if not provided or empty
             if (empty($employeeData['kode_karyawan'])) {
-                $year = date('Y');
-                $lastEmployee = Employee::where('kode_karyawan', 'like', "EMP-{$year}-%")
-                    ->orderByRaw('LENGTH(kode_karyawan) DESC')
-                    ->orderBy('kode_karyawan', 'DESC')
-                    ->first();
+                // Format: DDMMYY + 4 Random Digits (e.g., 0101901234)
 
-                $nextSequence = 1;
-                if ($lastEmployee) {
-                    $parts = explode('-', $lastEmployee->kode_karyawan);
-                    if (count($parts) === 3) {
-                        $nextSequence = intval($parts[2]) + 1;
-                    }
+                $dob = null;
+                if (!empty($employeeData['tanggal_lahir'])) {
+                    $dob = \Carbon\Carbon::parse($employeeData['tanggal_lahir']);
+                } else {
+                    $dob = now(); // Fallback if no DOB (should be validated, but safe fallback)
                 }
 
-                $employeeData['kode_karyawan'] = sprintf("EMP-%s-%03d", $year, $nextSequence);
+                $prefix = $dob->format('dmy'); // DDMMYY
+
+                // Retry generation to ensure uniqueness
+                do {
+                    $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+                    $newCode = $prefix . $random;
+                } while (Employee::where('kode_karyawan', $newCode)->exists());
+
+                $employeeData['kode_karyawan'] = $newCode;
             }
 
             // 3. Handle User Creation / Linking
