@@ -105,12 +105,46 @@ class EmployeeController
      */
     public function store(StoreEmployeeRequest $request): JsonResponse
     {
-        $employee = Employee::create($request->validated());
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $data = $request->validated();
+            $user = null;
 
-        return ApiResponse::created(
-            new EmployeeResource($employee->load('user')),
-            'Karyawan berhasil ditambahkan'
-        );
+            // 1. Handle User Creation / Linking
+            if (!empty($data['user_id'])) {
+                $user = \App\Modules\Identity\Domain\Models\User::findOrFail($data['user_id']);
+            } else {
+                // Create New User
+                $user = \App\Modules\Identity\Domain\Models\User::create([
+                    'name' => $data['user_name'],
+                    'email' => $data['user_email'],
+                    'password' => \Illuminate\Support\Facades\Hash::make($data['user_password']),
+                    'status' => 'Aktif', // Default active
+                ]);
+
+                // Assign Role
+                $roleName = !empty($data['user_role']) ? $data['user_role'] : 'Teacher'; // Default role
+                $role = \Spatie\Permission\Models\Role::where('name', $roleName)->where('guard_name', 'web')->first();
+                if ($role) {
+                    $user->assignRole($role);
+                }
+            }
+
+            // 2. Prepare Employee Data
+            // Remove user_* fields from data array to avoid error when creating Employee
+            $employeeData = collect($data)
+                ->except(['user_name', 'user_email', 'user_password', 'user_role', 'user_id'])
+                ->toArray();
+
+            $employeeData['user_id'] = $user->id;
+
+            // 3. Create Employee
+            $employee = Employee::create($employeeData);
+
+            return ApiResponse::created(
+                new EmployeeResource($employee->load('user')),
+                'Karyawan (dan User) berhasil ditambahkan'
+            );
+        });
     }
 
     /**

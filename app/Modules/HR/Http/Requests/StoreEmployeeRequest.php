@@ -23,7 +23,17 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             'kode_karyawan' => ['required', 'string', 'max:50', 'unique:karyawan,kode_karyawan'],
-            'user_id' => ['required', 'exists:users,id'],
+
+            // Link to existing user (Optional now)
+            'user_id' => ['nullable', 'exists:users,id'],
+
+            // If user_id is null, these are required to create a NEW user
+            'user_name' => ['required_without:user_id', 'nullable', 'string', 'max:255'],
+            'user_email' => ['required_without:user_id', 'nullable', 'email', 'unique:users,email'],
+            'user_password' => ['required_without:user_id', 'nullable', 'string', 'min:6'],
+            'user_role' => ['nullable', 'string'], // e.g. "Teacher", "Admin"
+
+            // Employee Data
             'kategori_karyawan' => ['required', 'string', 'max:255'],
             'subtipe_kontrak' => ['nullable', 'string', 'max:255'],
             'tipe_gaji' => ['nullable', 'string', 'max:255'],
