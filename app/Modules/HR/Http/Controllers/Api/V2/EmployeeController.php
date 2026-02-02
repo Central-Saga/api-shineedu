@@ -106,22 +106,26 @@ class EmployeeController
     public function store(StoreEmployeeRequest $request): JsonResponse
     {
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $data = $request->validated();
+            $validated = $request->validated();
+
+            $userData = $validated['user'] ?? [];
+            $employeeData = $validated['employee'] ?? [];
+
             $user = null;
 
-            // 1. Enforce Formatting
-            if (isset($data['user_name'])) {
-                $data['user_name'] = strtoupper($data['user_name']);
+            // 1. Enforce Formatting (on extraction)
+            if (isset($userData['user_name'])) {
+                $userData['user_name'] = strtoupper($userData['user_name']);
             }
-            if (isset($data['user_email'])) {
-                $data['user_email'] = strtolower($data['user_email']);
+            if (isset($userData['user_email'])) {
+                $userData['user_email'] = strtolower($userData['user_email']);
             }
 
             // 2. Auto-Generate Kode Karyawan if not provided or empty
-            if (empty($data['kode_karyawan'])) {
+            if (empty($employeeData['kode_karyawan'])) {
                 $year = date('Y');
                 $lastEmployee = Employee::where('kode_karyawan', 'like', "EMP-{$year}-%")
-                    ->orderByRaw('LENGTH(kode_karyawan) DESC') // Handle length differences
+                    ->orderByRaw('LENGTH(kode_karyawan) DESC')
                     ->orderBy('kode_karyawan', 'DESC')
                     ->first();
 
@@ -133,35 +137,30 @@ class EmployeeController
                     }
                 }
 
-                $data['kode_karyawan'] = sprintf("EMP-%s-%03d", $year, $nextSequence);
+                $employeeData['kode_karyawan'] = sprintf("EMP-%s-%03d", $year, $nextSequence);
             }
 
             // 3. Handle User Creation / Linking
-            if (!empty($data['user_id'])) {
-                $user = \App\Modules\Identity\Domain\Models\User::findOrFail($data['user_id']);
+            if (!empty($userData['user_id'])) {
+                $user = \App\Modules\Identity\Domain\Models\User::findOrFail($userData['user_id']);
             } else {
                 // Create New User
                 $user = \App\Modules\Identity\Domain\Models\User::create([
-                    'name' => $data['user_name'],
-                    'email' => $data['user_email'],
-                    'password' => \Illuminate\Support\Facades\Hash::make($data['user_password']),
-                    'status' => 'Aktif', // Default active
+                    'name' => $userData['user_name'],
+                    'email' => $userData['user_email'],
+                    'password' => \Illuminate\Support\Facades\Hash::make($userData['user_password']),
+                    'status' => 'Aktif',
                 ]);
 
                 // Assign Role
-                $roleName = !empty($data['user_role']) ? $data['user_role'] : 'Teacher'; // Default role
+                $roleName = !empty($userData['user_role']) ? $userData['user_role'] : 'Teacher';
                 $role = \Spatie\Permission\Models\Role::where('name', $roleName)->where('guard_name', 'web')->first();
                 if ($role) {
                     $user->assignRole($role);
                 }
             }
 
-            // 4. Prepare Employee Data
-            // Remove user_* fields from data array to avoid error when creating Employee
-            $employeeData = collect($data)
-                ->except(['user_name', 'user_email', 'user_password', 'user_role', 'user_id'])
-                ->toArray();
-
+            // 4. Link User ID to Employee Data
             $employeeData['user_id'] = $user->id;
 
             // 5. Create Employee
