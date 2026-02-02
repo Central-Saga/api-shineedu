@@ -109,7 +109,34 @@ class EmployeeController
             $data = $request->validated();
             $user = null;
 
-            // 1. Handle User Creation / Linking
+            // 1. Enforce Formatting
+            if (isset($data['user_name'])) {
+                $data['user_name'] = strtoupper($data['user_name']);
+            }
+            if (isset($data['user_email'])) {
+                $data['user_email'] = strtolower($data['user_email']);
+            }
+
+            // 2. Auto-Generate Kode Karyawan if not provided or empty
+            if (empty($data['kode_karyawan'])) {
+                $year = date('Y');
+                $lastEmployee = Employee::where('kode_karyawan', 'like', "EMP-{$year}-%")
+                    ->orderByRaw('LENGTH(kode_karyawan) DESC') // Handle length differences
+                    ->orderBy('kode_karyawan', 'DESC')
+                    ->first();
+
+                $nextSequence = 1;
+                if ($lastEmployee) {
+                    $parts = explode('-', $lastEmployee->kode_karyawan);
+                    if (count($parts) === 3) {
+                        $nextSequence = intval($parts[2]) + 1;
+                    }
+                }
+
+                $data['kode_karyawan'] = sprintf("EMP-%s-%03d", $year, $nextSequence);
+            }
+
+            // 3. Handle User Creation / Linking
             if (!empty($data['user_id'])) {
                 $user = \App\Modules\Identity\Domain\Models\User::findOrFail($data['user_id']);
             } else {
@@ -129,7 +156,7 @@ class EmployeeController
                 }
             }
 
-            // 2. Prepare Employee Data
+            // 4. Prepare Employee Data
             // Remove user_* fields from data array to avoid error when creating Employee
             $employeeData = collect($data)
                 ->except(['user_name', 'user_email', 'user_password', 'user_role', 'user_id'])
@@ -137,11 +164,11 @@ class EmployeeController
 
             $employeeData['user_id'] = $user->id;
 
-            // 3. Create Employee
+            // 5. Create Employee
             $employee = Employee::create($employeeData);
 
             return ApiResponse::created(
-                new EmployeeResource($employee->load('user')),
+                new EmployeeResource($employee->fresh()->load('user')),
                 'Karyawan (dan User) berhasil ditambahkan'
             );
         });

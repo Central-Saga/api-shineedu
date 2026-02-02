@@ -22,7 +22,7 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode_karyawan' => ['required', 'string', 'max:50', 'unique:karyawan,kode_karyawan'],
+            'kode_karyawan' => ['nullable', 'string', 'max:50', 'unique:karyawan,kode_karyawan'],
 
             // Link to existing user (Optional now)
             'user_id' => ['nullable', 'exists:users,id'],
