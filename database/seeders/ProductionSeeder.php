@@ -21,7 +21,7 @@ class ProductionSeeder extends Seeder
         $this->call(KatalogSeeder::class);
 
         // 3. HR Rules (Leave Rules, etc. - No Employees)
-        $this->call(LeaveRulesSeeder::class);
+        // $this->call(LeaveRulesSeeder::class);
 
         // 4. Create Only Super Admin and Admin
 
