@@ -33,8 +33,10 @@ class KasShiftService
             throw new \Exception('Sudah ada shift yang aktif. Tutup shift terlebih dahulu.');
         }
 
-            'opened_by' => Auth::id(),
-        ]);
+        $shift = KasShift::create([
+            'opened_at' => now(),
+            'opening_balance' => $openingBalance,
+            'status' => KasShift::STATUS_OPEN,
 
         // Notification: Foundation
         $user = Auth::user();
