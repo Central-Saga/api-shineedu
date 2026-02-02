@@ -149,6 +149,15 @@ class EnrollmentService
                 // NOTE: Saldo pertemuan akan di-topup setelah pembayaran pertama (pendaftaran + paket)
             }
 
+            // Notification: Foundation
+            $muridName = $murid ? $murid->nama_lengkap : 'Unknown';
+            $programName = $enrollment->program ? $enrollment->program->nama : 'Unknown Program';
+
+            $this->notifyFoundation(
+                "Pendaftaran Baru: {$muridName}",
+                "Siswa baru atas nama {$muridName} telah mendaftar di program {$programName}. Mohon verifikasi data."
+            );
+
             return $enrollment;
         });
     }
@@ -199,5 +208,19 @@ class EnrollmentService
     {
         // Simple generation logic, can be improved.
         return 'ENR-' . date('ymd') . '-' . strtoupper(uniqid());
+    }
+    protected function sendEmail(string $to, string $subject, string $message)
+    {
+        if (!empty($to)) {
+            dispatch(new \App\Jobs\SendEmailJob($to, new \App\Mail\GeneralNotification($subject, $message)));
+        }
+    }
+
+    protected function notifyFoundation(string $subject, string $message)
+    {
+        $foundationEmail = env('MAIL_TO_FOUNDATION');
+        if ($foundationEmail) {
+            $this->sendEmail($foundationEmail, $subject, $message);
+        }
     }
 }

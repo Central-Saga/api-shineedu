@@ -33,12 +33,21 @@ class KasShiftService
             throw new \Exception('Sudah ada shift yang aktif. Tutup shift terlebih dahulu.');
         }
 
-        return KasShift::create([
-            'opened_at' => now(),
-            'opening_balance' => $openingBalance,
-            'status' => KasShift::STATUS_OPEN,
             'opened_by' => Auth::id(),
         ]);
+
+        // Notification: Foundation
+        $user = Auth::user();
+        $userName = $user ? $user->name : 'Unknown';
+        $time = now()->format('d M Y H:i');
+        $nominal = number_format($openingBalance, 0, ',', '.');
+
+        $this->notifyFoundation(
+            "Open Shift: {$userName}",
+            "Shift kasir telah DIBUKA oleh {$userName} pada {$time}.\nSaldo Awal: Rp {$nominal}"
+        );
+
+        return $shift;
     }
 
     /**
@@ -50,7 +59,28 @@ class KasShiftService
             throw new \Exception('Shift sudah ditutup.');
         }
 
-        return $shift->close($actualCash, Auth::id(), $notes);
+        $shift = $shift->close($actualCash, Auth::id(), $notes);
+
+        // Notification: Foundation
+        $user = Auth::user();
+        $userName = $user ? $user->name : 'Unknown';
+        $time = now()->format('d M Y H:i');
+        $nominalActual = number_format($actualCash, 0, ',', '.');
+        $nominalExpected = number_format($shift->expected_cash, 0, ',', '.');
+        $difference = $shift->variance; // Assuming variance = actual - expected
+        $nominalDiff = number_format($difference, 0, ',', '.');
+        $statusDiff = $difference == 0 ? "PAS" : ($difference > 0 ? "LEBIH Rp {$nominalDiff}" : "KURANG Rp {$nominalDiff}");
+
+        $this->notifyFoundation(
+            "Close Shift: {$userName}",
+            "Shift kasir telah DITUTUP oleh {$userName} pada {$time}.\n\n" .
+            "Uang Fisik (Actual): Rp {$nominalActual}\n" .
+            "Uang Sistem (Expected): Rp {$nominalExpected}\n" .
+            "Selisih: {$statusDiff}\n" .
+            "Catatan: {$notes}"
+        );
+
+        return $shift;
     }
 
     /**
@@ -159,5 +189,19 @@ class KasShiftService
                 'closing_balance' => $s->closing_balance,
             ]),
         ];
+    }
+    protected function sendEmail(string $to, string $subject, string $message)
+    {
+        if (!empty($to)) {
+            dispatch(new \App\Jobs\SendEmailJob($to, new \App\Mail\GeneralNotification($subject, $message)));
+        }
+    }
+
+    protected function notifyFoundation(string $subject, string $message)
+    {
+        $foundationEmail = env('MAIL_TO_FOUNDATION');
+        if ($foundationEmail) {
+            $this->sendEmail($foundationEmail, $subject, $message);
+        }
     }
 }

@@ -80,6 +80,13 @@ class PayrollService
                 $results[] = $payroll;
             }
 
+            // Notification: Foundation
+            $monthName = \Carbon\Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+            $this->notifyFoundation(
+                "Payroll Generated: {$monthName}",
+                "Payroll untuk periode {$monthName} telah digenerate. Silakan cek sistem untuk verifikasi."
+            );
+
             return $results;
         });
     }
@@ -94,6 +101,20 @@ class PayrollService
         }
 
         $payroll->update($data);
+
+        // Notification: Employee (If Paid)
+        if (in_array(strtolower($status), ['paid', 'transferred'])) {
+            $employee = $payroll->karyawan;
+            if ($employee && $employee->email_pribadi) {
+                $monthName = \Carbon\Carbon::createFromDate($payroll->tahun, $payroll->bulan, 1)->translatedFormat('F Y');
+                $this->sendEmail(
+                    $employee->email_pribadi,
+                    "Slip Gaji Tersedia: {$monthName}",
+                    "Gaji periode {$monthName} telah ditransfer. Mohon cek rekening Anda dan slip gaji di sistem."
+                );
+            }
+        }
+
         return $payroll;
     }
 

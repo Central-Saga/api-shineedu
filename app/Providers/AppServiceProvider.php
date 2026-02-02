@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\RateLimiter::for('emails', function (object $job) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30);
+        });
+
         Gate::before(function ($user, $ability) {
             return $user?->hasRole('Superadmin') ? true : null;
         });

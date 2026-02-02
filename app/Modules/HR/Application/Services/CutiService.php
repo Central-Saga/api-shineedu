@@ -161,6 +161,22 @@ class CutiService
                 $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
             }
 
+            // Notification: Foundation
+            $employeeName = $employee->user ? $employee->user->name : $employee->kode_karyawan;
+            $this->notifyFoundation(
+                "Pengajuan Cuti Baru: {$employeeName}",
+                "Karyawan {$employeeName} telah mengajukan cuti ({$jenis}) mulai {$startDate->format('d M Y')} s/d {$endDate->format('d M Y')}."
+            );
+
+            // Notification: Employee
+            if ($employee->email_pribadi) {
+                $this->sendEmail(
+                    $employee->email_pribadi,
+                    "Pengajuan Cuti Berhasil Dibuat",
+                    "Pengajuan cuti Anda ({$jenis}) telah diterima sistem dan menunggu persetujuan."
+                );
+            }
+
             return $cuti;
         });
     }
@@ -195,6 +211,16 @@ class CutiService
             'disetujui_oleh' => $userId,
         ]);
 
+        // Notification: Employee
+        $employee = $cuti->karyawan;
+        if ($employee && $employee->email_pribadi) {
+            $this->sendEmail(
+                $employee->email_pribadi,
+                "Cuti Disetujui",
+                "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DISETUJUI."
+            );
+        }
+
         return $cuti;
     }
 
@@ -204,6 +230,16 @@ class CutiService
             'status' => 'ditolak',
             'disetujui_oleh' => $userId,
         ]);
+
+        // Notification: Employee
+        $employee = $cuti->karyawan;
+        if ($employee && $employee->email_pribadi) {
+            $this->sendEmail(
+                $employee->email_pribadi,
+                "Cuti Ditolak",
+                "Mohon maaf, pengajuan cuti Anda untuk tanggal {$cuti->start_date} DITOLAK."
+            );
+        }
 
         return $cuti;
     }
@@ -217,5 +253,20 @@ class CutiService
         ]);
 
         return $cuti;
+    }
+
+    protected function sendEmail(string $to, string $subject, string $message)
+    {
+        if (!empty($to)) {
+            dispatch(new \App\Jobs\SendEmailJob($to, new \App\Mail\GeneralNotification($subject, $message)));
+        }
+    }
+
+    protected function notifyFoundation(string $subject, string $message)
+    {
+        $foundationEmail = env('MAIL_TO_FOUNDATION');
+        if ($foundationEmail) {
+            $this->sendEmail($foundationEmail, $subject, $message);
+        }
     }
 }
