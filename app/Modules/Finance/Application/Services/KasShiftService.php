@@ -37,6 +37,8 @@ class KasShiftService
             'opened_at' => now(),
             'opening_balance' => $openingBalance,
             'status' => KasShift::STATUS_OPEN,
+            'opened_by' => Auth::id(),
+        ]);
 
         // Notification: Foundation
         $user = Auth::user();
@@ -76,10 +78,10 @@ class KasShiftService
         $this->notifyFoundation(
             "Close Shift: {$userName}",
             "Shift kasir telah DITUTUP oleh {$userName} pada {$time}.\n\n" .
-            "Uang Fisik (Actual): Rp {$nominalActual}\n" .
-            "Uang Sistem (Expected): Rp {$nominalExpected}\n" .
-            "Selisih: {$statusDiff}\n" .
-            "Catatan: {$notes}"
+                "Uang Fisik (Actual): Rp {$nominalActual}\n" .
+                "Uang Sistem (Expected): Rp {$nominalExpected}\n" .
+                "Selisih: {$statusDiff}\n" .
+                "Catatan: {$notes}"
         );
 
         return $shift;
