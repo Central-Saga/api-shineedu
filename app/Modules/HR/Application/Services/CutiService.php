@@ -205,9 +205,10 @@ class CutiService
             );
 
             // Notification: Employee
-            if ($employee->email_pribadi) {
+            $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
+            if ($emailTarget) {
                 $this->sendEmail(
-                    $employee->email_pribadi,
+                    $emailTarget,
                     "Pengajuan Cuti Berhasil Dibuat",
                     "Pengajuan cuti Anda ({$jenis}) telah diterima sistem dan menunggu persetujuan."
                 );
@@ -249,9 +250,11 @@ class CutiService
 
         // Notification: Employee
         $employee = $cuti->karyawan;
-        if ($employee && $employee->email_pribadi) {
+        $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
+
+        if ($employee && $emailTarget) {
             $this->sendEmail(
-                $employee->email_pribadi,
+                $emailTarget,
                 "Cuti Disetujui",
                 "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DISETUJUI."
             );
@@ -269,9 +272,11 @@ class CutiService
 
         // Notification: Employee
         $employee = $cuti->karyawan;
-        if ($employee && $employee->email_pribadi) {
+        $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
+
+        if ($employee && $emailTarget) {
             $this->sendEmail(
-                $employee->email_pribadi,
+                $emailTarget,
                 "Cuti Ditolak",
                 "Mohon maaf, pengajuan cuti Anda untuk tanggal {$cuti->start_date} DITOLAK."
             );
@@ -290,9 +295,11 @@ class CutiService
 
         // Notification: Employee
         $employee = $cuti->karyawan;
-        if ($employee && $employee->email_pribadi) {
+        $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
+
+        if ($employee && $emailTarget) {
             $this->sendEmail(
-                $employee->email_pribadi,
+                $emailTarget,
                 "Cuti Dibatalkan",
                 "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DIBATALKAN."
             );
