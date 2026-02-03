@@ -22,12 +22,21 @@ class AbsensiService
         $shouldRestrict = false;
 
         if ($user) {
-            // Special request: If user has 'Teacher' role, FORCE restriction to own attendance,
-            // even if they might have other permissions (including Superadmin).
-            // NOTE: We check roles collection directly to be guard-agnostic (API vs Web)
-            if ($user->roles->contains('name', 'Teacher')) {
+            // Special request: If user has 'Teacher' role, restrict to own attendance.
+            // BUT, if user is Superadmin (or Admin), they should still see everything.
+            // Wira has both Superadmin and Teacher. He must see all.
+            // Ordinary Teacher must strictly see their own.
+
+            // 1. If user is Admin/Superadmin (has permission to manage absensi), allow all.
+            if ($user->hasRole('Admin') || $user->hasRole('Superadmin') || $user->hasPermissionTo('absensi.manage')) {
+                $shouldRestrict = false;
+            }
+            // 2. Otherwise, if user is Teacher, force restrict.
+            elseif ($user->roles->contains('name', 'Teacher')) {
                 $shouldRestrict = true;
-            } elseif (! $user->hasRole('Admin') && ! $user->hasPermissionTo('absensi.manage')) {
+            }
+            // 3. Fallback: Anyone else without manage permission sees nothing/own only
+            else {
                 $shouldRestrict = true;
             }
         }
