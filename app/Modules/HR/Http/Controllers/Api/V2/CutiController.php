@@ -14,6 +14,8 @@ use Illuminate\Validation\ValidationException;
 use App\Exports\CutiExport;
 use Maatwebsite\Excel\Facades\Excel;
 
+use Illuminate\Support\Facades\Log;
+
 class CutiController
 {
     public function __construct(
@@ -62,6 +64,7 @@ class CutiController
 
     public function update(UpdateCutiRequest $request, Cuti $cuti): JsonResponse
     {
+        Log::info("CutiController::update hit. Cuti ID: {$cuti->id}");
         $updated = $this->service->update($cuti, $request->validated());
 
         return ApiResponse::ok(
@@ -180,6 +183,7 @@ class CutiController
 
     public function approve(Cuti $cuti): JsonResponse
     {
+        Log::info("CutiController::approve hit. Cuti ID: {$cuti->id}");
         $updated = $this->service->approve($cuti, auth()->id());
 
         return ApiResponse::ok(
@@ -190,6 +194,7 @@ class CutiController
 
     public function reject(Cuti $cuti): JsonResponse
     {
+        Log::info("CutiController::reject hit. Cuti ID: {$cuti->id}");
         $updated = $this->service->reject($cuti, auth()->id());
 
         return ApiResponse::ok(
@@ -200,6 +205,7 @@ class CutiController
 
     public function cancel(Cuti $cuti): JsonResponse
     {
+        Log::info("CutiController::cancel hit. Cuti ID: {$cuti->id}");
         $user = auth()->user();
         $isOwner = $cuti->karyawan->user_id === $user->id;
         $canManage = $user->can('cuti.manage');
