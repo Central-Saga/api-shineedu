@@ -33,10 +33,16 @@ class SendEmailJob implements ShouldQueue
      *
      * @return array
      */
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
     public function middleware()
     {
         // Limit to 30 emails per minute (1 every 2 seconds) to remain safe from spam filters
-        return [new RateLimited('emails')];
+        // return [new RateLimited('emails')];
+        return [];
     }
 
     /**
@@ -44,6 +50,8 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
+        \Illuminate\Support\Facades\Log::info("SendEmailJob Processing: Sending to " . $this->recipient);
         Mail::to($this->recipient)->send($this->mailable);
+        \Illuminate\Support\Facades\Log::info("SendEmailJob Success");
     }
 }
