@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class CutiService
 {
@@ -243,6 +244,8 @@ class CutiService
 
     public function approve(Cuti $cuti, int $userId): Cuti
     {
+        Log::info("Approving Cuti ID: {$cuti->id} by User: {$userId}");
+
         $cuti->update([
             'status' => 'disetujui',
             'disetujui_oleh' => $userId,
@@ -252,12 +255,17 @@ class CutiService
         $employee = $cuti->karyawan;
         $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
 
+        Log::info("Targeting Employee for Approval Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
+
         if ($employee && $emailTarget) {
             $this->sendEmail(
                 $emailTarget,
                 "Cuti Disetujui",
                 "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DISETUJUI."
             );
+            Log::info("Approval Email Dispatched.");
+        } else {
+            Log::warning("Approval Email NOT sent. Missing employee or email target.");
         }
 
         return $cuti;
@@ -265,6 +273,8 @@ class CutiService
 
     public function reject(Cuti $cuti, int $userId): Cuti
     {
+        Log::info("Rejecting Cuti ID: {$cuti->id} by User: {$userId}");
+
         $cuti->update([
             'status' => 'ditolak',
             'disetujui_oleh' => $userId,
@@ -274,12 +284,15 @@ class CutiService
         $employee = $cuti->karyawan;
         $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
 
+        Log::info("Targeting Employee for Rejection Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
+
         if ($employee && $emailTarget) {
             $this->sendEmail(
                 $emailTarget,
                 "Cuti Ditolak",
                 "Mohon maaf, pengajuan cuti Anda untuk tanggal {$cuti->start_date} DITOLAK."
             );
+            Log::info("Rejection Email Dispatched.");
         }
 
         return $cuti;
@@ -287,6 +300,8 @@ class CutiService
 
     public function cancel(Cuti $cuti, int $userId): Cuti
     {
+        Log::info("Cancelling Cuti ID: {$cuti->id} by User: {$userId}");
+
         // Reset approval info if it was approved
         $cuti->update([
             'status' => 'dibatalkan',
@@ -297,12 +312,15 @@ class CutiService
         $employee = $cuti->karyawan;
         $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
 
+        Log::info("Targeting Employee for Cancellation Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
+
         if ($employee && $emailTarget) {
             $this->sendEmail(
                 $emailTarget,
                 "Cuti Dibatalkan",
                 "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DIBATALKAN."
             );
+            Log::info("Cancellation Email Dispatched.");
         }
 
         return $cuti;
