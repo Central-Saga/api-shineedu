@@ -568,7 +568,7 @@ class ProductionEmployeeSeeder extends Seeder
                     "user_name" => "I Putu Wira Budhi Guna Ariyasa",
                     "user_email" => "wirbud1134@gmail.com",
                     "user_password" => "password123",
-                    "user_role" => "Teacher"
+                    "user_role" => ["Teacher", "Superadmin"]
                 ],
                 "employee" => [
                     "kode_karyawan" => null,
