@@ -288,6 +288,16 @@ class CutiService
             'disetujui_oleh' => null,
         ]);
 
+        // Notification: Employee
+        $employee = $cuti->karyawan;
+        if ($employee && $employee->email_pribadi) {
+            $this->sendEmail(
+                $employee->email_pribadi,
+                "Cuti Dibatalkan",
+                "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DIBATALKAN."
+            );
+        }
+
         return $cuti;
     }
 
