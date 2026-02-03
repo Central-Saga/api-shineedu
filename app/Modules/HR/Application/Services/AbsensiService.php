@@ -22,21 +22,25 @@ class AbsensiService
         $shouldRestrict = false;
 
         if ($user) {
-            // Special request:
-            // 1. Superadmin and Admin ALWAYS see everything.
-            if ($user->hasRole('Superadmin') || $user->hasRole('Admin')) {
+            // Force load roles ensures we have the data, but relying on database check is safer
+            // 1. Superadmin and Admin ALWAYS see everything. Check both web and generic.
+            if ($user->hasRole('Superadmin', 'web') || $user->hasRole('Admin', 'web')) {
                 $shouldRestrict = false;
             }
             // 2. If not admin/superadmin, but has Teacher role, MUST restrict.
-            // (Even if they have absensi.manage permission).
-            elseif ($user->roles->contains('name', 'Teacher')) {
+            // Explicitly check 'web' guard as roles are stored there.
+            elseif ($user->hasRole('Teacher', 'web')) {
                 $shouldRestrict = true;
             }
-            // 3. If not teacher, but has management permission (e.g. HR Staff), allow view.
-            elseif ($user->hasPermissionTo('absensi.manage')) {
+            // 3. Fallback: If local collection check failed, check DB directly to be absolutely sure
+            elseif ($user->roles()->where('name', 'Teacher')->exists()) {
+                $shouldRestrict = true;
+            }
+            // 4. If not teacher, but has management permission (e.g. HR Staff), allow view.
+            elseif ($user->hasPermissionTo('absensi.manage', 'web')) {
                 $shouldRestrict = false;
             }
-            // 4. Default restrict
+            // 5. Default restrict
             else {
                 $shouldRestrict = true;
             }
