@@ -6,6 +6,7 @@ use App\Modules\HR\Domain\Models\Absensi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class AbsensiService
 {
@@ -22,27 +23,42 @@ class AbsensiService
         $shouldRestrict = false;
 
         if ($user) {
+            // DEBUG LOGGING
+            Log::info("AbsensiView Check", [
+                'user' => $user->name,
+                'roles' => $user->roles->pluck('name'),
+                'is_teacher_web' => $user->hasRole('Teacher', 'web'),
+                'is_admin_web' => $user->hasRole('Admin', 'web'),
+                'is_super_web' => $user->hasRole('Superadmin', 'web'),
+                'can_manage' => $user->hasPermissionTo('absensi.manage', 'web'),
+            ]);
+
             // Force load roles ensures we have the data, but relying on database check is safer
             // 1. Superadmin and Admin ALWAYS see everything. Check both web and generic.
             if ($user->hasRole('Superadmin', 'web') || $user->hasRole('Admin', 'web')) {
                 $shouldRestrict = false;
+                Log::info("-> NOT Restricted (Admin/Super)");
             }
             // 2. If not admin/superadmin, but has Teacher role, MUST restrict.
             // Explicitly check 'web' guard as roles are stored there.
             elseif ($user->hasRole('Teacher', 'web')) {
                 $shouldRestrict = true;
+                Log::info("-> Restricted (Teacher Web)");
             }
             // 3. Fallback: If local collection check failed, check DB directly to be absolutely sure
             elseif ($user->roles()->where('name', 'Teacher')->exists()) {
                 $shouldRestrict = true;
+                Log::info("-> Restricted (Teacher DB)");
             }
             // 4. If not teacher, but has management permission (e.g. HR Staff), allow view.
             elseif ($user->hasPermissionTo('absensi.manage', 'web')) {
                 $shouldRestrict = false;
+                Log::info("-> NOT Restricted (Manage Perm)");
             }
             // 5. Default restrict
             else {
                 $shouldRestrict = true;
+                Log::info("-> Restricted (Default)");
             }
         }
 
