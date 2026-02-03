@@ -23,6 +23,42 @@ class CutiService
     {
         $query = Cuti::query()->with(['karyawan.user', 'approver']);
 
+        // Privacy filter: Restrict view based on role
+        $user = request()->user();
+        $shouldRestrict = false;
+
+        if ($user) {
+            // ROBUST GUARD-AGNOSTIC CHECK
+            $roleNames = $user->roles->pluck('name')->toArray();
+
+            // 1. Superadmin/Admin: ALLOW ALL
+            if (in_array('Superadmin', $roleNames) || in_array('Admin', $roleNames)) {
+                $shouldRestrict = false;
+            }
+            // 2. Teacher: RESTRICT (Strict override)
+            elseif (in_array('Teacher', $roleNames)) {
+                $shouldRestrict = true;
+            }
+            // 3. Others with manage permission: ALLOW
+            elseif ($user->can('cuti.manage')) {
+                $shouldRestrict = false;
+            }
+            // 4. Default: RESTRICT
+            else {
+                $shouldRestrict = true;
+            }
+        }
+
+        if ($shouldRestrict && $user) {
+            $employee = $user->employee;
+            if ($employee) {
+                $query->where('karyawan_id', $employee->id);
+            } else {
+                // If user is not an employee and not an admin, they see nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         // Search
         if (! empty($params['q'] ?? null)) {
             $keyword = (string) $params['q'];
