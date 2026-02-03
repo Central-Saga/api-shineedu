@@ -24,7 +24,8 @@ class AbsensiService
         if ($user) {
             // Special request: If user has 'Teacher' role, FORCE restriction to own attendance,
             // even if they might have other permissions (including Superadmin).
-            if ($user->hasRole('Teacher')) {
+            // NOTE: We check roles collection directly to be guard-agnostic (API vs Web)
+            if ($user->roles->contains('name', 'Teacher')) {
                 $shouldRestrict = true;
             } elseif (! $user->hasRole('Admin') && ! $user->hasPermissionTo('absensi.manage')) {
                 $shouldRestrict = true;
