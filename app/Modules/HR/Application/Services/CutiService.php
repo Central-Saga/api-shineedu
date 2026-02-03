@@ -221,6 +221,8 @@ class CutiService
 
     public function update(Cuti $cuti, array $data): Cuti
     {
+        $originalStatus = $cuti->status;
+
         $bukti = $data['bukti_pendukung'] ?? null;
         $dataToUpdate = collect($data)->except(['bukti_pendukung'])->toArray();
         if (isset($data['catatan']) && !isset($data['keterangan'])) {
@@ -232,6 +234,11 @@ class CutiService
         if ($bukti instanceof \Illuminate\Http\UploadedFile) {
             $cuti->clearMediaCollection('bukti_cuti');
             $cuti->addMedia($bukti)->toMediaCollection('bukti_cuti');
+        }
+
+        // Handle Status Change Notification
+        if (isset($data['status']) && $data['status'] !== $originalStatus) {
+            $this->handleStatusChangeNotification($cuti, $data['status']);
         }
 
         return $cuti;
@@ -251,22 +258,7 @@ class CutiService
             'disetujui_oleh' => $userId,
         ]);
 
-        // Notification: Employee
-        $employee = $cuti->karyawan;
-        $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
-
-        Log::info("Targeting Employee for Approval Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
-
-        if ($employee && $emailTarget) {
-            $this->sendEmail(
-                $emailTarget,
-                "Cuti Disetujui",
-                "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DISETUJUI."
-            );
-            Log::info("Approval Email Dispatched.");
-        } else {
-            Log::warning("Approval Email NOT sent. Missing employee or email target.");
-        }
+        $this->handleStatusChangeNotification($cuti, 'disetujui');
 
         return $cuti;
     }
@@ -280,20 +272,7 @@ class CutiService
             'disetujui_oleh' => $userId,
         ]);
 
-        // Notification: Employee
-        $employee = $cuti->karyawan;
-        $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
-
-        Log::info("Targeting Employee for Rejection Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
-
-        if ($employee && $emailTarget) {
-            $this->sendEmail(
-                $emailTarget,
-                "Cuti Ditolak",
-                "Mohon maaf, pengajuan cuti Anda untuk tanggal {$cuti->start_date} DITOLAK."
-            );
-            Log::info("Rejection Email Dispatched.");
-        }
+        $this->handleStatusChangeNotification($cuti, 'ditolak');
 
         return $cuti;
     }
@@ -308,22 +287,44 @@ class CutiService
             'disetujui_oleh' => null,
         ]);
 
+        $this->handleStatusChangeNotification($cuti, 'dibatalkan');
+
+        return $cuti;
+    }
+
+    protected function handleStatusChangeNotification(Cuti $cuti, string $newStatus)
+    {
+        $subject = "";
+        $message = "";
+
+        switch ($newStatus) {
+            case 'disetujui':
+                $subject = "Cuti Disetujui";
+                $message = "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DISETUJUI.";
+                break;
+            case 'ditolak':
+                $subject = "Cuti Ditolak";
+                $message = "Mohon maaf, pengajuan cuti Anda untuk tanggal {$cuti->start_date} DITOLAK.";
+                break;
+            case 'dibatalkan':
+                $subject = "Cuti Dibatalkan";
+                $message = "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DIBATALKAN.";
+                break;
+            default:
+                return;
+        }
+
         // Notification: Employee
         $employee = $cuti->karyawan;
         $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
 
-        Log::info("Targeting Employee for Cancellation Email. Employee ID: " . ($employee?->id ?? 'null') . ", Email Target: " . ($emailTarget ?? 'null'));
+        Log::info("Status Change Notification: {$newStatus}. Target: " . ($emailTarget ?? 'null'));
 
         if ($employee && $emailTarget) {
-            $this->sendEmail(
-                $emailTarget,
-                "Cuti Dibatalkan",
-                "Pengajuan cuti Anda untuk tanggal {$cuti->start_date} telah DIBATALKAN."
-            );
-            Log::info("Cancellation Email Dispatched.");
+            $this->sendEmail($emailTarget, $subject, $message);
+        } else {
+            Log::warning("Status Change Notification Failed: No email target found.");
         }
-
-        return $cuti;
     }
 
     protected function sendEmail(string $to, string $subject, string $message)
