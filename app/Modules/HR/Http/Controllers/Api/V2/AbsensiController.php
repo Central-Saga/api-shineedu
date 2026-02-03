@@ -15,8 +15,16 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController
 {
-    private const SHINE_LAT = -8.5207986;
-    private const SHINE_LNG = 115.137969;
+    private const ALLOWED_LOCATIONS = [
+        [
+            'lat' => -8.5207986,
+            'lng' => 115.137969,
+        ],
+        [
+            'lat' => -8.438817,
+            'lng' => 115.123787,
+        ],
+    ];
     private const MAX_RADIUS_METERS = 100;
 
     public function __construct(
@@ -109,15 +117,21 @@ class AbsensiController
             'qr_data' => 'nullable|string',
         ]);
 
-        $distance = $this->calculateDistance(
-            self::SHINE_LAT,
-            self::SHINE_LNG,
-            $request->latitude,
-            $request->longitude
-        );
+        $minDistance = INF;
+        foreach (self::ALLOWED_LOCATIONS as $loc) {
+            $dist = $this->calculateDistance(
+                $loc['lat'],
+                $loc['lng'],
+                $request->latitude,
+                $request->longitude
+            );
+            if ($dist < $minDistance) {
+                $minDistance = $dist;
+            }
+        }
 
-        if ($distance > self::MAX_RADIUS_METERS) {
-            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $distance, self::MAX_RADIUS_METERS), 400);
+        if ($minDistance > self::MAX_RADIUS_METERS) {
+            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $minDistance, self::MAX_RADIUS_METERS), 400);
         }
 
         $user = $request->user();
@@ -167,15 +181,21 @@ class AbsensiController
             'longitude' => 'required|numeric',
         ]);
 
-        $distance = $this->calculateDistance(
-            self::SHINE_LAT,
-            self::SHINE_LNG,
-            $request->latitude,
-            $request->longitude
-        );
+        $minDistance = INF;
+        foreach (self::ALLOWED_LOCATIONS as $loc) {
+            $dist = $this->calculateDistance(
+                $loc['lat'],
+                $loc['lng'],
+                $request->latitude,
+                $request->longitude
+            );
+            if ($dist < $minDistance) {
+                $minDistance = $dist;
+            }
+        }
 
-        if ($distance > self::MAX_RADIUS_METERS) {
-            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $distance, self::MAX_RADIUS_METERS), 400);
+        if ($minDistance > self::MAX_RADIUS_METERS) {
+            return ApiResponse::fail(sprintf('Anda berada di luar radius penjemputan/absen (%.2fm). Maksimal radius adalah %dm.', $minDistance, self::MAX_RADIUS_METERS), 400);
         }
 
         $user = $request->user();
