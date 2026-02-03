@@ -300,7 +300,7 @@ class CutiService
 
     protected function notifyFoundation(string $subject, string $message)
     {
-        $foundationEmail = env('MAIL_TO_FOUNDATION');
+        $foundationEmail = config('mail.to_foundation');
         if ($foundationEmail) {
             $this->sendEmail($foundationEmail, $subject, $message);
         }
