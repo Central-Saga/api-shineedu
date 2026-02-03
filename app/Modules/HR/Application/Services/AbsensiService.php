@@ -18,7 +18,20 @@ class AbsensiService
 
         // Privacy filter: regular users only see their own attendance
         $user = request()->user();
-        if ($user && ! $user->hasRole('Admin') && ! $user->hasPermissionTo('absensi.manage')) {
+
+        $shouldRestrict = false;
+
+        if ($user) {
+            // Special request: If user has 'Teacher' role, FORCE restriction to own attendance,
+            // even if they might have other permissions (including Superadmin).
+            if ($user->hasRole('Teacher')) {
+                $shouldRestrict = true;
+            } elseif (! $user->hasRole('Admin') && ! $user->hasPermissionTo('absensi.manage')) {
+                $shouldRestrict = true;
+            }
+        }
+
+        if ($shouldRestrict && $user) {
             $employee = $user->employee;
             if ($employee) {
                 $query->where('karyawan_id', $employee->id);
