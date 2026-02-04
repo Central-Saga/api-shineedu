@@ -5,6 +5,7 @@ use App\Modules\Identity\Http\Controllers\Api\V2\AuthController;
 use App\Modules\Identity\Http\Controllers\Api\V2\PermissionController;
 use App\Modules\Identity\Http\Controllers\Api\V2\RoleController;
 use App\Modules\Identity\Http\Controllers\Api\V2\UserController;
+use App\Modules\Identity\Http\Controllers\Api\V2\PasswordResetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::get('/user', function (Request $request) {
 Route::prefix('v2')->group(function () {
     // Public routes (no auth)
     Route::post('/auth/login', [AuthController::class, 'login']);
+
+    // Password Reset (public routes)
+    Route::post('/password-reset/validate', [PasswordResetController::class, 'validateToken']);
+    Route::post('/password-reset', [PasswordResetController::class, 'resetPassword']);
 
     // Public catalog (read-only for landing form)
     Route::prefix('public')->group(function () {
@@ -69,6 +74,7 @@ Route::prefix('v2')->group(function () {
         Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
         Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->middleware('permission:users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
+        Route::post('/users/{user}/send-password-reset', [PasswordResetController::class, 'sendResetLink'])->middleware('permission:users.update');
 
         // Activity Logs
         Route::get('/activity-logs', [\App\Modules\Identity\Http\Controllers\Api\V2\ActivityLogController::class, 'index'])->middleware('permission:activity_logs.view');
