@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
-        $schedule->command('hr:auto-checkout')->dailyAt('20:30');
+        $schedule->command('hr:auto-checkout')->dailyAt('20:20');
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

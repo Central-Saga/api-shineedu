@@ -21,48 +21,51 @@ class AutoCheckoutCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Automatically checkout employees who forgot to checkout by 20:30 WITA';
+    protected $description = 'Automatically checkout employees who forgot to checkout by 20:20 WITA';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $today = Carbon::today()->toDateString();
-        $checkoutTime = '20:30:00';
+        $checkoutTime = '20:20:00';
 
-        $records = Absensi::where('tanggal', $today)
-            ->whereNotNull('jam_masuk')
+        // Find all records where jam_masuk is present but jam_pulang is null
+        // We include older records as well in case the command didn't run or failed
+        $records = Absensi::whereNotNull('jam_masuk')
             ->whereNull('jam_pulang')
+            ->where('tanggal', '<=', Carbon::today())
             ->get();
 
         if ($records->isEmpty()) {
-            $this->info('No pending check-outs found for today.');
+            $this->info('No pending check-outs found.');
             return;
         }
 
         $count = 0;
         foreach ($records as $record) {
+            $tanggal = $record->tanggal->toDateString();
             $jamMasuk = Carbon::parse($record->jam_masuk);
-            $jamPulang = Carbon::parse($today . ' ' . $checkoutTime);
+            $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
 
-            // If jam_masuk is somehow after 20:30 (shouldn't happen for today's records)
-            // we use the jam_masuk as checkout to avoid negative duration
+            // If jam_masuk is after 20:20 (e.g. night shift or late input),
+            // we use the actual time or jam_masuk to avoid negative duration.
+            // But for auto-checkout, we follow the user's rule of 20:20.
             if ($jamMasuk->greaterThan($jamPulang)) {
-                $jamPulang = $jamMasuk;
+                $jamPulang = $jamMasuk->copy()->addMinutes(1); // Set 1 min after masuk as fallback
             }
 
             $record->update([
                 'jam_pulang' => $jamPulang,
                 'durasi' => $jamMasuk->diffInMinutes($jamPulang),
                 'sumber_absen' => $record->sumber_absen . ' (Auto-Checkout)',
-                'catatan' => $record->catatan ? $record->catatan . ' [Auto-checkout by system]' : 'Auto-checkout by system',
+                'catatan' => $record->catatan ? $record->catatan . ' [Auto-checkout by system at 20:20]' : 'Auto-checkout by system at 20:20',
             ]);
 
             $count++;
         }
 
         $this->info("Successfully checked out {$count} records.");
-        Log::info("Absensi Auto-Checkout: Checked out {$count} records for {$today}");
+        Log::info("Absensi Auto-Checkout: Checked out {$count} records.");
     }
 }
