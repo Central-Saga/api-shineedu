@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \App\Modules\Identity\Infrastructure\Console\Commands\ImportUsersCommand::class,
+                \App\Modules\HR\Infrastructure\Console\Commands\AutoCheckoutCommand::class,
             ]);
         }
     }
