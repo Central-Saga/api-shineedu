@@ -29,6 +29,7 @@ class AutoCheckoutCommand extends Command
     public function handle()
     {
         $checkoutTime = '20:20:00';
+        $now = Carbon::now();
 
         // Find all records where jam_masuk is present but jam_pulang is null
         // We include older records as well in case the command didn't run or failed
@@ -45,6 +46,12 @@ class AutoCheckoutCommand extends Command
         $count = 0;
         foreach ($records as $record) {
             $tanggal = $record->tanggal->toDateString();
+
+            // Safety check: Only auto-checkout today's records if it's strictly past 20:20
+            if ($tanggal === $now->toDateString() && $now->format('H:i:s') < $checkoutTime) {
+                continue;
+            }
+
             $jamMasuk = Carbon::parse($record->jam_masuk);
             $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
 
