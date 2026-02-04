@@ -10,6 +10,7 @@ use App\Modules\HR\Http\Resources\JobVacancyResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class JobVacancyController
 {
@@ -18,23 +19,31 @@ class JobVacancyController
     ) {}
 
     /**
-     * Public: list active job vacancies (simple, for landing dropdown / listing).
+     * Public: list active job vacancies with full detail (for landing page list + detail modal).
      */
     public function index(): JsonResponse
     {
-        $items = JobVacancy::where('is_active', true)
-            ->orderBy('title')
-            ->get(['id', 'title', 'location', 'employment_type']);
+        try {
+            $items = JobVacancy::where('is_active', true)
+                ->orderBy('title')
+                ->get();
 
-        return ApiResponse::ok(
-            $items->map(fn ($v) => [
-                'id' => $v->id,
-                'title' => $v->title,
-                'location' => $v->location,
-                'employment_type' => $v->employment_type,
-            ]),
-            'Daftar posisi berhasil diambil'
-        );
+            return ApiResponse::ok(
+                JobVacancyResource::collection($items),
+                'Daftar posisi berhasil diambil'
+            );
+        } catch (\Throwable $e) {
+            Log::error('JobVacancyControllesr@index failed', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return ApiResponse::serverError(
+                'Gagal mengambil daftar lowongan.',
+                $e->getMessage()
+            );
+        }
     }
 
     /**
