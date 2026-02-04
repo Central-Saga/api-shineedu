@@ -12,6 +12,8 @@ use App\Modules\Finance\Http\Requests\PayRegistrationFeeRequest;
 use App\Modules\Finance\Http\Requests\StoreKasTransaksiRequest;
 use App\Modules\Finance\Http\Resources\KasTransaksiResource;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\KasTransaksiExport;
 
 class KasTransaksiController extends Controller
 {
@@ -199,9 +201,10 @@ class KasTransaksiController extends Controller
             'per_page' => 9999,
         ]));
 
-        if ($format === 'excel') {
-            // TODO: Implement Excel export
-            return response()->json(['message' => 'Excel export belum tersedia'], 501);
+        if ($format === 'excel' || $format === 'csv' || $format === 'xlsx') {
+            $filename = 'transaksi-kas-' . now()->format('Y-m-d-His');
+            $ext = ($format === 'csv') ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX;
+            return Excel::download(new KasTransaksiExport($request), $filename . '.' . ($format === 'csv' ? 'csv' : 'xlsx'), $ext);
         }
 
         // PDF export

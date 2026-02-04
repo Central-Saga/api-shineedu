@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use App\Modules\Assessment\Http\Requests\StoreAssessmentGradeRequest;
+use App\Exports\AssessmentGradeExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssessmentGradeController extends Controller
 {
@@ -166,5 +168,33 @@ class AssessmentGradeController extends Controller
             Log::error('Certificate Generation Failed: ' . $e->getMessage());
             return ApiResponse::serverError('Gagal generate sertifikat: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Export Grades
+     */
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'assessment_grades_' . date('Ymd_His');
+
+        if ($format === 'pdf') {
+            $exporter = new AssessmentGradeExport($request);
+            $grades = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.assessment_grade', compact('grades'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new AssessmentGradeExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
     }
 }

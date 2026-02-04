@@ -10,6 +10,8 @@ use App\Modules\HR\Http\Resources\JobApplicationResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Exports\JobApplicationExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JobApplicationController
 {
@@ -26,6 +28,31 @@ class JobApplicationController
             $data,
             'Data lamaran berhasil diambil'
         );
+    }
+
+    public function export(Request $request)
+    {
+        $format = $request->get('export', 'xlsx');
+        $filename = 'job_applications_' . date('Ymd_His');
+
+        if ($format === 'pdf') {
+            $exporter = new JobApplicationExport($request);
+            $applications = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.job_application', compact('applications'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new JobApplicationExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
     }
 
     public function store(StoreJobApplicationRequest $request): JsonResponse

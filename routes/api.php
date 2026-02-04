@@ -122,6 +122,7 @@ Route::prefix('v2')->group(function () {
 
         // Job Applications (Lamaran Kerja)
         Route::get('/job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'index'])->middleware('permission:job_application.view');
+        Route::get('/job-applications/export', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'export'])->middleware('permission:job_application.view');
         Route::post('/job-applications', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'store'])->middleware('permission:job_application.create');
         Route::get('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'show'])->middleware('permission:job_application.view');
         Route::put('/job-applications/{job_application}', [\App\Modules\HR\Http\Controllers\Api\V2\JobApplicationController::class, 'update'])->middleware('permission:job_application.update');
@@ -155,6 +156,7 @@ Route::prefix('v2')->group(function () {
         // Penggajian
         Route::get('/payrolls', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'index'])->middleware('permission:gaji.view');
         Route::post('/payrolls/generate', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'generate'])->middleware('permission:gaji.manage');
+        Route::get('/payrolls/export-list', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'exportList'])->middleware('permission:gaji.view');
         Route::get('/payrolls/{id}/export', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'export'])->middleware('permission:gaji.view');
         Route::get('/payrolls/{id}', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'show'])->middleware('permission:gaji.view');
         Route::put('/payrolls/{id}/status', [\App\Modules\HR\Http\Controllers\Api\V2\PayrollController::class, 'updateStatus'])->middleware('permission:gaji.manage');
@@ -387,6 +389,7 @@ Route::prefix('v2')->group(function () {
                 Route::post('/grades/{grade}/generate', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'generate']);
             });
             Route::get('/grades', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'index']);
+            Route::get('/grades/export', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'export']);
             Route::get('/grades/{grade}', [\App\Modules\Assessment\Http\Controllers\Api\V2\AssessmentGradeController::class, 'show']);
         });
     });

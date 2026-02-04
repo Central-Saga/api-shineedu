@@ -7,6 +7,8 @@ use App\Modules\HR\Application\Services\PayrollService;
 use App\Modules\HR\Domain\Models\Payroll;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\Request;
+use App\Exports\PayrollExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PayrollController extends Controller
 {
@@ -103,5 +105,38 @@ class PayrollController extends Controller
         $filename = 'slip_gaji_' . $payroll->employee->kode_karyawan . '_' . $payroll->bulan . '_' . $payroll->tahun . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Export Payroll List (Generic)
+     */
+    public function exportList(Request $request)
+    {
+        $request->validate([
+            'bulan' => 'required|integer',
+            'tahun' => 'required|integer',
+        ]);
+
+        $format = $request->get('export', 'xlsx');
+        $filename = 'payroll_list_' . $request->bulan . '_' . $request->tahun . '_' . date('Ymd_His');
+
+        if ($format === 'pdf') {
+            $exporter = new PayrollExport($request);
+            $payrolls = $exporter->query()->get();
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.payroll_list', compact('payrolls'))
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download($filename . '.pdf');
+        }
+
+        $ext = match ($format) {
+            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'tsv' => \Maatwebsite\Excel\Excel::TSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new PayrollExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
     }
 }
