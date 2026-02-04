@@ -143,9 +143,7 @@ class CutiService
 
             // 4. Validate Minimal Hari Pengajuan (Only if > 0)
             if ($minimalHari > 0) {
-                $daysDiff = Carbon::now()->diffInDays($startDate, false);
                 // "tanggal izin - now() harus >= minimal_hari_pengajuan"
-                // Using start of day for accurate comparison?
                 $daysDiff = Carbon::today()->diffInDays($startDate->startOfDay(), false);
 
                 if ($daysDiff < $minimalHari) {
@@ -318,12 +316,10 @@ class CutiService
         $employee = $cuti->karyawan;
         $emailTarget = $employee->email_pribadi ?: ($employee->user ? $employee->user->email : null);
 
-        Log::info("Status Change Notification: {$newStatus}. Target: " . ($emailTarget ?? 'null'));
-
         if ($employee && $emailTarget) {
             $this->sendEmail($emailTarget, $subject, $message);
         } else {
-            Log::warning("Status Change Notification Failed: No email target found.");
+            Log::warning("Status Change Notification Failed: No email target found for Cuti ID {$cuti->id}");
         }
     }
 
@@ -337,6 +333,13 @@ class CutiService
     protected function notifyFoundation(string $subject, string $message)
     {
         $foundationEmail = config('mail.to_foundation');
+
+        // Fallback hardcoded to ensure delivery if config fails
+        if (empty($foundationEmail)) {
+            $foundationEmail = 'yayasanpendidikangemilangbali@gmail.com';
+            Log::warning("Notification Warning: config(mail.to_foundation) empty, using fallback: {$foundationEmail}");
+        }
+
         if ($foundationEmail) {
             $this->sendEmail($foundationEmail, $subject, $message);
         }
