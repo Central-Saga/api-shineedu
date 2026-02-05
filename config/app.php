@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend Application URL
+    |--------------------------------------------------------------------------
+    |
+    | Used for password reset links and other emails that point to the frontend
+    | app. Set to https://app.shineeducationbali.com in production.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'https://app.shineeducationbali.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
