@@ -25,7 +25,7 @@ class StoreMuridRequest extends FormRequest
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'jenis_kelamin' => ['nullable', 'in:L,P'],
             'tanggal_lahir' => ['nullable', 'date'],
-            'no_hp' => ['required', 'string', 'min:8', 'max:20'],
+            'no_hp' => ['nullable', 'string', 'min:8', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'alamat' => ['nullable', 'string'],
 

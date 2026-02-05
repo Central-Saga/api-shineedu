@@ -77,12 +77,19 @@ class MuridService
             }
 
             if (empty($data['kode_murid'])) {
-                $dateSource = !empty($data['tanggal_lahir']) ? $data['tanggal_lahir'] : date('Y-m-d');
-                $timestamp = strtotime($dateSource);
-                $ddmmyy = date('dmy', $timestamp);
-                $random = rand(1000, 9999);
+                // Generate Kode Murid: Registration Date (DDMMYY) + 4 Random Digits
+                // Example: 0502261234
+                $datePart = date('dmy');
+                $randomPart = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+                $generatedKode = $datePart . $randomPart;
 
-                $data['kode_murid'] = $ddmmyy . $random;
+                // Ensure uniqueness
+                while (\App\Modules\Student\Domain\Models\Murid::where('kode_murid', $generatedKode)->exists()) {
+                    $randomPart = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+                    $generatedKode = $datePart . $randomPart;
+                }
+
+                $data['kode_murid'] = $generatedKode;
             }
 
             $data['user_id'] = $userId;
