@@ -74,7 +74,9 @@ Route::prefix('v2')->group(function () {
         Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('permission:users.update');
         Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->middleware('permission:users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
-        Route::post('/users/{user}/send-password-reset', [PasswordResetController::class, 'sendResetLink'])->middleware('permission:users.update');
+        Route::post('/users/{user}/send-password-reset', [PasswordResetController::class, 'sendResetLink'])
+            ->name('v2.users.send-password-reset')
+            ->middleware('permission:users.update');
 
         // Activity Logs
         Route::get('/activity-logs', [\App\Modules\Identity\Http\Controllers\Api\V2\ActivityLogController::class, 'index'])->middleware('permission:activity_logs.view');
