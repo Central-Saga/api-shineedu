@@ -3,6 +3,7 @@
 namespace App\Modules\Scheduling\Http\Controllers\Api\V2;
 
 use App\Modules\Scheduling\Domain\Models\JadwalKerja;
+use App\Modules\Scheduling\Application\Services\JadwalKerjaBulkService;
 use App\Modules\Scheduling\Http\Requests\StoreJadwalKerjaRequest;
 use App\Modules\Scheduling\Http\Requests\UpdateJadwalKerjaRequest;
 use App\Modules\Scheduling\Http\Resources\JadwalKerjaResource;
@@ -14,6 +15,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class JadwalKerjaController
 {
+    protected JadwalKerjaBulkService $bulkService;
+
+    public function __construct(JadwalKerjaBulkService $bulkService)
+    {
+        $this->bulkService = $bulkService;
+    }
+
     public function index(Request $request): JsonResponse
     {
         $query = JadwalKerja::query()->with('guru.user');
@@ -109,6 +117,21 @@ class JadwalKerjaController
         $jadwalKerja->delete();
 
         return ApiResponse::ok(null, 'Jadwal kerja berhasil dihapus');
+    }
+
+    public function bulk(Request $request): JsonResponse
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'dry_run' => 'boolean',
+        ]);
+
+        $items = $request->input('items', []);
+        $dryRun = $request->boolean('dry_run', false);
+
+        $result = $this->bulkService->bulkCreate($items, $dryRun);
+
+        return ApiResponse::ok($result, 'Bulk operation completed');
     }
 
     public function export(Request $request)

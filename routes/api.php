@@ -96,6 +96,7 @@ Route::prefix('v2')->group(function () {
         Route::get('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'index'])->middleware('permission:jadwal_kerja.view');
         Route::get('/jadwal-kerja/export', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'export'])->middleware('permission:jadwal_kerja.view');
         Route::post('/jadwal-kerja', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'store'])->middleware('permission:jadwal_kerja.create');
+        Route::post('/jadwal-kerja/bulk', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'bulk'])->middleware('permission:jadwal_kerja.create');
         Route::get('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'show'])->middleware('permission:jadwal_kerja.view');
         Route::put('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'update'])->middleware('permission:jadwal_kerja.update');
         Route::delete('/jadwal-kerja/{jadwalKerja}', [\App\Modules\Scheduling\Http\Controllers\Api\V2\JadwalKerjaController::class, 'destroy'])->middleware('permission:jadwal_kerja.delete');
