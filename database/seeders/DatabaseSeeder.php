@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ProductionEmployeeSeeder::class,
             KatalogSeeder::class,
             JobVacancySeeder::class,
-            RealisticBalineseSeeder::class,
+            // RealisticBalineseSeeder::class, // Disabled - creates test murid data
         ]);
     }
 }
