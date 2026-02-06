@@ -21,6 +21,7 @@ class MuridResource extends JsonResource
             'jenis_kelamin' => $this->jenis_kelamin,
             'tanggal_lahir' => $this->tanggal_lahir ? $this->tanggal_lahir->format('Y-m-d') : null,
             'no_hp' => $this->no_hp,
+            'no_hp_display' => $this->no_hp ?: $this->no_hp_wali, // Fallback to wali if empty
             'email' => $this->email,
             'alamat' => $this->alamat,
 
