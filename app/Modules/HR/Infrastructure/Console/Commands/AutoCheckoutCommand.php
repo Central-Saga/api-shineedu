@@ -60,14 +60,17 @@ class AutoCheckoutCommand extends Command
             $tanggal = $record->tanggal->toDateString();
 
             // Safety check: Only auto-checkout today's records if it's strictly past 20:20
-            if ($tanggal === $today && $now->format('H:i:s') < $checkoutTime) {
-                $skipped++;
-                Log::debug("Auto-Checkout: Skipped today's record (too early)", [
-                    'karyawan_id' => $record->karyawan_id,
-                    'tanggal' => $tanggal,
-                    'current_time' => $now->format('H:i:s'),
-                ]);
-                continue;
+            // Also ensure we are comparing strict Y-m-d strings
+            if ($tanggal === $today) {
+                if ($now->format('H:i') < '20:20') {
+                    $skipped++;
+                    Log::debug("Auto-Checkout: Skipped today's record (too early)", [
+                        'karyawan_id' => $record->karyawan_id,
+                        'tanggal' => $tanggal,
+                        'current_time' => $now->format('H:i'),
+                    ]);
+                    continue;
+                }
             }
 
             // Parse jam_masuk - handle both TIME and DATETIME formats
