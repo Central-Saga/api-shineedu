@@ -70,7 +70,16 @@ class AutoCheckoutCommand extends Command
                 continue;
             }
 
-            $jamMasuk = Carbon::parse($tanggal . ' ' . $record->jam_masuk);
+            // Parse jam_masuk - handle both TIME and DATETIME formats
+            $jamMasukStr = $record->jam_masuk;
+            if (strlen($jamMasukStr) > 8) {
+                // Already has date (DATETIME format), just parse it
+                $jamMasuk = Carbon::parse($jamMasukStr);
+            } else {
+                // Only time (TIME format), add the record's date
+                $jamMasuk = Carbon::parse($tanggal . ' ' . $jamMasukStr);
+            }
+
             $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
 
             // If jam_masuk is after 20:20 (e.g. night shift or late input),
