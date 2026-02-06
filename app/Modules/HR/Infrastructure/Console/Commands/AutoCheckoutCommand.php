@@ -93,6 +93,7 @@ class AutoCheckoutCommand extends Command
             $record->update([
                 'jam_pulang' => $jamPulang,
                 'durasi' => $durasi,
+                'tanggal' => $tanggal, // Update tanggal to match jam_masuk
                 'sumber_absen' => $record->sumber_absen . ' (Auto-Checkout)',
                 'catatan' => $record->catatan ? $record->catatan . ' [Auto-checkout by system at 20:20]' : 'Auto-checkout by system at 20:20',
             ]);

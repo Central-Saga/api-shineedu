@@ -35,17 +35,11 @@ class FixWrongAutoCheckout extends Command
         $checkoutTime = '20:20:00';
 
         foreach ($records as $record) {
-            $tanggal = $record->tanggal->toDateString();
+            // Parse jam_masuk - it's in DATETIME format
+            $jamMasuk = Carbon::parse($record->jam_masuk);
 
-            // Parse jam_masuk - handle both TIME and DATETIME formats
-            $jamMasukStr = $record->jam_masuk;
-            if (strlen($jamMasukStr) > 8) {
-                // Already has date, just parse it
-                $jamMasuk = Carbon::parse($jamMasukStr);
-            } else {
-                // Only time, add the record's date
-                $jamMasuk = Carbon::parse($tanggal . ' ' . $jamMasukStr);
-            }
+            // Use the date from jam_masuk, not from tanggal field
+            $tanggal = $jamMasuk->toDateString();
 
             $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
 
@@ -59,14 +53,16 @@ class FixWrongAutoCheckout extends Command
             // Only update if the new durasi is significantly different
             if (abs($durasi - $record->durasi) > 10) {
                 $this->info("Fixing record ID {$record->id}:");
-                $this->info("  Tanggal: {$tanggal}");
-                $this->info("  Jam Masuk: {$record->jam_masuk}");
+                $this->info("  Karyawan ID: {$record->karyawan_id}");
+                $this->info("  Tanggal (from jam_masuk): {$tanggal}");
+                $this->info("  Jam Masuk: {$jamMasuk->format('Y-m-d H:i:s')}");
                 $this->info("  Old Jam Pulang: {$record->jam_pulang} (durasi: {$record->durasi} menit)");
-                $this->info("  New Jam Pulang: {$jamPulang->format('H:i:s')} (durasi: {$durasi} menit)");
+                $this->info("  New Jam Pulang: {$jamPulang->format('Y-m-d H:i:s')} (durasi: {$durasi} menit)");
 
                 $record->update([
-                    'jam_pulang' => $jamPulang->format('H:i:s'),
+                    'jam_pulang' => $jamPulang,
                     'durasi' => $durasi,
+                    'tanggal' => $tanggal, // Also fix the tanggal field
                 ]);
 
                 $fixed++;
