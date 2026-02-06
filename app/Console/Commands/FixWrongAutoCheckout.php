@@ -2,74 +2,57 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
 use App\Modules\HR\Domain\Models\Absensi;
 use Carbon\Carbon;
-use Illuminate\Console\Command;
 
 class FixWrongAutoCheckout extends Command
 {
-    protected $signature = 'fix:wrong-auto-checkout';
-    protected $description = 'Fix auto-checkout records that have wrong checkout time (1 minute after check-in)';
+    protected $signature = 'fix:start-fresh';
+    protected $description = 'Revert premature auto-checkout for today';
 
     public function handle()
     {
-        $this->info('Finding records with wrong auto-checkout time...');
+        $today = Carbon::now()->toDateString();
+        $checkoutTime = '20:20:00';
 
-        // Find records where:
-        // 1. Has Auto-checkout in catatan
-        // 2. Durasi is very small (1-5 minutes) which indicates the bug
-        $records = Absensi::where('catatan', 'like', '%Auto-checkout%')
-            ->where('durasi', '<=', 5)
-            ->whereNotNull('jam_masuk')
-            ->whereNotNull('jam_pulang')
+        $this->info("🔍 Finding records auto-checked out today ({$today}) at {$checkoutTime}...");
+
+        $records = Absensi::whereDate('tanggal', $today)
+            ->whereTime('jam_pulang', $checkoutTime)
+            ->where('sumber_absen', 'LIKE', '%(Auto-Checkout)%')
             ->get();
 
         if ($records->isEmpty()) {
-            $this->info('No records found with wrong auto-checkout.');
-            return 0;
+            $this->info("✅ No incorrect auto-checkout records found for today.");
+            return;
         }
 
-        $this->info("Found {$records->count()} records with potential wrong checkout time.");
+        $this->info("Found {$records->count()} records to revert.");
 
-        $fixed = 0;
-        $checkoutTime = '20:20:00';
+        if (!$this->confirm("Are you sure you want to revert these records? They will be set to 'ongoing' (jam_pulang = null).")) {
+            return;
+        }
 
         foreach ($records as $record) {
-            // Parse jam_masuk - it's in DATETIME format
-            $jamMasuk = Carbon::parse($record->jam_masuk);
+            // Remove (Auto-Checkout) from sumber_absen
+            $sumber = str_replace(' (Auto-Checkout)', '', $record->sumber_absen);
 
-            // Use the date from jam_masuk, not from tanggal field
-            $tanggal = $jamMasuk->toDateString();
+            // Remove auto-checkout note
+            $catatan = $record->catatan;
+            $catatan = str_replace(' [Auto-checkout by system at 20:20]', '', $catatan);
+            $catatan = str_replace('Auto-checkout by system at 20:20', '', $catatan);
 
-            $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
+            $record->update([
+                'jam_pulang' => null,
+                'durasi' => null,
+                'sumber_absen' => trim($sumber),
+                'catatan' => trim($catatan) ?: null,
+            ]);
 
-            // If jam_masuk is after 20:20 (night shift), set checkout to next day
-            if ($jamMasuk->greaterThan($jamPulang)) {
-                $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime)->addDay();
-            }
-
-            $durasi = $jamMasuk->diffInMinutes($jamPulang);
-
-            // Only update if the new durasi is significantly different
-            if (abs($durasi - $record->durasi) > 10) {
-                $this->info("Fixing record ID {$record->id}:");
-                $this->info("  Karyawan ID: {$record->karyawan_id}");
-                $this->info("  Tanggal (from jam_masuk): {$tanggal}");
-                $this->info("  Jam Masuk: {$jamMasuk->format('Y-m-d H:i:s')}");
-                $this->info("  Old Jam Pulang: {$record->jam_pulang} (durasi: {$record->durasi} menit)");
-                $this->info("  New Jam Pulang: {$jamPulang->format('Y-m-d H:i:s')} (durasi: {$durasi} menit)");
-
-                $record->update([
-                    'jam_pulang' => $jamPulang,
-                    'durasi' => $durasi,
-                    'tanggal' => $tanggal, // Also fix the tanggal field
-                ]);
-
-                $fixed++;
-            }
+            $this->line("Reverted record ID: {$record->id} (Karyawan ID: {$record->karyawan_id})");
         }
 
-        $this->info("✅ Fixed {$fixed} records!");
-        return 0;
+        $this->info("✅ Successfully reverted records.");
     }
 }
