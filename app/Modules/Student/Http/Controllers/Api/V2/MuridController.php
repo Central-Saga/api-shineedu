@@ -200,10 +200,27 @@ class MuridController extends Controller
         ]);
     }
     /**
-     * Import murid from Excel/CSV/txt/sql.
+     * Import murid from Excel/CSV/txt/sql OR handle bulk JSON.
      */
     public function import(Request $request)
     {
+        // Handle JSON Bulk payload (from frontend dry-run/import)
+        if ($request->isJson() && $request->has('items')) {
+            $data = $request->validate([
+                'items' => 'required|array',
+                'items.*.nama_lengkap' => 'required|string',
+                'dry_run' => 'boolean',
+            ]);
+
+            $items = $request->input('items', []);
+            $dryRun = $request->boolean('dry_run', false);
+
+            $result = $this->muridService->bulkCreate($items, $dryRun);
+
+            return response()->json($result);
+        }
+
+        // Handle File Upload
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv,txt,sql',
         ]);
