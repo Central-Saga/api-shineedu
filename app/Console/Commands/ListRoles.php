@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Modules\Identity\Domain\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class ListRoles extends Command
 {
