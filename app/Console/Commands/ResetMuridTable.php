@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\DB;
 
 class ResetMuridTable extends Command
 {
-    protected $signature = 'reset:murid-table';
+    protected $signature = 'reset:murid-table {--force : Force the operation without confirmation}';
     protected $description = 'Reset murid table only (truncate all data)';
 
     public function handle()
     {
-        if (!$this->confirm('⚠️  This will DELETE ALL data in murid table. Are you sure?')) {
+        if (!$this->option('force') && !$this->confirm('⚠️  This will DELETE ALL data in murid table. Are you sure?')) {
             $this->info('Operation cancelled.');
             return 0;
         }
