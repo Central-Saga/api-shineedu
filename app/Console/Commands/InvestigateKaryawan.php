@@ -65,7 +65,7 @@ class InvestigateKaryawan extends Command
                     $employees->map(fn($e) => [
                         $e->id,
                         $e->kode_karyawan,
-                        $e->status,
+                        is_object($e->status) && enum_exists(get_class($e->status)) ? $e->status->value : $e->status, // Handle Enum
                         $e->created_at->toDateTimeString()
                     ])
                 );
