@@ -70,14 +70,13 @@ class AutoCheckoutCommand extends Command
                 continue;
             }
 
-            $jamMasuk = Carbon::parse($record->jam_masuk);
+            $jamMasuk = Carbon::parse($tanggal . ' ' . $record->jam_masuk);
             $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime);
 
             // If jam_masuk is after 20:20 (e.g. night shift or late input),
-            // we use the actual time or jam_masuk to avoid negative duration.
-            // But for auto-checkout, we follow the user's rule of 20:20.
+            // set jam_pulang to next day at checkout time
             if ($jamMasuk->greaterThan($jamPulang)) {
-                $jamPulang = $jamMasuk->copy()->addMinutes(1); // Set 1 min after masuk as fallback
+                $jamPulang = Carbon::parse($tanggal . ' ' . $checkoutTime)->addDay();
             }
 
             $durasi = $jamMasuk->diffInMinutes($jamPulang);
