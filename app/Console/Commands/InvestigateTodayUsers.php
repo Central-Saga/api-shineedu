@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\User;
+use App\Modules\Identity\Domain\Models\User;
 use Carbon\Carbon;
 
 class InvestigateTodayUsers extends Command
