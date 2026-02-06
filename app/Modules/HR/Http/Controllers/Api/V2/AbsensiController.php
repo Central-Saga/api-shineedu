@@ -25,7 +25,7 @@ class AbsensiController
             'lng' => 115.123787,
         ],
     ];
-    private const MAX_RADIUS_METERS = 300;
+    private const MAX_RADIUS_METERS = 50;
 
     public function __construct(
         protected AbsensiService $service
