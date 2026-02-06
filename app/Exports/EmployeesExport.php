@@ -82,6 +82,11 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
 
     public function map($employee): array
     {
+        $status = $employee->status;
+        if (is_object($status) && property_exists($status, 'value')) {
+            $status = $status->value;
+        }
+
         return [
             $employee->kode_karyawan,
             $employee->user?->name ?? '-',
@@ -97,7 +102,7 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping
             $employee->nomor_hp,
             $employee->alamat,
             $employee->tanggal_lahir ? $employee->tanggal_lahir->format('Y-m-d') : '-',
-            $employee->status,
+            $status ?? '-',
             $employee->created_at ? $employee->created_at->format('Y-m-d H:i:s') : '-',
             $employee->updated_at ? $employee->updated_at->format('Y-m-d H:i:s') : '-',
         ];
