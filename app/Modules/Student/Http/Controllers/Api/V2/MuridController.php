@@ -217,7 +217,7 @@ class MuridController extends Controller
 
             $result = $this->muridService->bulkCreate($items, $dryRun);
 
-            return response()->json($result);
+            return ApiResponse::ok($result, 'Bulk operation completed');
         }
 
         // Handle File Upload
