@@ -173,6 +173,8 @@ Route::prefix('v2')->group(function () {
         // Murid
         Route::get('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'index'])->middleware('permission:student.view');
         Route::get('/murid/export', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'export'])->middleware('permission:student.view');
+        Route::post('/murid/import', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'import'])->middleware('permission:student.create');
+        Route::post('/murid/bulk', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'import'])->middleware('permission:student.create');
         Route::post('/murid', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'store'])->middleware('permission:student.create');
         Route::get('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'show'])->middleware('permission:student.view');
         Route::put('/murid/{murid}', [\App\Modules\Student\Http\Controllers\Api\V2\MuridController::class, 'update'])->middleware('permission:student.update');

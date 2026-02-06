@@ -199,4 +199,19 @@ class MuridController extends Controller
             'Content-Type' => 'application/sql',
         ]);
     }
+    /**
+     * Import murid from Excel/CSV/txt/sql.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt,sql',
+        ]);
+
+        $file = $request->file('file');
+
+        Excel::import(new MuridImport, $file);
+
+        return ApiResponse::ok(null, 'Data murid berhasil diimport');
+    }
 }
