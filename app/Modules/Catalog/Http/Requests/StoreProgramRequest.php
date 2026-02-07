@@ -20,7 +20,11 @@ class StoreProgramRequest extends FormRequest
             'kode' => 'required|string|unique:program,kode|max:255',
             'nama' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
+            'image' => 'nullable|string|max:500',
+            'fitur' => 'nullable|array',
+            'fitur.*' => 'string|max:255',
             'status' => 'required|in:Aktif,Non Aktif',
+            'is_highlight' => 'nullable|boolean',
             'jenjang_ids' => 'nullable|array',
             'jenjang_ids.*' => 'exists:jenjang,id',
         ];

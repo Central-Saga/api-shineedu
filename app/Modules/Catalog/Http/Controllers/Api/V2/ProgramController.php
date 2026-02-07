@@ -18,6 +18,11 @@ class ProgramController
     {
         $query = Program::query()->with('jenjangs');
 
+        // Filter: hanya program unggulan (untuk landing home)
+        if ($request->boolean('highlight')) {
+            $query->highlighted();
+        }
+
         // Search
         if ($q = $request->input('q')) {
             $query->where(function ($sub) use ($q) {
