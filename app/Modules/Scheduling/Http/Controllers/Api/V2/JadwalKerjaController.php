@@ -53,6 +53,9 @@ class JadwalKerjaController
         if ($status = $request->get('status')) {
             $query->where('status', $status);
         }
+        if ($kategori = $request->get('kategori')) {
+            $query->where('kategori', $kategori);
+        }
         if ($teacherId = $request->get('guru_pengajar_id')) {
             $query->where('guru_pengajar_id', $teacherId);
         }
