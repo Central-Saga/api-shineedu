@@ -31,6 +31,8 @@ class RoleAndPermissionSeeder extends Seeder
             'kelas',          // kelas akademik
             'scheduling',     // jadwal, reschedule rules
             'schedule',       // FIX: route uses 'schedule.manage'
+            'jadwal_kerja',   // jadwal kerja (API v2)
+            'realisasi_jadwal_kerja', // realisasi jadwal (API v2)
             'enrollment',     // sesi, carry over, paket berjalan
             'attendance',     // absensi guru/murid
             'logbook',        // catatan sesi / laporan guru
@@ -143,12 +145,10 @@ class RoleAndPermissionSeeder extends Seeder
             // Student Data
             'student.view',
             'paket_murid.view', // view saldo murid
-            'users.view',
 
             // Operations
             'enrollment.view',
             'kelas.view',
-            'catalog.view',
 
             // HR Self-Service
             'cuti.view',
@@ -156,6 +156,10 @@ class RoleAndPermissionSeeder extends Seeder
             'cuti.update', // maybe view only depending on flow
             'absensi.view', // view own attendance history
             'absensi.create', // perform attendance (check-in/out)
+
+            // Scheduling (Jadwal Kerja & Realisasi)
+            'jadwal_kerja.view',
+            'realisasi_jadwal_kerja.view',
         ]);
 
         // Student: mostly view + submit assignments
