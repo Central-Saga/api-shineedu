@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Exports\RealisasiJadwalKerjaExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class RealisasiJadwalKerjaController
 {
@@ -45,6 +46,14 @@ class RealisasiJadwalKerjaController
         }
         if ($teacherId = $request->get('guru_pengajar_id')) {
             $query->where('guru_pengajar_id', $teacherId);
+        }
+
+        // Restrict view for teachers who don't have manage permission
+        $user = Auth::user();
+        if ($user && $user->hasRole('Teacher') && !$user->can('realisasi_jadwal_kerja.manage')) {
+            if ($user->employee) {
+                $query->where('guru_pengajar_id', $user->employee->id);
+            }
         }
 
         // Sort

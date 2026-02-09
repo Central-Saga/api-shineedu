@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Exports\JadwalKerjaExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class JadwalKerjaController
 {
@@ -58,6 +59,15 @@ class JadwalKerjaController
         }
         if ($teacherId = $request->get('guru_pengajar_id')) {
             $query->where('guru_pengajar_id', $teacherId);
+        }
+
+        // Restrict view for teachers who don't have manage permission
+        $user = Auth::user();
+
+        if ($user && $user->hasRole('Teacher') && !$user->can('jadwal_kerja.manage')) {
+            if ($user->employee) {
+                $query->where('guru_pengajar_id', $user->employee->id);
+            }
         }
 
         // Sort
