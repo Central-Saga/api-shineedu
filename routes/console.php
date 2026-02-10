@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 
 \Illuminate\Support\Facades\Schedule::command('backup:clean')->weeklyOn(0, '02:00');
 \Illuminate\Support\Facades\Schedule::command('backup:run')->weeklyOn(0, '03:00');
+\Illuminate\Support\Facades\Schedule::command('hr:auto-checkout')->dailyAt('20:30');
