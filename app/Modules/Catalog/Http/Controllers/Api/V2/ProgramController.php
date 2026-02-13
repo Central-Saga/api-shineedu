@@ -9,11 +9,37 @@ use App\Modules\Catalog\Http\Resources\ProgramResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProgramExport;
 
 class ProgramController
 {
+    /**
+     * Upload gambar katalog program. Mengembalikan path untuk disimpan di field program.image.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ], [
+            'image.required' => 'File gambar wajib diunggah.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.max' => 'Ukuran gambar maksimal 5 MB.',
+        ]);
+
+        $file = $request->file('image');
+        $path = $file->store('program', 'public');
+        $url = Storage::disk('public')->url($path);
+        if (str_starts_with($url, '/')) {
+            $url = rtrim(config('app.url', ''), '/') . $url;
+        }
+
+        return ApiResponse::ok([
+            'path' => $path,
+            'image_url' => $url,
+        ], 'Gambar program berhasil diunggah');
+    }
     public function index(Request $request): JsonResponse
     {
         $query = Program::query()->with('jenjangs');
