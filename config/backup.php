@@ -15,7 +15,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    storage_path('app'),
                 ],
 
                 /*
@@ -24,8 +24,8 @@ return [
                  * Directories used by the backup process will automatically be excluded.
                  */
                 'exclude' => [
-                    base_path('vendor'),
-                    base_path('node_modules'),
+                    storage_path('app/backup-temp'),
+                    
                 ],
 
                 /*
@@ -151,13 +151,13 @@ return [
              * The disk names on which the backups will be stored.
              */
             'disks' => [
-                'google',
+                'local', 'google',
             ],
 
             /*
              * Determines whether to allow backups to continue when some targets fail instead of failing completely.
              */
-            'continue_on_failure' => false,
+            'continue_on_failure' => true,
         ],
 
         /*
