@@ -9,14 +9,47 @@ use App\Modules\Catalog\Http\Resources\ProgramResource;
 use App\Shared\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProgramExport;
 
 class ProgramController
 {
+    /**
+     * Upload gambar katalog program. Mengembalikan path untuk disimpan di field program.image.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ], [
+            'image.required' => 'File gambar wajib diunggah.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format file tidak didukung. Harap gunakan JPG, JPEG, PNG, GIF, atau WEBP.',
+            'image.max' => 'Ukuran gambar maksimal 5 MB.',
+            'image.uploaded' => 'File gagal diunggah ke server (mungkin melebihi batas ukuran maksimal atau format tidak valid).',
+        ]);
+
+        $file = $request->file('image');
+        $path = $file->store('program', 'public');
+        $url = Storage::disk('public')->url($path);
+        if (str_starts_with($url, '/')) {
+            $url = rtrim(config('app.url', ''), '/') . $url;
+        }
+
+        return ApiResponse::ok([
+            'path' => $path,
+            'image_url' => $url,
+        ], 'Gambar program berhasil diunggah');
+    }
     public function index(Request $request): JsonResponse
     {
         $query = Program::query()->with('jenjangs');
+
+        // Filter: hanya program unggulan (untuk landing home)
+        if ($request->boolean('highlight')) {
+            $query->highlighted();
+        }
 
         // Search
         if ($q = $request->input('q')) {
@@ -38,7 +71,7 @@ class ProgramController
         $query->orderBy($sortBy, $sortDir);
 
         // Pagination
-        $perPage = (int) $request->input('per_page', 15);
+        $perPage = (int)$request->input('per_page', 15);
         $perPage = min(max($perPage, 1), 100);
 
         $programs = $query->paginate($perPage)->withQueryString();
@@ -119,11 +152,11 @@ class ProgramController
         }
 
         $ext = match ($format) {
-            'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
-            'csv' => \Maatwebsite\Excel\Excel::CSV,
-            'tsv' => \Maatwebsite\Excel\Excel::TSV,
-            default => \Maatwebsite\Excel\Excel::XLSX,
-        };
+                'xlsx' => \Maatwebsite\Excel\Excel::XLSX,
+                'csv' => \Maatwebsite\Excel\Excel::CSV,
+                'tsv' => \Maatwebsite\Excel\Excel::TSV,
+                default => \Maatwebsite\Excel\Excel::XLSX,
+            };
 
         return Excel::download(new ProgramExport($request), $filename . '.' . ($format === 'tsv' ? 'tsv' : $format), $ext);
     }
@@ -135,13 +168,14 @@ class ProgramController
             $handle = fopen('php://output', 'w');
             fwrite($handle, implode("\t", $exporter->headings()) . "\n");
             $exporter->query()->chunk(100, function ($items) use ($handle, $exporter) {
-                /** @var Program $item */
-                foreach ($items as $item) {
-                    fwrite($handle, implode("\t", $exporter->map($item)) . "\n");
+                    /** @var Program $item */
+                    foreach ($items as $item) {
+                        fwrite($handle, implode("\t", $exporter->map($item)) . "\n");
+                    }
                 }
-            });
-            fclose($handle);
-        }, $filename . '.txt', ['Content-Type' => 'text/plain']);
+                );
+                fclose($handle);
+            }, $filename . '.txt', ['Content-Type' => 'text/plain']);
     }
 
     protected function exportSql(Request $request, string $filename)
@@ -152,22 +186,23 @@ class ProgramController
             $handle = fopen('php://output', 'w');
             fwrite($handle, "-- Program Data Export\n\n");
             $query->chunk(100, function ($items) use ($handle) {
-                /** @var Program $item */
-                foreach ($items as $item) {
-                    $sql = sprintf(
-                        "INSERT INTO program (id, kode, nama, deskripsi, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', '%s', %s, %s) ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), deskripsi=VALUES(deskripsi), status=VALUES(status), updated_at=VALUES(updated_at);\n",
-                        $item->id,
-                        addslashes($item->kode),
-                        addslashes($item->nama),
-                        addslashes((string)$item->deskripsi),
-                        $item->status,
-                        $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
-                        $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
-                    );
-                    fwrite($handle, $sql);
+                    /** @var Program $item */
+                    foreach ($items as $item) {
+                        $sql = sprintf(
+                            "INSERT INTO program (id, kode, nama, deskripsi, status, created_at, updated_at) VALUES (%d, '%s', '%s', '%s', '%s', %s, %s) ON DUPLICATE KEY UPDATE kode=VALUES(kode), nama=VALUES(nama), deskripsi=VALUES(deskripsi), status=VALUES(status), updated_at=VALUES(updated_at);\n",
+                            $item->id,
+                            addslashes($item->kode),
+                            addslashes($item->nama),
+                            addslashes((string)$item->deskripsi),
+                            $item->status,
+                            $item->created_at ? "'" . $item->created_at->format('Y-m-d H:i:s') . "'" : "NULL",
+                            $item->updated_at ? "'" . $item->updated_at->format('Y-m-d H:i:s') . "'" : "NULL"
+                        );
+                        fwrite($handle, $sql);
+                    }
                 }
-            });
-            fclose($handle);
-        }, $filename . '.sql', ['Content-Type' => 'application/sql']);
+                );
+                fclose($handle);
+            }, $filename . '.sql', ['Content-Type' => 'application/sql']);
     }
 }

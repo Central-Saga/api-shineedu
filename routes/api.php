@@ -191,13 +191,14 @@ Route::prefix('v2')->group(function () {
             Route::put('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'update'])->middleware('permission:catalog.jenjang.update');
             Route::delete('jenjang/{jenjang}', [\App\Modules\Catalog\Http\Controllers\Api\V2\JenjangController::class, 'destroy'])->middleware('permission:catalog.jenjang.delete');
 
-            // Program
+            // Program — rute dengan segment statis (upload-image, export) harus di atas {program} agar tidak tertangkap sebagai ID
+            Route::post('program/upload-image', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'uploadImage'])->middleware('permission:catalog.program.create')->name('catalog.program.upload-image');
             Route::get('program/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'export'])->middleware('permission:catalog.program.view');
             Route::get('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'index'])->middleware('permission:catalog.program.view');
             Route::post('program', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'store'])->middleware('permission:catalog.program.create');
-            Route::get('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'show'])->middleware('permission:catalog.program.view');
-            Route::put('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'update'])->middleware('permission:catalog.program.update');
-            Route::delete('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'destroy'])->middleware('permission:catalog.program.delete');
+            Route::get('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'show'])->middleware('permission:catalog.program.view')->whereNumber('program');
+            Route::put('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'update'])->middleware('permission:catalog.program.update')->whereNumber('program');
+            Route::delete('program/{program}', [\App\Modules\Catalog\Http\Controllers\Api\V2\ProgramController::class, 'destroy'])->middleware('permission:catalog.program.delete')->whereNumber('program');
 
             // Paket
             Route::get('paket/export', [\App\Modules\Catalog\Http\Controllers\Api\V2\PaketController::class, 'export'])->middleware('permission:catalog.paket.view');

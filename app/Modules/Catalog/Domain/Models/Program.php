@@ -23,10 +23,15 @@ class Program extends Model
         'kode',
         'nama',
         'deskripsi',
+        'image',
+        'fitur',
         'status',
+        'is_highlight',
     ];
 
     protected $casts = [
+        'fitur' => 'array',
+        'is_highlight' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -35,6 +40,11 @@ class Program extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'Aktif');
+    }
+
+    public function scopeHighlighted($query)
+    {
+        return $query->where('is_highlight', true);
     }
 
     public function jenjangs()
