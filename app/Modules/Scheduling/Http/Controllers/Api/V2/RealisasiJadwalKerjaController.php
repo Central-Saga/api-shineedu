@@ -60,7 +60,7 @@ class RealisasiJadwalKerjaController
         $query->orderBy('tanggal', 'desc')->orderBy('created_at', 'desc');
 
         $perPage = (int) $request->get('per_page', 15);
-        $perPage = min(max($perPage, 1), 100);
+        $perPage = min(max($perPage, 1), 1000);
 
         $realisasi = $query->paginate($perPage)->withQueryString();
 
