@@ -82,7 +82,7 @@ class JadwalKerjaController
         }
 
         $perPage = (int) $request->get('per_page', 15);
-        $perPage = min(max($perPage, 1), 100);
+        $perPage = min(max($perPage, 1), 1000);
 
         $schedules = $query->paginate($perPage)->withQueryString();
 
