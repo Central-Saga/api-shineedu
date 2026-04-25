@@ -274,4 +274,25 @@ class PayrollService
             'items' => $deductions
         ];
     }
+
+    protected function sendEmail(string $to, string $subject, string $message)
+    {
+        if (!empty($to)) {
+            dispatch(new \App\Jobs\SendEmailJob($to, new \App\Mail\GeneralNotification($subject, $message)));
+        }
+    }
+
+    protected function notifyFoundation(string $subject, string $message)
+    {
+        $foundationEmail = config('mail.to_foundation');
+
+        // Fallback hardcoded to ensure delivery if config fails
+        if (empty($foundationEmail)) {
+            $foundationEmail = 'yayasanpendidikangemilangbali@gmail.com';
+        }
+
+        if ($foundationEmail) {
+            $this->sendEmail($foundationEmail, $subject, $message);
+        }
+    }
 }

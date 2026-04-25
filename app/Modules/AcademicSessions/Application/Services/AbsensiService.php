@@ -17,21 +17,21 @@ class AbsensiService
     {
         $this->saldoService = $saldoService;
     }
+
+    /**
+     * Bulk update absensi dengan saldo handling yang fleksibel
+     * 
+     * @param int $sessionId
+     * @param array $items
+     * @param int $userId
+     * @return array ['success' => true, 'warnings' => [...]]
+     */
     public function bulkUpdate($sessionId, array $items, $userId)
     {
         $session = Session::findOrFail($sessionId);
+        $warnings = [];
 
-        // Validate all enrollment_ids belong to the class of the session?
-        // Or at least are valid enrollments.
-        // User request: "validate enrollment_id memang anggota kelas sesi tsb (422 jika tidak)"
-
-        // Implementation: We can trust the caller or validate.
-        // Let's validate against SesiAbsensiMurid existence if we only allow updating existing rows?
-        // User said "UPSERT by (sesi_id, enrollment_id)". So we might be adding new students ad-hoc?
-        // But rule says "validate enrollment_id memang anggota kelas".
-        // Let's assume we check `KelasEnrollment`.
-
-        DB::transaction(function () use ($session, $items, $userId) {
+        DB::transaction(function () use ($session, $items, $userId, &$warnings) {
             foreach ($items as $item) {
                 $enrollmentId = $item['enrollment_id'];
 
@@ -56,13 +56,17 @@ class AbsensiService
                     ]
                 );
 
-                // Fetch the updated/created record
+                // Fetch the updated/created record with enrollment
                 $absensi = SesiAbsensiMurid::where('realisasi_jadwal_kerja_id', $session->id)
                     ->where('enrollment_id', $enrollmentId)
                     ->first();
 
-                // Apply credit logic based on status change
-                $this->applyCreditLogic($oldStatus, $newStatus, $absensi);
+                // Apply credit logic with flexible handling
+                $result = $this->applyCreditLogic($oldStatus, $newStatus, $absensi);
+                
+                if ($result['warning']) {
+                    $warnings[] = $result['warning'];
+                }
 
                 // If user wants to move to another session
                 if ($item['status'] === 'BATAL' && !empty($item['target_session_id'])) {
@@ -71,7 +75,10 @@ class AbsensiService
             }
         });
 
-        return true;
+        return [
+            'success' => true,
+            'warnings' => $warnings
+        ];
     }
 
     public function moveAttendance($sourceSessionId, $enrollmentId, $targetSessionId, $userId)
@@ -125,15 +132,62 @@ class AbsensiService
 
     /**
      * Apply credit deduction/refund logic based on status change
+     * Dengan handling fleksibel untuk enrollment dari i-seller:
+     * - saldo_override = -1: unlimited (tidak dicek)
+     * - saldo_override >= 0: pakai saldo manual
+     * - saldo_override = null: pakai sistem ledger normal
      *
      * @param string|null $oldStatus
      * @param string $newStatus
      * @param SesiAbsensiMurid $absensi
-     * @return void
+     * @return array ['success' => bool, 'warning' => string|null]
      */
-    private function applyCreditLogic(?string $oldStatus, string $newStatus, SesiAbsensiMurid $absensi)
+    private function applyCreditLogic(?string $oldStatus, string $newStatus, SesiAbsensiMurid $absensi): array
     {
+        $warning = null;
+        
         try {
+            // Load enrollment dengan relasi
+            $enrollment = $absensi->enrollment;
+            
+            if (!$enrollment) {
+                Log::warning("Enrollment not found for attendance {$absensi->id}");
+                return ['success' => true, 'warning' => null];
+            }
+
+            // Cek saldo override
+            $saldoOverride = $enrollment->getSaldoOverride();
+            
+            // Case 1: Unlimited (-1) - tidak dicek saldo sama sekali
+            if ($saldoOverride === -1) {
+                Log::info("Unlimited saldo for enrollment {$enrollment->id}, skipping credit check");
+                return ['success' => true, 'warning' => null];
+            }
+            
+            // Case 2: Saldo manual (0 atau positif)
+            if ($saldoOverride !== null && $saldoOverride >= 0) {
+                // Update saldo override (decrement)
+                if ($newStatus === 'HADIR' && $oldStatus !== 'HADIR') {
+                    if ($saldoOverride > 0) {
+                        $enrollment->update(['saldo_override' => $saldoOverride - 1]);
+                        Log::info("Manual saldo decremented for enrollment {$enrollment->id}: {$saldoOverride} -> " . ($saldoOverride - 1));
+                    } else {
+                        // Saldo 0, tetap izinkan tapi kasih warning
+                        $warning = "Murid {$enrollment->murid?->nama_lengkap} (Enrollment: {$enrollment->kode_enrollment}) hadir dengan saldo 0";
+                        Log::warning($warning);
+                    }
+                }
+                
+                // Refund jika dari HADIR ke status lain
+                if ($oldStatus === 'HADIR' && $newStatus !== 'HADIR' && $saldoOverride >= 0) {
+                    $enrollment->update(['saldo_override' => $saldoOverride + 1]);
+                    Log::info("Manual saldo refunded for enrollment {$enrollment->id}: {$saldoOverride} -> " . ($saldoOverride + 1));
+                }
+                
+                return ['success' => true, 'warning' => $warning];
+            }
+
+            // Case 3: Sistem ledger normal (saldo_override = null)
             // Case 1: Status IS HADIR. The service handles idempotency (won't deduct twice).
             if ($newStatus === 'HADIR') {
                 $this->saldoService->deductCreditForAttendance($absensi);
@@ -143,15 +197,25 @@ class AbsensiService
             if ($oldStatus === 'HADIR' && $newStatus !== 'HADIR') {
                 $this->saldoService->refundCreditForAttendance($absensi);
             }
+            
+            return ['success' => true, 'warning' => null];
+            
+        } catch (\App\Modules\Enrollment\Application\Exceptions\InsufficientCreditException $e) {
+            // Saldo habis tapi tetap izinkan absensi, kasih warning saja
+            $warning = "Saldo pertemuan habis untuk murid {$absensi->enrollment?->murid?->nama_lengkap} (Enrollment: {$absensi->enrollment?->kode_enrollment})";
+            Log::warning($warning . ": " . $e->getMessage());
+            return ['success' => true, 'warning' => $warning];
+            
+        } catch (\App\Modules\Enrollment\Application\Exceptions\NoActivePaketException $e) {
+            // Tidak ada paket aktif tapi tetap izinkan absensi
+            $warning = "Tidak ada paket aktif untuk murid {$absensi->enrollment?->murid?->nama_lengkap} (Enrollment: {$absensi->enrollment?->kode_enrollment})";
+            Log::warning($warning . ": " . $e->getMessage());
+            return ['success' => true, 'warning' => $warning];
+            
         } catch (\Exception $e) {
-            // Log error but don't block attendance update
-            // This allows attendance to be recorded even if credit system has issues
+            // Log error tapi jangan block absensi
             Log::error("Credit operation failed for attendance {$absensi->id}: " . $e->getMessage());
-
-            // Re-throw if it's a business rule violation (insufficient credit)
-            if ($e instanceof \App\Modules\Enrollment\Application\Exceptions\InsufficientCreditException) {
-                throw $e;
-            }
+            return ['success' => true, 'warning' => null];
         }
     }
 }

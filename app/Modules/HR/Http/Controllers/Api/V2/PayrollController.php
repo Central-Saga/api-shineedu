@@ -42,6 +42,24 @@ class PayrollController extends Controller
             $query->where('status', $status);
         }
 
+        if ($karyawanId = $request->get('karyawan_id')) {
+            $query->where('karyawan_id', $karyawanId);
+        }
+
+        if ($sortBy = $request->get('sort_by')) {
+            $sortDir = $request->get('sort_dir', 'asc');
+            if (in_array($sortBy, ['gaji_bersih', 'gaji_pokok', 'total_potongan'])) {
+                $query->orderBy($sortBy, $sortDir);
+            } elseif ($sortBy === 'employee_name') {
+                $query->join('karyawan', 'payrolls.karyawan_id', '=', 'karyawan.id')
+                    ->join('users', 'karyawan.user_id', '=', 'users.id')
+                    ->orderBy('users.name', $sortDir)
+                    ->select('payrolls.*');
+            } elseif ($sortBy === 'status') {
+                $query->orderBy('status', $sortDir);
+            }
+        }
+
         $data = $query->paginate($request->get('per_page', 15));
 
         return ApiResponse::paginated(
