@@ -60,6 +60,10 @@ class EnrollmentService
         if (! empty($params['murid_id'] ?? null)) {
             $query->where('murid_id', $params['murid_id']);
         }
+        // Filter by sumber (INTERNAL, ISELLER, IMPORT)
+        if (! empty($params['sumber'] ?? null)) {
+            $query->where('sumber', $params['sumber']);
+        }
 
         // Sorting
         $sortBy = $params['sort_by'] ?? 'created_at';
@@ -134,6 +138,8 @@ class EnrollmentService
                 'biaya_pendaftaran_status' => $data['biaya_pendaftaran_status'] ?? $regFeeStatus,
                 'biaya_pendaftaran_due_date' => $data['biaya_pendaftaran_due_date'] ?? null,
                 'created_by' => $data['created_by'] ?? auth()->id(),
+                'sumber' => $data['sumber'] ?? 'INTERNAL',
+                // saldo_override = null untuk internal enrollment (pakai sistem ledger normal)
             ]);
 
             // 4. Create Initial Paket Murid (with saldo 0 - saldo will be added after payment)
@@ -160,6 +166,152 @@ class EnrollmentService
 
             return $enrollment;
         });
+    }
+
+    /**
+     * Create enrollment from external system (i-seller/legacy)
+     * untuk tracking absensi, logbook, dan sisa pertemuan saja
+     * Pembayaran sudah lunas di sistem external
+     * 
+     * Opsi saldo:
+     * - saldo_override = null: pakai sistem ledger (topup ke ledger)
+     * - saldo_override >= 0: saldo manual (decrement saat absen)
+     * - saldo_override = -1: unlimited (tidak dicek saldo)
+     */
+    public function createFromExternal(array $data): Enrollment
+    {
+        return DB::transaction(function () use ($data) {
+            // 1. Handle Murid (Existing OR New)
+            $muridId = $data['murid_id'] ?? null;
+            $muridBaruData = $data['murid_baru'] ?? null;
+
+            if (! $muridId && $muridBaruData) {
+                // Inline create murid dari data i-seller
+                $muridBaruData['jenjang_id'] = $data['jenjang_id'];
+                $murid = $this->muridService->create($muridBaruData);
+                $muridId = $murid->id;
+            } elseif ($muridId) {
+                $murid = Murid::findOrFail($muridId);
+            } else {
+                throw new Exception("Murid ID atau Murid Baru data wajib diisi.");
+            }
+
+            $programId = $data['program_id'];
+            $jenjangId = $data['jenjang_id'];
+            $paketId = $data['paket_id'];
+            $jumlahSiswa = $data['jumlah_siswa'] ?? 1;
+            $tanggalMulai = $data['tanggal_mulai'] ?? date('Y-m-d');
+
+            // 2. Harga final (bisa dari input atau lookup)
+            $hargaFinal = $data['harga_final'] ?? null;
+            
+            // Kalau harga_final tidak diisi, coba lookup
+            if ($hargaFinal === null) {
+                $priceRule = $this->pricingService->lookupPrice(
+                    $programId,
+                    $jenjangId,
+                    $paketId,
+                    $jumlahSiswa,
+                    $tanggalMulai
+                );
+                $hargaFinal = $priceRule?->harga ?? 0;
+            }
+
+            // 3. Determine saldo_override mode
+            $saldoOverride = $data['saldo_override'] ?? null;
+            $jumlahPertemuan = $data['jumlah_pertemuan'] ?? null;
+            
+            // Jika saldo_override tidak di-set, tapi ada jumlah_pertemuan:
+            // - Set saldo_override = jumlah_pertemuan (manual mode)
+            if ($saldoOverride === null && $jumlahPertemuan !== null) {
+                $saldoOverride = (int) $jumlahPertemuan;
+            }
+
+            // 4. Create Enrollment dengan flag external
+            $enrollment = Enrollment::create([
+                'kode_enrollment' => $data['kode_enrollment'] ?? $this->generateKodeEnrollment(),
+                'murid_id' => $muridId,
+                'program_id' => $programId,
+                'jenjang_id' => $jenjangId,
+                'paket_id' => $paketId,
+                'jumlah_siswa' => $jumlahSiswa,
+                'harga_final' => $hargaFinal,
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_selesai' = $data['tanggal_selesai'] ?? null,
+                'status' => 'Aktif',
+                'catatan' => $data['catatan'] ?? null,
+                // Registration fee langsung PAID karena sudah bayar di i-seller
+                'biaya_pendaftaran_amount' => $data['biaya_pendaftaran_amount'] ?? 0,
+                'biaya_pendaftaran_status' => 'PAID',
+                'biaya_pendaftaran_due_date' => null,
+                'created_by' => $data['created_by'] ?? auth()->id(),
+                'sumber' => $data['sumber'] ?? 'ISELLER',
+                'external_reference_id' => $data['external_reference_id'] ?? null,
+                'saldo_override' => $saldoOverride,
+            ]);
+
+            // 5. Buat PaketMurid hanya jika pakai sistem ledger (saldo_override = null)
+            // Kalau saldo_override di-set, pakai saldo manual dari enrollment.saldo_override
+            if ($saldoOverride === null) {
+                $paket = Paket::find($paketId);
+                if ($paket && $paket->pertemuan_per_bulan > 0) {
+                    $jumlahPertemuanLedger = $jumlahPertemuan ?? $paket->pertemuan_per_bulan ?? 0;
+                    
+                    if ($jumlahPertemuanLedger > 0) {
+                        $paketMurid = PaketMurid::create([
+                            'enrollment_id' => $enrollment->id,
+                            'paket_id' => $paketId,
+                            'status' => 'AKTIF',
+                            'tanggal_mulai' => $tanggalMulai,
+                            'tanggal_berakhir' => $data['tanggal_berakhir'] ?? null,
+                            'catatan' => 'Import dari external: ' . ($data['sumber'] ?? 'ISELLER'),
+                            'created_by' => auth()->id(),
+                        ]);
+
+                        // TOPUP ke ledger
+                        PaketMuridLedger::create([
+                            'paket_murid_id' => $paketMurid->id,
+                            'tanggal' => $data['tanggal_pembayaran'] ?? now(),
+                            'type' => PaketMuridLedger::TYPE_TOPUP,
+                            'qty' => $jumlahPertemuanLedger,
+                            'reference_type' => PaketMuridLedger::REF_PURCHASE,
+                            'reference_id' => null,
+                            'reason' => "Pembelian di " . ($data['sumber'] ?? 'i-seller') . " (Ref: " . ($data['external_reference_id'] ?? 'N/A') . ")",
+                            'created_by' => auth()->id(),
+                        ]);
+                    }
+                }
+            }
+
+            // 6. Optional: Assign ke kelas jika sudah ada data kelas
+            if (!empty($data['kelas_id'])) {
+                $enrollment->kelas()->attach($data['kelas_id'], [
+                    'status_anggota' => 'Aktif',
+                    'tanggal_masuk' => $tanggalMulai,
+                ]);
+            }
+
+            return $enrollment->load(['murid', 'paketMurid.ledger', 'kelas']);
+        });
+    }
+
+    /**
+     * Update saldo override untuk enrollment
+     * Untuk admin/guru yang ingin update saldo manual
+     * 
+     * @param Enrollment $enrollment
+     * @param int|null $saldoOverride null = pakai ledger, >=0 = manual, -1 = unlimited
+     * @return Enrollment
+     */
+    public function updateSaldoOverride(Enrollment $enrollment, ?int $saldoOverride): Enrollment
+    {
+        $enrollment->update(['saldo_override' => $saldoOverride]);
+        
+        \Illuminate\Support\Facades\Log::info("Saldo override updated for enrollment {$enrollment->id}: " . 
+            ($saldoOverride === null ? 'ledger mode' : 
+            ($saldoOverride === -1 ? 'unlimited mode' : "manual saldo {$saldoOverride}")));
+        
+        return $enrollment;
     }
 
     /**

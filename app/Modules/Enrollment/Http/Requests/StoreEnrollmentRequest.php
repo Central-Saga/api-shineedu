@@ -56,6 +56,8 @@ class StoreEnrollmentRequest extends FormRequest
             'biaya_pendaftaran_amount' => ['nullable', 'numeric', 'min:0'],
             'biaya_pendaftaran_status' => ['nullable', 'string', 'in:UNPAID,PAID,WAIVED'],
             'biaya_pendaftaran_due_date' => ['nullable', 'date'],
+            'sumber' => ['nullable', 'string', 'in:INTERNAL,ISELLER,IMPORT'],
+            'saldo_override' => ['nullable', 'integer'],
         ];
     }
 }

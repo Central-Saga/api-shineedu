@@ -41,6 +41,9 @@ class Enrollment extends Model
         'biaya_pendaftaran_status',
         'biaya_pendaftaran_due_date',
         'registration_fee_transaction_id',
+        'sumber',
+        'external_reference_id',
+        'saldo_override',
     ];
 
     protected $casts = [
@@ -50,6 +53,7 @@ class Enrollment extends Model
         'jumlah_siswa' => 'integer',
         'biaya_pendaftaran_amount' => 'decimal:2',
         'biaya_pendaftaran_due_date' => 'date',
+        'saldo_override' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -105,5 +109,70 @@ class Enrollment extends Model
     public function paketMurid()
     {
         return $this->hasMany(PaketMurid::class, 'enrollment_id');
+    }
+
+    // Scopes
+
+    /**
+     * Scope untuk enrollment dari sistem internal
+     */
+    public function scopeInternal($query)
+    {
+        return $query->where('sumber', 'INTERNAL');
+    }
+
+    /**
+     * Scope untuk enrollment dari i-seller/external
+     */
+    public function scopeExternal($query)
+    {
+        return $query->whereIn('sumber', ['ISELLER', 'IMPORT']);
+    }
+
+    // Helper Methods
+
+    /**
+     * Check apakah enrollment dari external system
+     */
+    public function isFromExternal(): bool
+    {
+        return in_array($this->sumber, ['ISELLER', 'IMPORT']);
+    }
+
+    /**
+     * Get saldo override value
+     * NULL = pakai sistem normal (ledger)
+     * -1 = unlimited (tidak dicek)
+     * >= 0 = saldo manual yang di-set admin
+     */
+    public function getSaldoOverride(): ?int
+    {
+        return $this->saldo_override;
+    }
+
+    /**
+     * Check apakah saldo unlimited (tidak dicek)
+     */
+    public function isSaldoUnlimited(): bool
+    {
+        return $this->saldo_override === -1;
+    }
+
+    /**
+     * Check apakah pakai saldo manual
+     */
+    public function isSaldoManual(): bool
+    {
+        return $this->saldo_override !== null && $this->saldo_override >= 0;
+    }
+
+    /**
+     * Get current saldo dari ledger (kalau tidak ada override)
+     */
+    public function getCurrentSaldoFromLedger(): int
+    {
+        return $this->paketMurid->sum(function ($pm) {
+            return $pm->saldo_current;
+        });
     }
 }

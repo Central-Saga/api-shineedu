@@ -248,9 +248,21 @@ Route::prefix('v2')->group(function () {
         Route::get('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:enrollment.view');
         Route::get('/enrollments/export', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'export'])->middleware('permission:enrollment.view');
         Route::post('/enrollments', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'store'])->middleware('permission:enrollment.create');
+
+        // Import enrollment dari external system (i-seller)
+        Route::post('/enrollments/import-external', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'importExternal'])
+            ->middleware('permission:enrollment.create')
+            ->name('enrollments.import-external');
+
         Route::get('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'show'])->middleware('permission:enrollment.view');
         Route::put('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'update'])->middleware('permission:enrollment.update');
         Route::put('/enrollments/{enrollment}/registration-fee-status', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'updateRegistrationFeeStatus'])->middleware('permission:enrollment.update');
+        
+        // Update saldo override (admin/guru bisa update saldo manual)
+        Route::put('/enrollments/{enrollment}/saldo-override', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'updateSaldoOverride'])
+            ->middleware('permission:enrollment.update')
+            ->name('enrollments.update-saldo-override');
+
         Route::delete('/enrollments/{enrollment}', [\App\Modules\Enrollment\Http\Controllers\EnrollmentController::class, 'destroy'])->middleware('permission:enrollment.delete');
 
         // Paket Murid (Meetings & Credit)
